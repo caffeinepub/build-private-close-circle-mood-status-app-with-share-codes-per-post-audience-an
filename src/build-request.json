@@ -1,51 +1,136 @@
 {
   "kind": "build_request",
-  "title": "Update login copy and rebrand 'Inner Circle' to 'CloseCircle'",
+  "title": "Add optional private mood context tags to status compose flow",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "On the public login/home screen, replace the button text \"Sign in with Internet Identity\" with a calmer, more emotional English phrase centered on \"Log in\" (and ensure the loading-state label is consistent with the new wording).",
-      "target": "frontend",
+      "text": "Extend the backend StatusPost data model to persist optional mood context tags for each status post, and accept these tags when creating a status.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4",
+          "msg-6",
+          "msg-7"
         ],
         "quotes": [
-          "In homepage, edit \"Sign in with Internet Identity\" to just \"Log in\" to something more emotional & calm."
+          "Add Mood context tags (optional): after choosing a mood, offer subtle tags like “work”, “family”, “health” to add meaning without writing text.",
+          "from predefined list + custom",
+          "yes & a soft limit"
         ]
       },
       "acceptanceCriteria": [
-        "On the login screen, the primary auth button no longer displays the exact text \"Sign in with Internet Identity\".",
-        "While login is in progress, the button's loading label matches the new copy style (no mismatched \"Signing in...\" if the button now says \"Log in\")."
+        "StatusPost includes a field for context tags (stored with the post)",
+        "postStatus accepts and persists the provided tags for the post",
+        "If no tags are provided, the stored tags value is an empty list (not null/undefined)"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Replace every user-facing occurrence of the app name text \"Inner Circle\" with \"CloseCircle\" across the frontend UI (including the login screen branding header and the in-app header).",
-      "target": "frontend",
+      "text": "Ensure mood context tags are private: they must not be returned to or observable by recipients who are not the author (including via getFeed and getStatus), while still being available to the author for personal context/internal analysis.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Change all appearance of \"Inner Circle\" to \"CloseCircle\""
+          "not visible in feed"
         ]
       },
       "acceptanceCriteria": [
-        "The login screen title shows \"CloseCircle\" instead of \"Inner Circle\".",
-        "The authenticated app header shows \"CloseCircle\" instead of \"Inner Circle\".",
-        "No user-facing UI text anywhere in the frontend displays the exact string \"Inner Circle\"."
+        "When caller is not the author, getFeed returns posts with context tags removed/empty",
+        "When caller is not the author, getStatus returns the post with context tags removed/empty",
+        "When caller is the author, getFeed/getStatus includes the author’s saved context tags"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add a subtle 'context tags' step/section to the Compose Status page that appears after a mood is selected, allowing multi-select tags from a predefined list and adding custom tags.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-6",
+          "msg-7"
+        ],
+        "quotes": [
+          "after choosing a mood, offer subtle tags like “work”, “family”, “health”",
+          "from predefined list + custom",
+          "yes & a soft limit"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The tags UI is not shown until a mood is selected",
+        "Users can select multiple predefined tags",
+        "Users can add a custom tag and select it",
+        "Selected tags are shown as selected chips/badges and can be removed"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement a soft limit for mood context tag selection to keep the feature lightweight (e.g., gently discourage selecting more than the soft limit with calm inline guidance rather than a hard block).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "yes & a soft limit"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A soft limit exists and is enforced as a gentle UX constraint (not a hard error that prevents posting)",
+        "When the user exceeds the soft limit, the UI displays a subtle, calm message indicating the recommended maximum",
+        "Posting a status remains possible even if the user exceeds the soft limit"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Include the selected context tags when posting a status from the Compose Status page, and ensure tags are not displayed anywhere in the feed UI (StatusCard/FeedPage) or to other circle members.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6",
+          "msg-7"
+        ],
+        "quotes": [
+          "not visible in feed",
+          "I’ll add the optional mood context tags into the existing mood flow exactly as agreed"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Compose Status submission sends the selected tags to the backend as part of the status payload",
+        "Feed UI continues to show no tag indicators (no chips/labels/metadata) for any posts",
+        "No tag indicators appear on the status detail UI for non-authors"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add basic frontend validation/normalization for custom tags to keep them lightweight and safe (trim whitespace, prevent empty tags, avoid duplicates ignoring case, and enforce a reasonable max length).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "from predefined list + custom"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Empty/whitespace-only custom tags cannot be added",
+        "Duplicate tags (case-insensitive) cannot be added",
+        "Custom tags longer than the configured maximum cannot be added (user gets a clear inline message)"
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (compose existing UI components instead).",
-    "Do not modify immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx."
+    "Backend must remain a single Motoko actor in backend/main.mo; only add backend/migration.mo if required by existing persisted state upgrade needs.",
+    "Do not modify files in frontend immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui). Compose existing UI components instead."
   ],
   "nonGoals": [
-    "Do not change authentication behavior or Internet Identity integration—only adjust the displayed copy.",
-    "Do not change backend types, storage, or canister APIs as part of this request."
+    "Do not display mood context tags in the feed UI or any recipient-facing UI.",
+    "Do not add advanced analytics, search, filtering, or new recommendation features based on tags.",
+    "Do not add any third-party integrations or external storage for tags."
   ],
   "imageRequirements": {
     "required": [],

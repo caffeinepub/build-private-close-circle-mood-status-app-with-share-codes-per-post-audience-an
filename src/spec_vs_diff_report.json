@@ -1,24 +1,39 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-03T21:01:05.698Z",
-  "summary": "Implemented new branding constant (CloseCircle) and updated login/auth button copy and loading label; updated app header to display new app name via shared constant. Also introduced additional login screen copy/UI content beyond the requested text changes.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-03T21:47:48.208Z",
+  "summary": "Frontend adds a context tags picker UI (predefined + custom tags) that appears after mood selection, validates custom tags, and includes contextTags in the post payload. Backend adds a migration module introducing a contextTags field on the stored status type, but the diff summary does not show backend create/read logic changes needed to ensure privacy and the required empty-list storage behavior.",
+  "missing_requirements": [
     {
-      "description": "Expanded/rewrote the login screen UI and supporting marketing copy beyond just changing the auth button label and app name (e.g., added Welcome card, privacy/trusted-circle highlight sections, new tagline, and additional consent text).",
-      "reason": "BuildRequest only asked to (1) change the login button text + loading label consistency and (2) replace the app name text occurrences; it did not request broader login screen content/layout changes.",
+      "id": "REQ-1",
+      "requirement": "StatusPost includes a field for context tags (stored with the post); postStatus accepts and persists the provided tags for the post; If no tags are provided, the stored tags value is an empty list (not null/undefined).",
+      "reason": "The only explicit backend evidence shows `contextTags` as an optional (`?[Text]`) field (suggesting it can be null/undefined) rather than being stored as an always-present empty list when absent. Also, the diff summary for backend/main.mo is truncated and does not show postStatus persisting tags or defaulting to an empty list.",
       "evidence": [
-        "frontend/src/components/auth/LoginPanel.tsx"
+        "backend/migration.mo",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Ensure mood context tags are private: when caller is not the author, getFeed/getStatus returns posts with context tags removed/empty; when caller is the author, getFeed/getStatus includes the author’s saved context tags.",
+      "reason": "The diff summary does not provide evidence of getFeed/getStatus filtering behavior in the backend. StatusCard includes a comment about not displaying tags, but that does not satisfy backend privacy requirements (non-authors must not be able to observe tags via API responses).",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/components/status/StatusCard.tsx"
       ]
     }
   ],
-  "confidence": 0.72,
+  "hallucinated_features": [],
+  "confidence": 0.66,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/app/AppHeader.tsx",
-    "frontend/src/components/auth/LoginPanel.tsx",
-    "frontend/src/constants/branding.ts",
+    "frontend/src/components/status/ContextTagsPicker.tsx",
+    "frontend/src/components/status/StatusCard.tsx",
+    "frontend/src/constants/contextTags.ts",
+    "frontend/src/pages/ComposeStatusPage.tsx",
+    "frontend/src/utils/contextTags.ts",
     "project_state.json"
   ]
 }

@@ -1,26 +1,41 @@
-import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { usePostStatus, useGetCircleMembers, useGetUserProfiles } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import MoodPicker from '@/components/status/MoodPicker';
+import ContextTagsPicker from '@/components/status/ContextTagsPicker';
 import type { Mood } from '@/backend';
 import { Principal } from '@dfinity/principal';
 import { calculateAge } from '@/utils/age';
 
 export default function ComposeStatusPage() {
   const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as { from?: string };
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [content, setContent] = useState('');
   const [selectedAudience, setSelectedAudience] = useState<Set<string>>(new Set());
+  const [contextTags, setContextTags] = useState<string[]>([]);
+  const moodPickerRef = useRef<HTMLDivElement>(null);
 
   const { data: circleMembers = [], isLoading: loadingMembers } = useGetCircleMembers();
   const { data: profiles = {} } = useGetUserProfiles(circleMembers);
   const postStatus = usePostStatus();
+
+  useEffect(() => {
+    if (search.from === 'mood-reminder' && moodPickerRef.current) {
+      setTimeout(() => {
+        moodPickerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const searchInput = moodPickerRef.current?.querySelector('input[type="text"]') as HTMLInputElement;
+        searchInput?.focus();
+      }, 100);
+    }
+  }, [search.from]);
 
   const handleAudienceToggle = (principalStr: string) => {
     const newSet = new Set(selectedAudience);
@@ -51,6 +66,7 @@ export default function ComposeStatusPage() {
         author: Principal.anonymous(),
         mood: selectedMood,
         content: content.trim(),
+        contextTags: contextTags.length > 0 ? contextTags : undefined,
         audience: audiencePrincipals,
         createdAt: BigInt(0),
       });
@@ -75,10 +91,22 @@ export default function ComposeStatusPage() {
           <CardDescription>Select a mood and optionally add a note</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
+          <div className="space-y-2" ref={moodPickerRef}>
             <Label>Mood *</Label>
-            <MoodPicker selectedMood={selectedMood} onSelectMood={setSelectedMood} />
+            <MoodPicker selectedMood={selectedMood} onSelectMood={setSelectedMood} autoFocus={search.from === 'mood-reminder'} />
           </div>
+
+          {selectedMood && (
+            <>
+              <Separator />
+              <ContextTagsPicker
+                selectedTags={contextTags}
+                onTagsChange={setContextTags}
+              />
+            </>
+          )}
+
+          <Separator />
 
           <div className="space-y-2">
             <Label htmlFor="content">Add a note (optional)</Label>

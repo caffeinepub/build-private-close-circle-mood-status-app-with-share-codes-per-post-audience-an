@@ -5,16 +5,16 @@ import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import Time "mo:core/Time";
-import Nat32 "mo:core/Nat32";
-import Order "mo:core/Order";
 import Iter "mo:core/Iter";
+import Order "mo:core/Order";
+import Nat32 "mo:core/Nat32";
 import Char "mo:core/Char";
+import Migration "migration";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-
-
+(with migration = Migration.run)
 actor {
   type Mood = {
     #happy;
@@ -212,6 +212,7 @@ actor {
     author : Principal;
     mood : Mood;
     content : Text;
+    contextTags : ?[Text];
     audience : [Principal];
     createdAt : Time.Time;
   };
@@ -262,6 +263,16 @@ actor {
       if (m == member) { return true };
     };
     false;
+  };
+
+  func sanitizeStatusForViewer(status : StatusPost, viewer : Principal) : StatusPost {
+    if (status.author == viewer) {
+      status;
+    } else {
+      {
+        status with contextTags = null;
+      };
+    };
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -511,6 +522,7 @@ actor {
       author = caller;
       mood = status.mood;
       content = status.content;
+      contextTags = status.contextTags;
       audience = status.audience;
       createdAt = Time.now();
     });
@@ -538,7 +550,17 @@ actor {
       func(status) {
         status.author == caller or contains(status.audience, caller);
       }
-    ).sort();
+    ).map(
+      func(status) {
+        sanitizeStatusForViewer(status, caller);
+      }
+    ).sort(
+      func(a, b) {
+        if (a.createdAt < b.createdAt) {
+          #greater;
+        } else { #less };
+      }
+    );
   };
 
   public query ({ caller }) func getNotifications() : async [Notification] {
@@ -588,7 +610,7 @@ actor {
       case (null) { null };
       case (?status) {
         if (status.author == caller or contains(status.audience, caller)) {
-          ?status;
+          ?sanitizeStatusForViewer(status, caller);
         } else {
           Runtime.trap("Unauthorized: You are not in the audience for this status");
         };

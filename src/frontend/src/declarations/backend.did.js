@@ -94,6 +94,7 @@ export const Mood = IDL.Variant({
 export const StatusPost = IDL.Record({
   'id' : IDL.Text,
   'content' : IDL.Text,
+  'contextTags' : IDL.Opt(IDL.Vec(IDL.Text)),
   'mood' : Mood,
   'createdAt' : Time,
   'audience' : IDL.Vec(IDL.Principal),
@@ -245,6 +246,7 @@ export const idlFactory = ({ IDL }) => {
   const StatusPost = IDL.Record({
     'id' : IDL.Text,
     'content' : IDL.Text,
+    'contextTags' : IDL.Opt(IDL.Vec(IDL.Text)),
     'mood' : Mood,
     'createdAt' : Time,
     'audience' : IDL.Vec(IDL.Principal),

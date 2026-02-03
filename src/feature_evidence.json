@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-on-the-public-login-home-screen-replace-the-button-text-sign-in-with-internet-identity-with-a-calmer-more-emotional-english-phrase-centered-on-log-in-and-ensure-the-loading-state-label-is-consistent-with-the-new-wording",
-      "featureTitle": "On the public login/home screen, replace the button text \"Sign in with Internet Identity\" with a calmer, more emotional English phrase centered on \"Log in\" (and ensure the loading-state label is consistent with the new wording).",
+      "featureId": "feature-add-a-subtle-context-tags-step-section-to-the-compose-status-page-that-appears-after-a-mood-is-selected-allowing-multi-select-tags-from-a-predefined-list-and-adding-custom-tags",
+      "featureTitle": "Add a subtle 'context tags' step/section to the Compose Status page that appears after a mood is selected, allowing multi-select tags from a predefined list and adding custom tags.",
       "files": [
-        "frontend/src/components/auth/LoginPanel.tsx"
+        "frontend/src/components/status/ContextTagsPicker.tsx",
+        "frontend/src/constants/contextTags.ts",
+        "frontend/src/pages/ComposeStatusPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,17 +18,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-3"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-replace-every-user-facing-occurrence-of-the-app-name-text-inner-circle-with-closecircle-across-the-frontend-ui-including-the-login-screen-branding-header-and-the-in-app-header",
-      "featureTitle": "Replace every user-facing occurrence of the app name text \"Inner Circle\" with \"CloseCircle\" across the frontend UI (including the login screen branding header and the in-app header).",
+      "featureId": "feature-implement-a-soft-limit-for-mood-context-tag-selection-to-keep-the-feature-lightweight-e-g-gently-discourage-selecting-more-than-the-soft-limit-with-calm-inline-guidance-rather-than-a-hard-block",
+      "featureTitle": "Implement a soft limit for mood context tag selection to keep the feature lightweight (e.g., gently discourage selecting more than the soft limit with calm inline guidance rather than a hard block).",
       "files": [
-        "frontend/src/components/app/AppHeader.tsx",
-        "frontend/src/components/auth/LoginPanel.tsx",
-        "frontend/src/constants/branding.ts"
+        "frontend/src/components/status/ContextTagsPicker.tsx",
+        "frontend/src/constants/contextTags.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -37,7 +38,48 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-include-the-selected-context-tags-when-posting-a-status-from-the-compose-status-page-and-ensure-tags-are-not-displayed-anywhere-in-the-feed-ui-statuscard-feedpage-or-to-other-circle-members",
+      "featureTitle": "Include the selected context tags when posting a status from the Compose Status page, and ensure tags are not displayed anywhere in the feed UI (StatusCard/FeedPage) or to other circle members.",
+      "files": [
+        "frontend/src/components/status/StatusCard.tsx",
+        "frontend/src/pages/ComposeStatusPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-basic-frontend-validation-normalization-for-custom-tags-to-keep-them-lightweight-and-safe-trim-whitespace-prevent-empty-tags-avoid-duplicates-ignoring-case-and-enforce-a-reasonable-max-length",
+      "featureTitle": "Add basic frontend validation/normalization for custom tags to keep them lightweight and safe (trim whitespace, prevent empty tags, avoid duplicates ignoring case, and enforce a reasonable max length).",
+      "files": [
+        "frontend/src/components/status/ContextTagsPicker.tsx",
+        "frontend/src/constants/contextTags.ts",
+        "frontend/src/utils/contextTags.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
       ],
       "confidence": "high"
     }

@@ -228,6 +228,14 @@ export function useGetFeed() {
       if (!actor) return [];
       return actor.getFeed();
     },
+    select: (data) => {
+      // Ensure stable descending sort by createdAt (newest first)
+      return [...data].sort((a, b) => {
+        if (a.createdAt > b.createdAt) return -1;
+        if (a.createdAt < b.createdAt) return 1;
+        return 0;
+      });
+    },
     enabled: !!actor && !isFetching,
     refetchInterval: 30000, // Poll every 30 seconds for near-real-time updates
   });

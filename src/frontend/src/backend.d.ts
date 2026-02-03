@@ -10,6 +10,7 @@ export type Option<T> = Some<T> | None;
 export interface StatusPost {
     id: string;
     content: string;
+    contextTags?: Array<string>;
     mood: Mood;
     createdAt: Time;
     audience: Array<Principal>;

@@ -88,6 +88,7 @@ export type RelationshipIntent = { 'romantic' : null } |
 export interface StatusPost {
   'id' : string,
   'content' : string,
+  'contextTags' : [] | [Array<string>],
   'mood' : Mood,
   'createdAt' : Time,
   'audience' : Array<Principal>,

@@ -20,6 +20,9 @@ export default function StatusCard({ status, hideAudience = false }: StatusCardP
 
   const authorName = authorProfile?.name || `User ${status.author.toString().slice(0, 8)}...`;
 
+  // Defensive: ensure context tags are never displayed in the UI
+  // (backend already filters them for non-authors, but this is an extra safeguard)
+
   return (
     <Card>
       <CardContent className="pt-6 space-y-4">

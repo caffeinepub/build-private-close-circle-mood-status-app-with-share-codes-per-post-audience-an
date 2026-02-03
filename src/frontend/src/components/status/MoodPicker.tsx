@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,10 +10,18 @@ import type { MoodOption } from '@/constants/moods';
 interface MoodPickerProps {
   selectedMood: Mood | null;
   onSelectMood: (mood: Mood) => void;
+  autoFocus?: boolean;
 }
 
-export default function MoodPicker({ selectedMood, onSelectMood }: MoodPickerProps) {
+export default function MoodPicker({ selectedMood, onSelectMood, autoFocus = false }: MoodPickerProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (autoFocus && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [autoFocus]);
 
   const filteredMoods = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -61,6 +69,7 @@ export default function MoodPicker({ selectedMood, onSelectMood }: MoodPickerPro
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
+          ref={searchInputRef}
           type="text"
           placeholder="Search moods..."
           value={searchQuery}

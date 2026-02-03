@@ -1,11 +1,17 @@
+import { useMemo } from 'react';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, Lock, Users } from 'lucide-react';
 import { APP_NAME } from '@/constants/branding';
+import { heroSubtexts, cardSubheadings, pickRandomPhrase } from '@/constants/loginCopy';
 
 export default function LoginPanel() {
   const { login, isLoggingIn, isLoginError, loginError } = useInternetIdentity();
+
+  // Pick random phrases once on mount, stable during session
+  const heroSubtext = useMemo(() => pickRandomPhrase(heroSubtexts), []);
+  const cardSubheading = useMemo(() => pickRandomPhrase(cardSubheadings), []);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
@@ -18,7 +24,7 @@ export default function LoginPanel() {
           </div>
           <h1 className="text-3xl font-bold tracking-tight">{APP_NAME}</h1>
           <p className="mt-2 text-muted-foreground">
-            A private emotional status app for your closest circle
+            {heroSubtext}
           </p>
         </div>
 
@@ -26,7 +32,7 @@ export default function LoginPanel() {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl">Welcome</CardTitle>
             <CardDescription>
-              Log in to share your feelings with those who matter most
+              {cardSubheading}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
