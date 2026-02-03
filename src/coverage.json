@@ -1,0 +1,54 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-03T21:01:05.745Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 2,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "On the public login/home screen, replace the button text \"Sign in with Internet Identity\" with a calmer, more emotional English phrase centered on \"Log in\" (and ensure the loading-state label is consistent with the new wording).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/auth/LoginPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/auth/LoginPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Replace every user-facing occurrence of the app name text \"Inner Circle\" with \"CloseCircle\" across the frontend UI (including the login screen branding header and the in-app header).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/constants/branding.ts",
+          "frontend/src/components/auth/LoginPanel.tsx",
+          "frontend/src/components/app/AppHeader.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/constants/branding.ts",
+          "frontend/src/components/auth/LoginPanel.tsx",
+          "frontend/src/components/app/AppHeader.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/components/app/AppHeader.tsx",
+    "frontend/src/components/auth/LoginPanel.tsx",
+    "frontend/src/constants/branding.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

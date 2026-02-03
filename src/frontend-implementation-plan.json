@@ -1,0 +1,48 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Update login copy and rebrand 'Inner Circle' to 'CloseCircle'",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Update the public login screen primary auth button copy to a calmer, more emotional 'Log in' phrase and align the loading label with the new wording.",
+      "acceptanceCriteria": [
+        "On the login screen, the primary auth button no longer displays the exact text \"Sign in with Internet Identity\".",
+        "While login is in progress, the button's loading label matches the new copy style (no mismatched \"Signing in...\" if the button now says \"Log in\")."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/auth/LoginPanel.tsx",
+          "operation": "modify",
+          "description": "Update the primary login button label to a calmer, more emotional phrase centered on \"Log in\" (e.g., \"Log in to your safe space\"), and update the loading-state label to match the new copy style (e.g., \"Logging you in...\") so it no longer uses \"Signing in...\"."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Replace all user-facing app name text 'Inner Circle' with 'CloseCircle' across the frontend UI, including login branding and the in-app header.",
+      "acceptanceCriteria": [
+        "The login screen title shows \"CloseCircle\" instead of \"Inner Circle\".",
+        "The authenticated app header shows \"CloseCircle\" instead of \"Inner Circle\".",
+        "No user-facing UI text anywhere in the frontend displays the exact string \"Inner Circle\"."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/constants/branding.ts",
+          "operation": "create",
+          "description": "Create a single source of truth for user-facing branding text (e.g., export an APP_NAME constant set to \"CloseCircle\") to prevent future reintroductions of the string \"Inner Circle\"."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginPanel.tsx",
+          "operation": "modify",
+          "description": "Replace the login screen branding header text \"Inner Circle\" with \"CloseCircle\" by using the shared branding constant from frontend/src/constants/branding.ts."
+        },
+        {
+          "path": "frontend/src/components/app/AppHeader.tsx",
+          "operation": "modify",
+          "description": "Replace the in-app header branding text \"Inner Circle\" with \"CloseCircle\" by using the shared branding constant from frontend/src/constants/branding.ts."
+        }
+      ]
+    }
+  ]
+}

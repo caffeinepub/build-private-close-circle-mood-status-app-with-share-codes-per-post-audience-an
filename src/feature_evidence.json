@@ -1,0 +1,45 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-on-the-public-login-home-screen-replace-the-button-text-sign-in-with-internet-identity-with-a-calmer-more-emotional-english-phrase-centered-on-log-in-and-ensure-the-loading-state-label-is-consistent-with-the-new-wording",
+      "featureTitle": "On the public login/home screen, replace the button text \"Sign in with Internet Identity\" with a calmer, more emotional English phrase centered on \"Log in\" (and ensure the loading-state label is consistent with the new wording).",
+      "files": [
+        "frontend/src/components/auth/LoginPanel.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-replace-every-user-facing-occurrence-of-the-app-name-text-inner-circle-with-closecircle-across-the-frontend-ui-including-the-login-screen-branding-header-and-the-in-app-header",
+      "featureTitle": "Replace every user-facing occurrence of the app name text \"Inner Circle\" with \"CloseCircle\" across the frontend UI (including the login screen branding header and the in-app header).",
+      "files": [
+        "frontend/src/components/app/AppHeader.tsx",
+        "frontend/src/components/auth/LoginPanel.tsx",
+        "frontend/src/constants/branding.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

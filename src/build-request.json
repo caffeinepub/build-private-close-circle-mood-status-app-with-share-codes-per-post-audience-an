@@ -1,0 +1,54 @@
+{
+  "kind": "build_request",
+  "title": "Update login copy and rebrand 'Inner Circle' to 'CloseCircle'",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "On the public login/home screen, replace the button text \"Sign in with Internet Identity\" with a calmer, more emotional English phrase centered on \"Log in\" (and ensure the loading-state label is consistent with the new wording).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "In homepage, edit \"Sign in with Internet Identity\" to just \"Log in\" to something more emotional & calm."
+        ]
+      },
+      "acceptanceCriteria": [
+        "On the login screen, the primary auth button no longer displays the exact text \"Sign in with Internet Identity\".",
+        "While login is in progress, the button's loading label matches the new copy style (no mismatched \"Signing in...\" if the button now says \"Log in\")."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Replace every user-facing occurrence of the app name text \"Inner Circle\" with \"CloseCircle\" across the frontend UI (including the login screen branding header and the in-app header).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Change all appearance of \"Inner Circle\" to \"CloseCircle\""
+        ]
+      },
+      "acceptanceCriteria": [
+        "The login screen title shows \"CloseCircle\" instead of \"Inner Circle\".",
+        "The authenticated app header shows \"CloseCircle\" instead of \"Inner Circle\".",
+        "No user-facing UI text anywhere in the frontend displays the exact string \"Inner Circle\"."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/src/components/ui (compose existing UI components instead).",
+    "Do not modify immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx."
+  ],
+  "nonGoals": [
+    "Do not change authentication behavior or Internet Identity integration—only adjust the displayed copy.",
+    "Do not change backend types, storage, or canister APIs as part of this request."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

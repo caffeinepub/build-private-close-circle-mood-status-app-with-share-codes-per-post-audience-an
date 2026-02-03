@@ -1,2 +1,3 @@
-# build-private-close-circle-mood-status-app-with-share-codes-per-post-audience-an
-Exported from Caffeine project: Hide audience details in Feed and expand mood library with 18+ opt-in moods and custom fallback
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

@@ -1,0 +1,335 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 76,
+  "summary": "Build a private close-circle social app (“A private emotional status app for your closest circle”) where users sign up with name only, then complete a fast, guided profile via simple question/button inputs (gender, DOB/age, plus additional dating-profile-like questions such as relationship intent/preferences); users get an auto-generated random private share code (editable later in a 'Your Share Code' section) to invite trusted people into their circle (manual accept/decline), and post mood/status updates (quick-select + optional short text) to selected individuals in their circle with instant in-app/realtime notifications; true device push notifications marked as “Coming soon.” Add a floating, always-available calendar/journal entry point (tap to open live date picker and write a daily journal), and an AI mood analyzer in the profile that summarizes mood trends over time and flags potentially health-critical patterns. The mood library/picker is expanded with a large safe/neutral predefined set (no 18+ explicit moods in the current implementation). UI/UX should feel calm, safe, minimal, and introspective.",
+  "existing_features": [
+    {
+      "id": "IF-1",
+      "title": "User registration and login via Internet Identity",
+      "synonyms": [
+        "Authentication",
+        "AuthGate",
+        "Internet Identity login"
+      ],
+      "description": "Users authenticate using Internet Identity and the app gates access to authenticated principals before allowing access to app pages.",
+      "reqIds": [
+        "AR-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-2",
+      "title": "User profile creation and profile gate",
+      "synonyms": [
+        "Profile setup",
+        "ProfileGate"
+      ],
+      "description": "Authenticated users are prompted to create/complete an essential profile before using core app features.",
+      "reqIds": [
+        "AR-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Private share code generation and management",
+      "synonyms": [
+        "Invite code",
+        "ShareCodeCard"
+      ],
+      "description": "Each user can generate and manage a unique private share code used by others to request joining their circle.",
+      "reqIds": [
+        "AR-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Circle management with join-by-code and manual accept/decline",
+      "synonyms": [
+        "Circle requests",
+        "PendingRequestsPanel",
+        "JoinByCodeForm"
+      ],
+      "description": "Users can request to join another user's circle using a share code; owners can review pending requests and manually accept or decline them; accepted users appear in the circle members list.",
+      "reqIds": [
+        "AR-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "Create and view mood/status updates (quick-select mood + optional text)",
+      "synonyms": [
+        "Compose status",
+        "MoodPicker",
+        "Feed",
+        "Status detail"
+      ],
+      "description": "Users can compose a status using a quick-select mood signal plus optional short text, and view statuses in a feed and on a status detail screen.",
+      "reqIds": [
+        "AR-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Instant in-app notifications for new/updated statuses",
+      "synonyms": [
+        "NotificationsPage",
+        "In-app alerts"
+      ],
+      "description": "Circle members receive instant in-app notifications for relevant status activity, accessible via the notifications screen (realtime/in-app, not device push).",
+      "reqIds": [
+        "AR-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Per-status audience selection among circle members",
+      "synonyms": [
+        "Audience controls",
+        "Targeted status sharing"
+      ],
+      "description": "When composing a status, the author can choose which individual circle members can view that specific update.",
+      "reqIds": [
+        "AR-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Device push notifications marked as 'Coming soon'",
+      "synonyms": [
+        "Push notifications placeholder"
+      ],
+      "description": "UI/UX indicates device push notifications are 'Coming soon' while current delivery relies on in-app/realtime notifications.",
+      "reqIds": [
+        "AR-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Expanded guided profile questions (dating-profile-like quick inputs)",
+      "synonyms": [
+        "Guided profile questions",
+        "Relationship intent/preferences"
+      ],
+      "description": "Profile setup flow includes additional fast, button-based questions beyond gender and DOB/age (e.g., relationship intent/preferences) and keeps input lightweight (no heavy biodata).",
+      "reqIds": [
+        "AR-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Name-only signup with guided post-signup profile completion",
+      "synonyms": [
+        "Simplified signup",
+        "Fast onboarding"
+      ],
+      "description": "Initial signup collects name only; remaining user details are collected in a separate, fast guided profile flow before accessing core app features.",
+      "reqIds": [
+        "AR-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "Auto-generated share code with later editing in 'Your Share Code' section",
+      "synonyms": [
+        "Random share code",
+        "Editable invite code"
+      ],
+      "description": "Share code is randomly generated automatically (no initial user input), with UI prompting the user to store it and allowing updates later via a dedicated share code management section.",
+      "reqIds": [
+        "AR-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Calm, minimal, introspective UI/UX theme applied across core screens",
+      "synonyms": [
+        "UI refresh",
+        "Emotionally resonant theme"
+      ],
+      "description": "App-wide UI/UX and color/theme updated to feel calm, safe, minimal, and oriented toward personal reflection/emotional resonance.",
+      "reqIds": [
+        "AR-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-13",
+      "title": "Floating journal entry FAB with date picker + journal overlay (private, same-day only)",
+      "synonyms": [
+        "FloatingJournalFab",
+        "JournalOverlay",
+        "JournalDatePicker",
+        "Journal entries"
+      ],
+      "description": "Adds a floating on-screen journal button that can be shown/hidden per flow; tapping opens a lightweight date picker and journal overlay to write private journal entries for the selected day. Enforces the constraint that users can create/edit entries for today (including unlimited edits), but cannot create/edit entries for past missed days.",
+      "reqIds": [
+        "AR-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-14",
+      "title": "AI mood analyzer card in profile (trend summary + safety disclaimer)",
+      "synonyms": [
+        "MoodAnalyzerCard",
+        "Mood history analysis",
+        "Mood trends"
+      ],
+      "description": "Adds an AI-style mood analyzer section in the Profile that analyzes the user’s mood/status history over time to summarize trends and flag potentially health-critical patterns using conservative wording and a clear non-medical disclaimer; output is private to the user.",
+      "reqIds": [
+        "AR-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-15",
+      "title": "Human-friendly 6-character alphanumeric share/join codes for new users",
+      "synonyms": [
+        "Short share code",
+        "6-char invite code",
+        "Alphanumeric share code"
+      ],
+      "description": "Auto-generated share/join codes are now 6-character alphanumeric (A–Z, 0–9) for newly created users; existing users keep their prior codes unless they manually edit/regenerate in the 'Your Share Code' section.",
+      "reqIds": [
+        "AR-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-16",
+      "title": "Display names shown across circle invites/requests UI",
+      "synonyms": [
+        "Human-friendly names in requests",
+        "Requester display names"
+      ],
+      "description": "Circle join requests/invites surfaces show users’ display names instead of ICP principal IDs/hashes wherever users review or act on join requests.",
+      "reqIds": [
+        "AR-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-17",
+      "title": "Requests tab pending-count indicator and in-app notification on new join requests",
+      "synonyms": [
+        "Requests (N) badge",
+        "Pending requests count",
+        "Join request notification"
+      ],
+      "description": "The Requests tab displays a pending-requests count indicator (e.g., “Requests (N)”) and the app emits an in-app notification when new join requests are received.",
+      "reqIds": [
+        "AR-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-18",
+      "title": "Feed hides all audience/recipient indicators for status posts",
+      "synonyms": [
+        "Feed audience privacy",
+        "No recipients on feed",
+        "Hide share targets"
+      ],
+      "description": "Feed UI never displays who a status was shared with (no counts, no names, no avatars), including when the author views their own posts; share targets remain private to the poster.",
+      "reqIds": [
+        "AR-20",
+        "AR-21",
+        "AR-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-20",
+      "title": "Expanded safe/neutral mood library (backend + frontend) with reorganized mood picker UI",
+      "synonyms": [
+        "Mood library safe/neutral expansion",
+        "Mood type expansion",
+        "MoodPicker reorg",
+        "Expanded moods v2 (no explicit)"
+      ],
+      "description": "Backend Mood type and frontend mood constants are expanded to a much larger safe/neutral-only predefined mood set (no 18+/explicit moods). The mood picker UI is reorganized to support browsing/filtering/grouping over the larger set while keeping the compose-status submission behavior unchanged. Mood labeling/analysis logic is updated to safely handle the expanded mood set without runtime errors and with correct English labels, preserving compatibility with existing stored statuses.",
+      "reqIds": [
+        "AR-1",
+        "AR-2",
+        "AR-3",
+        "AR-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-on-the-public-login-home-screen-replace-the-button-text-sign-in-with-internet-identity-with-a-calmer-more-emotional-english-phrase-centered-on-log-in-and-ensure-the-loading-state-label-is-consistent-with-the-new-wording",
+      "title": "On the public login/home screen, replace the button text \"Sign in with Internet Identity\" with a calmer, more emotional English phrase centered on \"Log in\" (and ensure the loading-state label is consistent with the new wording).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-every-user-facing-occurrence-of-the-app-name-text-inner-circle-with-closecircle-across-the-frontend-ui-including-the-login-screen-branding-header-and-the-in-app-header",
+      "title": "Replace every user-facing occurrence of the app name text \"Inner Circle\" with \"CloseCircle\" across the frontend UI (including the login screen branding header and the in-app header).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [],
+  "architectural_notes": [
+    "Notifications plan: implement 'instant notifications' as in-app alerts and real-time refresh now; show true device push notifications as 'Coming soon' until supported.",
+    "Per-status audience controls will be implemented by manually selecting individual circle members for each status update (no named groups required for MVP).",
+    "Status posts support quick-select mood/status signals plus an optional short text note.",
+    "Authentication is implemented using Internet Identity (ICP).",
+    "Onboarding decision: signup collects name only; remaining user details are collected in a separate, fast guided profile flow using button-based questions (e.g., gender) and DOB/age.",
+    "Profile flow scope update: include additional guided questions beyond gender + DOB (e.g., relationship intent, preferences) using button-based/quick inputs (no heavy biodata).",
+    "Age visibility rule: compute/display age to circle members by default, with a user-controlled option to turn age visibility off.",
+    "UI/UX direction: redesign should be calm, safe, minimal, and introspective; emphasize personal reflection and emotional resonance.",
+    "Journal privacy rule: journal/diary entries are private to the user only (not shareable to circle members).",
+    "Journal entry constraints: for a given day, the user can make unlimited entries and modifications that same day; if the day is missed, the user cannot create/edit an entry for that past date.",
+    "Floating journal entry point UX: use a simpler date picker (not a full month calendar view).",
+    "Floating icon visibility: floating icon should be hidden on certain flows (e.g., signup/onboarding/profile editing) rather than always visible everywhere.",
+    "AI mood analyzer output: private to the user only (not shareable with circle members).",
+    "AI mood analyzer tone expectation: user requests both 'device-style' trend analysis and clinical/diagnostic language.",
+    "AI mood analyzer safety decision: include a clear non-medical disclaimer (not a diagnosis / not a substitute for professional care) and use conservative thresholds + cautious escalation wording when flagging potentially health-critical patterns (avoid definitive condition labeling).",
+    "Implementation kickoff confirmed: proceed to build AR-13 (floating journal/date picker) and AR-14 (AI mood analyzer) end-to-end with agreed privacy rules and conservative, disclaimer-backed clinical-style wording.",
+    "Journal UI implementation: floating FAB + overlay uses a simple date picker component (not a full month calendar) and a visibility context to hide the FAB on restricted flows (e.g., auth/onboarding/profile editing).",
+    "Journal rule enforcement implemented: journal entries are private and restricted to same-day creation/editing; past missed days are read-only / disallowed for new edits.",
+    "Mood analyzer implementation: profile includes a MoodAnalyzerCard that computes mood trends from mood history and displays conservative, disclaimer-backed health-critical flagging; results are private to the user.",
+    "Share/join code format decision: generate 6-character alphanumeric codes (A–Z + 0–9). Roll out applies to new users only; existing users retain their current code unless they manually edit/regenerate it in 'Your Share Code'.",
+    "Circle requests/invites UX: display human-friendly user display names instead of ICP principal IDs/hashes wherever users review or act on join requests.",
+    "Requests tab UX: show a pending-requests count indicator (e.g., “Requests (N)”) and emit an in-app notification when new join requests are received.",
+    "Feed UI rule: do not display a numeric 'shared with N people' indicator for a status; instead, only show the actual selected recipients/individuals (where recipients are shown).",
+    "Mood library scope: expand the predefined quick-select mood/status list; include optional 18+ / explicit mood options (may require content gating/labeling decisions).",
+    "Feed privacy rule update: do not display any audience/recipient information on Feed items (no 'shared with N', no recipient chips/names); audience remains private to the poster.",
+    "Mood library expansion decision: implement a much larger predefined mood library; additionally allow user-custom moods only as a fallback when the user cannot find an expressive mood in the library.",
+    "18+ / explicit moods gating: explicit moods are available only if user DOB indicates age >= 18, and are opt-in/hidden by default behind a content warning; tone should support raw emotional expression for users who choose to share with their circle.",
+    "Implementation kickoff confirmed: proceed to implement AR-20 (Feed hides all audience/recipients info) and AR-19 (expanded mood library with custom-mood fallback + 18+ explicit moods gated by DOB>=18 and opt-in/hidden by default).",
+    "Due to repeated build/deploy failures when implementing Feed audience-privacy changes + expanded mood library (incl. 18+ opt-in and custom fallback), proceed step-by-step by simplifying scope and implementing in smaller increments.",
+    "Mood library implementation: use a centralized mood definition source (e.g., constants) that supports expanded predefined moods, an explicit 18+ subset flag, and categorization/search/browsing UI in the mood picker.",
+    "Explicit 18+ moods UX: explicit/raw-emotional moods are hidden by default behind an opt-in/content warning and only available when DOB indicates age >= 18.",
+    "Mood analytics compatibility: mood analyzer/trend logic should not assume a fixed small set of mood keys; it must handle expanded predefined moods, explicit moods, and custom moods safely.",
+    "Step-by-step rollout decision (post build failures): after implementing Feed audience privacy removal (Step 1), proceed next with Step 2: expand the predefined mood library with safe/neutral moods only and reorganize the mood picker UI; explicitly defer 18+ explicit moods and age-gate/opt-in foundation to a later step.",
+    "Step-by-step rollout: user confirmed to proceed with Step 2 next — expand the predefined safe/neutral-only mood library and reorganize the mood picker UI; explicitly keep 18+ / explicit moods out of this step and keep everything else unchanged.",
+    "Implementation completed: Step 2 mood rollout — expand the predefined mood library with safe/neutral moods only (no 18+ explicit subset), update backend Mood variants and frontend constants to match, reorganize MoodPicker browsing UI, and harden any mood labeling/analysis code to handle the expanded set while preserving compatibility with existing stored statuses.",
+    "UI copy change: On homepage, replace “Sign in with Internet Identity” with a calmer/more emotional “Log in” label (exact wording TBD but should match calm/safe/minimal tone).",
+    "Terminology change: replace all UI text occurrences of “Inner Circle” with “CloseCircle” across the app."
+  ],
+  "known_issues": [
+    "Potential compliance/safety risk: user requests clinical/diagnostic language for AI mood analyzer; may require strong disclaimers and/or non-diagnostic phrasing depending on platform/policy constraints (especially if external AI services are unavailable).",
+    "Potential safety/compliance risk: adding 18+ / explicit mood options may require age-gating, content labeling, and stricter UX defaults to avoid policy violations or unintended exposure."
+  ],
+  "isFixRequest": false,
+  "gameProjectType": "none",
+  "projectName": "Hide audience details in Feed and expand mood library with 18+ opt-in moods and custom fallback",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
