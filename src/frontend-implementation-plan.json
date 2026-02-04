@@ -1,40 +1,98 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove authenticated footer attribution and add subtle login attribution under logo",
+  "title": "Profile avatars: upload + bundled system avatar picker on Profile edit",
   "requirements": [
     {
-      "id": "REQ-12",
-      "summary": "Remove the authenticated app layout footer attribution so it no longer renders (including ICP credit line and logo).",
+      "id": "REQ-14",
+      "summary": "Show the current avatar on Profile and add edit-mode controls to upload a PNG/JPEG (≤1000KB) or pick a bundled system avatar with preview + validation messaging.",
       "acceptanceCriteria": [
-        "No footer credit/attribution content is visible anywhere in the app layout footer area after login",
-        "The “Powered by Internet Computer” text and ICP logo are not displayed in the UI footer area"
+        "In non-edit mode, Profile page shows the user’s current avatar (or a sensible fallback if none is set)",
+        "In edit mode, the user can pick a system avatar from a visible list/grid and see it selected in the preview",
+        "In edit mode, the user can choose a local file and the UI blocks files that are not PNG/JPEG or exceed 1000KB with an English error toast/message",
+        "Saving persists the chosen avatar and it remains after refresh/reload"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/app/AppLayout.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Stop rendering the footer attribution in the authenticated app layout by removing the AppFooter import and the <AppFooter /> usage so no footer attribution content appears after login."
+          "description": "Add React Query mutations for avatar changes using existing backend actor capabilities (uploading an avatar image and selecting a system avatar), and ensure relevant cached profile queries are invalidated after success."
         },
         {
-          "path": "frontend/src/components/app/AppFooter.tsx",
-          "operation": "delete",
-          "description": "Delete the footer attribution component containing the CloseCircle credits and the “Powered by Internet Computer” line + ICP logo to ensure it cannot be rendered anywhere."
+          "path": "frontend/src/utils/profileAvatar.ts",
+          "operation": "create",
+          "description": "Add helper utilities to derive a renderable avatar src from a UserProfile avatar value (system avatar -> static asset path; uploaded -> browser object URL from bytes) and provide cleanup helpers for uploaded avatar object URLs."
+        },
+        {
+          "path": "frontend/src/components/profile/ProfileAvatarEditor.tsx",
+          "operation": "create",
+          "description": "Create a Profile-only avatar editor block that supports: preview of current/selected avatar, system avatar grid selection, and local file selection with client-side validation (PNG/JPEG only; ≤1000KB) and English toast/message errors. Use the authorization component guidance for gracefully handling backend authorization errors in the UI; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/ProfilePage.tsx",
+          "operation": "modify",
+          "description": "Update Profile UI to render the current avatar in non-edit mode (with fallback) and to include the new ProfileAvatarEditor only when isEditing is true; wire editor state into save flow so the chosen avatar is persisted via backend calls (system avatar selection / upload) and remains after refresh. Keep avatar selection strictly on the existing profile edit screen (no onboarding changes)."
         }
       ]
     },
     {
-      "id": "REQ-13",
-      "summary": "Add a small muted “Built by Abel Odoh” line directly under the CloseCircle title on the login screen.",
+      "id": "REQ-15",
+      "summary": "Bundle a fixed set of system avatar images as static frontend assets and expose a stable identifier mapping used by the Profile edit avatar picker for round-trip persistence.",
       "acceptanceCriteria": [
-        "On the login screen, a new line “Built by Abel Odoh” appears directly below the “CloseCircle” title",
-        "The attribution line is visually smaller than the title and uses a subdued/muted style"
+        "System avatar images are included as static frontend assets (not served via backend)",
+        "Profile edit shows the full set of system avatars and allows selecting one",
+        "The persisted system-avatar choice round-trips correctly (select -> save -> reload -> still selected)"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/auth/LoginPanel.tsx",
+          "path": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-01.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/public/assets/generated/system-avatar-02.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-02.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/public/assets/generated/system-avatar-03.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-03.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/public/assets/generated/system-avatar-04.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-04.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/public/assets/generated/system-avatar-05.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-05.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/public/assets/generated/system-avatar-06.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-06.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/public/assets/generated/system-avatar-07.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-07.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/public/assets/generated/system-avatar-08.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated system avatar image asset at frontend/public/assets/generated/system-avatar-08.dim_256x256.png for the bundled avatar picker."
+        },
+        {
+          "path": "frontend/src/constants/systemAvatars.ts",
+          "operation": "create",
+          "description": "Define the fixed system avatar catalog (stable explicit identifiers like system-avatar-01..08 mapped to the corresponding static asset file paths under frontend/public/assets/generated/). This mapping is the single source for the Profile edit picker and for rendering persisted system-avatar choices."
+        },
+        {
+          "path": "frontend/src/components/profile/ProfileAvatarEditor.tsx",
           "operation": "modify",
-          "description": "Under the existing login branding title (APP_NAME / “CloseCircle”), render a new secondary-text line reading exactly “Built by Abel Odoh”, styled smaller with muted/subtle typography so it reads as understated attribution."
+          "description": "Wire the system avatar grid to the stable catalog from frontend/src/constants/systemAvatars.ts and ensure selection uses the stable identifier that round-trips to persisted profile data."
         }
       ]
     }

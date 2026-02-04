@@ -9,10 +9,11 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Nat32 "mo:core/Nat32";
 import Char "mo:core/Char";
-
+import Migration "migration";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
+(with migration = Migration.run)
 actor {
   type Mood = {
     #happy;
@@ -153,6 +154,16 @@ actor {
     gender : Gender;
   };
 
+  type Avatar = {
+    #systemAvatar : Text;
+    #uploaded : UploadedAvatar;
+  };
+
+  type UploadedAvatar = {
+    contentType : Text;
+    image : [Nat8];
+  };
+
   type UserProfile = {
     name : Text;
     gender : Gender;
@@ -162,6 +173,7 @@ actor {
     preferences : Preferences;
     shareCode : Text;
     createdAt : Time.Time;
+    avatar : ?Avatar;
   };
 
   module UserProfile {
@@ -389,6 +401,51 @@ actor {
       createdAt = Time.now();
     };
     profiles.add(caller, entry);
+  };
+
+  public shared ({ caller }) func uploadAvatar(avatar : UploadedAvatar) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can upload avatars");
+    };
+
+    // Validate content type
+    if (avatar.contentType != "image/png" and avatar.contentType != "image/jpeg") {
+      Runtime.trap("Invalid content type. Only PNG and JPEG images are supported");
+    };
+
+    // Validate size (max 1000KB)
+    let maxSizeBytes = 1000 * 1024; // 1000 KB
+    if (avatar.image.size() > maxSizeBytes) {
+      Runtime.trap("Image size exceeds the maximum allowed size of 1000KB.");
+    };
+
+    let currentProfile = switch (profiles.get(caller)) {
+      case (?profile) { profile };
+      case (null) { Runtime.trap("User not found") };
+    };
+
+    let updatedProfile : UserProfile = {
+      currentProfile with avatar = ?(#uploaded avatar);
+    };
+
+    profiles.add(caller, updatedProfile);
+  };
+
+  public shared ({ caller }) func selectSystemAvatar(avatarId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can select system avatars");
+    };
+
+    let currentProfile = switch (profiles.get(caller)) {
+      case (?profile) { profile };
+      case (null) { Runtime.trap("User not found") };
+    };
+
+    let updatedProfile : UserProfile = {
+      currentProfile with avatar = ?(#systemAvatar avatarId);
+    };
+
+    profiles.add(caller, updatedProfile);
   };
 
   public query ({ caller }) func getUnprocessedJoinRequests() : async [JoinRequest] {

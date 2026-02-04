@@ -34,6 +34,14 @@ export const Preferences = IDL.Record({
   'intent' : RelationshipIntent,
   'gender' : Gender,
 });
+export const UploadedAvatar = IDL.Record({
+  'contentType' : IDL.Text,
+  'image' : IDL.Vec(IDL.Nat8),
+});
+export const Avatar = IDL.Variant({
+  'uploaded' : UploadedAvatar,
+  'systemAvatar' : IDL.Text,
+});
 export const UserProfile = IDL.Record({
   'dateOfBirth' : IDL.Nat,
   'name' : IDL.Text,
@@ -43,6 +51,7 @@ export const UserProfile = IDL.Record({
   'relationshipIntent' : RelationshipIntent,
   'gender' : Gender,
   'shareCode' : IDL.Text,
+  'avatar' : IDL.Opt(Avatar),
 });
 export const Mood = IDL.Variant({
   'joy' : IDL.Null,
@@ -173,10 +182,12 @@ export const idlService = IDL.Service({
   'postStatus' : IDL.Func([StatusPost], [], []),
   'removeCircleMember' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'selectSystemAvatar' : IDL.Func([IDL.Text], [], []),
   'setSafePerson' : IDL.Func([IDL.Principal], [], []),
   'unsetSafePerson' : IDL.Func([IDL.Principal], [], []),
   'updateProfile' : IDL.Func([UserProfile], [], []),
   'updateShareCode' : IDL.Func([IDL.Text], [IDL.Text], []),
+  'uploadAvatar' : IDL.Func([UploadedAvatar], [], []),
   'viewProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),
 });
 
@@ -209,6 +220,14 @@ export const idlFactory = ({ IDL }) => {
     'intent' : RelationshipIntent,
     'gender' : Gender,
   });
+  const UploadedAvatar = IDL.Record({
+    'contentType' : IDL.Text,
+    'image' : IDL.Vec(IDL.Nat8),
+  });
+  const Avatar = IDL.Variant({
+    'uploaded' : UploadedAvatar,
+    'systemAvatar' : IDL.Text,
+  });
   const UserProfile = IDL.Record({
     'dateOfBirth' : IDL.Nat,
     'name' : IDL.Text,
@@ -218,6 +237,7 @@ export const idlFactory = ({ IDL }) => {
     'relationshipIntent' : RelationshipIntent,
     'gender' : Gender,
     'shareCode' : IDL.Text,
+    'avatar' : IDL.Opt(Avatar),
   });
   const Mood = IDL.Variant({
     'joy' : IDL.Null,
@@ -352,10 +372,12 @@ export const idlFactory = ({ IDL }) => {
     'postStatus' : IDL.Func([StatusPost], [], []),
     'removeCircleMember' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'selectSystemAvatar' : IDL.Func([IDL.Text], [], []),
     'setSafePerson' : IDL.Func([IDL.Principal], [], []),
     'unsetSafePerson' : IDL.Func([IDL.Principal], [], []),
     'updateProfile' : IDL.Func([UserProfile], [], []),
     'updateShareCode' : IDL.Func([IDL.Text], [IDL.Text], []),
+    'uploadAvatar' : IDL.Func([UploadedAvatar], [], []),
     'viewProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),
   });
 };

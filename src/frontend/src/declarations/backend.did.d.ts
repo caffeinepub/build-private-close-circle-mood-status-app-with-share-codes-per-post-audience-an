@@ -10,6 +10,8 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type Avatar = { 'uploaded' : UploadedAvatar } |
+  { 'systemAvatar' : string };
 export type FeedItem = { 'status' : StatusPost } |
   { 'silentSignal' : SilentSignal };
 export type Gender = { 'other' : null } |
@@ -105,6 +107,7 @@ export interface StatusPost {
   'author' : Principal,
 }
 export type Time = bigint;
+export interface UploadedAvatar { 'contentType' : string, 'image' : Uint8Array }
 export interface UserProfile {
   'dateOfBirth' : bigint,
   'name' : string,
@@ -114,6 +117,7 @@ export interface UserProfile {
   'relationshipIntent' : RelationshipIntent,
   'gender' : Gender,
   'shareCode' : string,
+  'avatar' : [] | [Avatar],
 }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -148,10 +152,12 @@ export interface _SERVICE {
   'postStatus' : ActorMethod<[StatusPost], undefined>,
   'removeCircleMember' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'selectSystemAvatar' : ActorMethod<[string], undefined>,
   'setSafePerson' : ActorMethod<[Principal], undefined>,
   'unsetSafePerson' : ActorMethod<[Principal], undefined>,
   'updateProfile' : ActorMethod<[UserProfile], undefined>,
   'updateShareCode' : ActorMethod<[string], string>,
+  'uploadAvatar' : ActorMethod<[UploadedAvatar], undefined>,
   'viewProfile' : ActorMethod<[Principal], UserProfile>,
 }
 export declare const idlService: IDL.ServiceClass;

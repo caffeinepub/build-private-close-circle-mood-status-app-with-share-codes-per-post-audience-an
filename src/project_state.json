@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 102,
-  "summary": "CloseCircle focuses on a private daily check‑in that reduces thinking and increases guidance. Foundation promise/boundary copy is integrated across key surfaces; mood language preserves user agency (no auto-suggested feelings). Mood Analyzer is actionable via conservative, rule‑based micro‑actions (≤2 minutes). Circles are day‑to‑day useful without social pressure via global Safe People (1–2) and Silent Signals (no notifications). UI direction includes an expressive neon/tech palette (light + dark) with strong mood-based colors and a Gen‑Z, text‑light pass using progressive disclosure and more visual communication.",
+  "projectStateVersion": 109,
+  "summary": "CloseCircle Scope 2 remains micro‑UX to reduce thinking and increase guidance in the daily check‑in flow. Scope 3 makes the Mood Analyzer actionable by mapping detected patterns to conservative, rule‑based, non‑clinical micro‑actions (≤2 minutes). Add Scope 4: Circles that do something day‑to‑day—make circles useful without social pressure via Safe People (1–2) and silent, no‑reply signals (e.g., “Low energy today”, “Okay, just quiet”) with no demanding notifications.",
   "existing_features": [
     {
       "id": "IF-1",
@@ -605,18 +605,18 @@
       "version": 1
     },
     {
-      "id": "feature-remove-the-existing-footer-attribution-block-from-the-authenticated-app-layout-so-it-no-longer-renders-at-the-bottom-of-the-screen-including-removing-the-powered-by-internet-computer-line-and-icp-logo-from-the-ui",
-      "title": "Remove the existing footer attribution block from the authenticated app layout so it no longer renders at the bottom of the screen (including removing the “Powered by Internet Computer” line and ICP logo from the UI).",
+      "id": "feature-update-the-profile-page-ui-to-display-the-current-avatar-and-when-editing-allow-users-to-either-upload-a-new-avatar-image-png-jpeg-1000kb-or-select-from-a-fixed-set-of-bundled-system-avatars-keep-avatar-selection-only-on-the-existing-profile-edit-screen-no-onboarding-changes",
+      "title": "Update the Profile page UI to display the current avatar and, when editing, allow users to either upload a new avatar image (PNG/JPEG ≤ 1000KB) or select from a fixed set of bundled system avatars; keep avatar selection only on the existing profile edit screen (no onboarding changes).",
       "reqIds": [
-        "REQ-12"
+        "REQ-14"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-small-attribution-line-reading-exactly-built-by-abel-odoh-directly-under-the-closecircle-logo-title-on-the-login-screen-styled-with-a-much-smaller-muted-font-so-it-reads-like-subtle-secondary-text",
-      "title": "Add a small attribution line reading exactly “Built by Abel Odoh” directly under the “CloseCircle” logo/title on the login screen, styled with a much smaller, muted font so it reads like subtle secondary text.",
+      "id": "feature-bundle-a-fixed-set-of-system-avatar-images-in-the-frontend-as-static-assets-and-wire-the-profile-edit-picker-to-these-assets-using-stable-explicit-identifiers-so-the-selection-can-be-persisted-in-the-backend",
+      "title": "Bundle a fixed set of system avatar images in the frontend as static assets and wire the Profile edit picker to these assets using stable, explicit identifiers (so the selection can be persisted in the backend).",
       "reqIds": [
-        "REQ-13"
+        "REQ-15"
       ],
       "version": 1
     }
@@ -660,14 +660,24 @@
     },
     {
       "id": "AR-16",
-      "summary": "Hide all audience/recipient indicators in the Feed UI (no counts, names, or avatars) so sharing targets remain private to the poster",
+      "summary": "Add profile picture support: allow users to upload an avatar and/or choose from default system images (e.g., gravatar-style) in the profile flow",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-17",
-      "summary": "Add 18+ explicit/raw-emotional mood set that is age-gated (DOB ≥ 18) and opt-in by default",
-      "reqIds": [],
+      "summary": "Extend the backend user profile model to persist an optional avatar choice that can be either (a) a bundled system avatar identifier or (b) an uploaded image (PNG/JPEG).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Add backend validation for uploaded avatars to enforce: content type must be PNG or JPEG, and byte size must be ≤ 1000KB; reject invalid uploads with clear error messages.",
+      "reqIds": [
+        "REQ-13"
+      ],
       "status": "pending"
     }
   ],
@@ -696,12 +706,55 @@
     "urlParams clearParamFromHash() only removes params from hash routes that include a '?' query segment; for simple '#token=value' style hashes, secrets may remain in the URL/history after extraction."
   ],
   "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Abstract system avatar illustration with simple shapes, warm neutral palette (system-avatar-01.dim_256x256.png)\n- Abstract system avatar illustration with simple shapes, high-contrast dark-friendly palette (system-avatar-02.dim_256x256.png)\n- Abstract system avatar illustration with geometric pattern and soft gradients (system-avatar-03.dim_256x256.png)\n- Abstract system avatar illustration with minimal face silhouette and flat colors (system-avatar-04.dim_256x256.png)\n- Abstract system avatar illustration with nature motif (leaf/stone shapes), minimal style (system-avatar-05.dim_256x256.png)\n- Abstract system avatar illustration with playful stickers/collage feel, minimal noise (system-avatar-06.dim_256x256.png)\n- Abstract system avatar illustration with bold lines and pastel blocks (system-avatar-07.dim_256x256.png)\n- Abstract system avatar illustration with calm monochrome + accent color (system-avatar-08.dim_256x256.png)",
   "generatedImages": [
     {
-      "filename": "frontend/public/assets/generated/icp-logo.dim_64x64.png",
-      "description": "Resized/dimensioned ICP logo for small inline footer use.",
-      "targetWidth": 64,
-      "targetHeight": 64
+      "filename": "system-avatar-01.dim_256x256.png",
+      "description": "Abstract system avatar illustration with simple shapes, warm neutral palette",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "system-avatar-02.dim_256x256.png",
+      "description": "Abstract system avatar illustration with simple shapes, high-contrast dark-friendly palette",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "system-avatar-03.dim_256x256.png",
+      "description": "Abstract system avatar illustration with geometric pattern and soft gradients",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "system-avatar-04.dim_256x256.png",
+      "description": "Abstract system avatar illustration with minimal face silhouette and flat colors",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "system-avatar-05.dim_256x256.png",
+      "description": "Abstract system avatar illustration with nature motif (leaf/stone shapes), minimal style",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "system-avatar-06.dim_256x256.png",
+      "description": "Abstract system avatar illustration with playful stickers/collage feel, minimal noise",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "system-avatar-07.dim_256x256.png",
+      "description": "Abstract system avatar illustration with bold lines and pastel blocks",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "system-avatar-08.dim_256x256.png",
+      "description": "Abstract system avatar illustration with calm monochrome + accent color",
+      "targetWidth": 256,
+      "targetHeight": 256
     }
   ],
   "gameProjectType": "none",

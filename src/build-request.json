@@ -1,57 +1,109 @@
 {
   "kind": "build_request",
-  "title": "Remove footer attribution and relocate a small “Built by Abel Odoh” line under the CloseCircle logo",
+  "title": "Add profile avatars: upload (≤1000KB PNG/JPEG) + bundled system avatar picker on Profile edit",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-12",
-      "text": "Remove the existing footer attribution block from the authenticated app layout so it no longer renders at the bottom of the screen (including removing the “Powered by Internet Computer” line and ICP logo from the UI).",
-      "target": "frontend",
+      "text": "Extend the backend user profile model to persist an optional avatar choice that can be either (a) a bundled system avatar identifier or (b) an uploaded image (PNG/JPEG).",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-8",
-          "msg-10"
+          "msg-3",
+          "msg-5"
         ],
         "quotes": [
-          "Delete the footer of © CloseCircle. 2026. Built by\nAbel Odoh\nusing Caffeine AI\n\n•\nPowered by Internet Computer.",
-          "Find somewhere else to put this information",
-          "you want the footer removed"
+          "Allow users to upload their profile picture in profile or just pick a default system images/gravatars",
+          "i want a fixed set of system avatars we bundle in the frontend"
         ]
       },
       "acceptanceCriteria": [
-        "No footer credit/attribution content is visible anywhere in the app layout footer area after login",
-        "The “Powered by Internet Computer” text and ICP logo are not displayed in the UI footer area"
+        "Backend candid/types compile and the frontend can read/write the avatar choice as part of a user profile",
+        "Avatar storage supports both: system avatar reference and uploaded image bytes + content type",
+        "Existing profile reads (getCallerUserProfile/getUserProfile/viewProfile) include the avatar data needed for rendering"
       ]
     },
     {
       "id": "REQ-13",
-      "text": "Add a small attribution line reading exactly “Built by Abel Odoh” directly under the “CloseCircle” logo/title on the login screen, styled with a much smaller, muted font so it reads like subtle secondary text.",
-      "target": "frontend",
+      "text": "Add backend validation for uploaded avatars to enforce: content type must be PNG or JPEG, and byte size must be ≤ 1000KB; reject invalid uploads with clear error messages.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-5"
         ],
         "quotes": [
-          "Maybe close to the logo CloseCircle, \"Built by\nAbel Odoh\" but with very smaller font, under the logo"
+          "enforce a max file size/format limit, ≤ 1000KB"
         ]
       },
       "acceptanceCriteria": [
-        "On the login screen, a new line “Built by Abel Odoh” appears directly below the “CloseCircle” title",
-        "The attribution line is visually smaller than the title and uses a subdued/muted style"
+        "Uploading an avatar > 1000KB fails with an error explaining the size limit",
+        "Uploading a non-PNG/JPEG fails with an error explaining allowed formats",
+        "Uploading a valid PNG/JPEG ≤ 1000KB succeeds and is returned on subsequent profile fetches"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Update the Profile page UI to display the current avatar and, when editing, allow users to either upload a new avatar image (PNG/JPEG ≤ 1000KB) or select from a fixed set of bundled system avatars; keep avatar selection only on the existing profile edit screen (no onboarding changes).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-3",
+          "msg-5"
+        ],
+        "quotes": [
+          "Allow users to upload their profile picture in profile or just pick a default system images/gravatars",
+          "only in the existing profile edit screen"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In non-edit mode, Profile page shows the user’s current avatar (or a sensible fallback if none is set)",
+        "In edit mode, the user can pick a system avatar from a visible list/grid and see it selected in the preview",
+        "In edit mode, the user can choose a local file and the UI blocks files that are not PNG/JPEG or exceed 1000KB with an English error toast/message",
+        "Saving persists the chosen avatar and it remains after refresh/reload"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Bundle a fixed set of system avatar images in the frontend as static assets and wire the Profile edit picker to these assets using stable, explicit identifiers (so the selection can be persisted in the backend).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "i want a fixed set of system avatars we bundle in the frontend"
+        ]
+      },
+      "acceptanceCriteria": [
+        "System avatar images are included as static frontend assets (not served via backend)",
+        "Profile edit shows the full set of system avatars and allows selecting one",
+        "The persisted system-avatar choice round-trips correctly (select -> save -> reload -> still selected)"
       ]
     }
   ],
   "constraints": [
-    "Frontend files listed as immutable in SYSTEM_CONTEXT must not be edited; compose changes through other files only.",
-    "No backend changes; keep the single-actor Motoko architecture unchanged."
+    "Backend must remain a single-actor Motoko canister; all Motoko logic lives in backend/main.mo.",
+    "Do not edit any files under frontend/src/components/ui (shadcn components are read-only).",
+    "Do not edit immutable frontend hook files listed in SYSTEM_CONTEXT (compose around them instead).",
+    "No external storage/CDN for uploaded images; store uploaded avatar data within the canister.",
+    "All user-facing text must be in English."
   ],
   "nonGoals": [
-    "Do not add new settings/about pages or other new navigation destinations for attribution.",
-    "Do not change Internet Identity login behavior, routing, or any existing feature unrelated to attribution placement."
+    "Do not add avatar selection/upload to onboarding; only the existing Profile edit screen.",
+    "Do not implement auto-generated gravatars/identicons derived from principal.",
+    "Do not add third-party authentication or third-party media hosting."
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Abstract system avatar illustration with simple shapes, warm neutral palette (system-avatar-01.dim_256x256.png)",
+      "Abstract system avatar illustration with simple shapes, high-contrast dark-friendly palette (system-avatar-02.dim_256x256.png)",
+      "Abstract system avatar illustration with geometric pattern and soft gradients (system-avatar-03.dim_256x256.png)",
+      "Abstract system avatar illustration with minimal face silhouette and flat colors (system-avatar-04.dim_256x256.png)",
+      "Abstract system avatar illustration with nature motif (leaf/stone shapes), minimal style (system-avatar-05.dim_256x256.png)",
+      "Abstract system avatar illustration with playful stickers/collage feel, minimal noise (system-avatar-06.dim_256x256.png)",
+      "Abstract system avatar illustration with bold lines and pastel blocks (system-avatar-07.dim_256x256.png)",
+      "Abstract system avatar illustration with calm monochrome + accent color (system-avatar-08.dim_256x256.png)"
+    ],
     "edits": []
   }
 }

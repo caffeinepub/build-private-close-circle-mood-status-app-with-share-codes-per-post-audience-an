@@ -1,235 +1,101 @@
 import Map "mo:core/Map";
-import List "mo:core/List";
 import Principal "mo:core/Principal";
 import Time "mo:core/Time";
 
 module {
-  type StatusPostOld = {
-    id : Text;
-    author : Principal;
-    mood : {
-      #happy;
-      #sad;
-      #stressed;
-      #excited;
-      #neutral;
-      #anxious;
-      #content;
-      #angry;
-      #relaxed;
-      #motivate;
-      #tired;
-      #bore;
-      #hopeful;
-      #frustrate;
-      #grateful;
-      #calm;
-      #nervous;
-      #satisfy;
-      #disappoint;
-      #optimistic;
-      #confident;
-      #lonely;
-      #shy;
-      #fear;
-      #curious;
-      #inspiration;
-      #overwhelm;
-      #embarrass;
-      #guilty;
-      #apathetic;
-      #secure;
-      #unsafe;
-      #courage;
-      #ashamed;
-      #relieved;
-      #triumph;
-      #disgust;
-      #joy;
-      #worry;
-      #melancholy;
-      #humbled;
-      #zen;
-      #passionate;
-      #indifferen;
-      #irritate;
+  // Old actor types without avatar field.
+  type OldUserProfile = {
+    name : Text;
+    gender : {
+      #male;
+      #female;
+      #nonBinary;
+      #other;
     };
-    content : Text;
-    audience : [Principal];
-    createdAt : Time.Time;
-  };
-
-  type NewStatusPost = {
-    id : Text;
-    author : Principal;
-    mood : {
-      #happy;
-      #sad;
-      #stressed;
-      #excited;
-      #neutral;
-      #anxious;
-      #content;
-      #angry;
-      #relaxed;
-      #motivate;
-      #tired;
-      #bore;
-      #hopeful;
-      #frustrate;
-      #grateful;
-      #calm;
-      #nervous;
-      #satisfy;
-      #disappoint;
-      #optimistic;
-      #confident;
-      #lonely;
-      #shy;
-      #fear;
-      #curious;
-      #inspiration;
-      #overwhelm;
-      #embarrass;
-      #guilty;
-      #apathetic;
-      #secure;
-      #unsafe;
-      #courage;
-      #ashamed;
-      #relieved;
-      #triumph;
-      #disgust;
-      #joy;
-      #worry;
-      #melancholy;
-      #humbled;
-      #zen;
-      #passionate;
-      #indifferen;
-      #irritate;
+    dateOfBirth : Nat;
+    showAge : Bool;
+    relationshipIntent : {
+      #friendship;
+      #romantic;
+      #both;
     };
-    content : Text;
-    contextTags : ?[Text];
-    audience : [Principal];
+    preferences : {
+      intent : {
+        #friendship;
+        #romantic;
+        #both;
+      };
+      gender : {
+        #male;
+        #female;
+        #nonBinary;
+        #other;
+      };
+    };
+    shareCode : Text;
     createdAt : Time.Time;
   };
 
   type OldActor = {
-    statuses : Map.Map<Text, StatusPostOld>;
-    profiles : Map.Map<Principal, {
-      name : Text;
+    profiles : Map.Map<Principal, OldUserProfile>;
+  };
+
+  // New types with avatar field explicitly defined.
+  type Avatar = {
+    #systemAvatar : Text;
+    #uploaded : {
+      contentType : Text;
+      image : [Nat8];
+    };
+  };
+
+  type NewUserProfile = {
+    name : Text;
+    gender : {
+      #male;
+      #female;
+      #nonBinary;
+      #other;
+    };
+    dateOfBirth : Nat;
+    showAge : Bool;
+    relationshipIntent : {
+      #friendship;
+      #romantic;
+      #both;
+    };
+    preferences : {
+      intent : {
+        #friendship;
+        #romantic;
+        #both;
+      };
       gender : {
         #male;
         #female;
         #nonBinary;
         #other;
       };
-      dateOfBirth : Nat;
-      showAge : Bool;
-      relationshipIntent : {
-        #friendship;
-        #romantic;
-        #both;
-      };
-      preferences : {
-        intent : {
-          #friendship;
-          #romantic;
-          #both;
-        };
-        gender : {
-          #male;
-          #female;
-          #nonBinary;
-          #other;
-        };
-      };
-      shareCode : Text;
-      createdAt : Time.Time;
-    }>;
-    requests : Map.Map<Text, {
-      from : Principal;
-      to : Principal;
-      shareCode : Text;
-      createdAt : Time.Time;
-    }>;
-    notifications : Map.Map<Text, {
-      id : Text;
-      user : Principal;
-      message : Text;
-      statusId : ?Text;
-      isRead : Bool;
-      createdAt : Time.Time;
-    }>;
-    circles : Map.Map<Principal, List.List<Principal>>;
-    journals : Map.Map<Principal, List.List<{ date : Time.Time; content : Text; createdAt : Time.Time }>>;
-    DEFAULT_CIRCLE_SIZE_LIMIT : Nat;
+    };
+    shareCode : Text;
+    createdAt : Time.Time;
+    avatar : ?Avatar;
   };
 
   type NewActor = {
-    statuses : Map.Map<Text, NewStatusPost>;
-    profiles : Map.Map<Principal, {
-      name : Text;
-      gender : {
-        #male;
-        #female;
-        #nonBinary;
-        #other;
-      };
-      dateOfBirth : Nat;
-      showAge : Bool;
-      relationshipIntent : {
-        #friendship;
-        #romantic;
-        #both;
-      };
-      preferences : {
-        intent : {
-          #friendship;
-          #romantic;
-          #both;
-        };
-        gender : {
-          #male;
-          #female;
-          #nonBinary;
-          #other;
-        };
-      };
-      shareCode : Text;
-      createdAt : Time.Time;
-    }>;
-    requests : Map.Map<Text, {
-      from : Principal;
-      to : Principal;
-      shareCode : Text;
-      createdAt : Time.Time;
-    }>;
-    notifications : Map.Map<Text, {
-      id : Text;
-      user : Principal;
-      message : Text;
-      statusId : ?Text;
-      isRead : Bool;
-      createdAt : Time.Time;
-    }>;
-    circles : Map.Map<Principal, List.List<Principal>>;
-    journals : Map.Map<Principal, List.List<{ date : Time.Time; content : Text; createdAt : Time.Time }>>;
-    DEFAULT_CIRCLE_SIZE_LIMIT : Nat;
+    profiles : Map.Map<Principal, NewUserProfile>;
   };
 
+  // Migration function to transform old state to new state with optional avatar field
   public func run(old : OldActor) : NewActor {
-    let newStatuses = old.statuses.map<Text, StatusPostOld, NewStatusPost>(
-      func(_id, oldPost) {
+    let newProfiles = old.profiles.map<Principal, OldUserProfile, NewUserProfile>(
+      func(_id, oldProfile) {
         {
-          oldPost with
-          contextTags = null;
+          oldProfile with
+          avatar = null : ?Avatar // Set avatar explicitly as null for all migrated records
         };
       }
     );
-    {
-      old with statuses = newStatuses;
-    };
+    { profiles = newProfiles };
   };
 };

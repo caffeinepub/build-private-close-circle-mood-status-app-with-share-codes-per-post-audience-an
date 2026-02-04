@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, JoinRequest, StatusPost, Notification, FeedItem, SilentSignal, Mood } from '@/backend';
+import type { UserProfile, JoinRequest, StatusPost, Notification, FeedItem, SilentSignal, Mood, Avatar, UploadedAvatar } from '@/backend';
 import type { Principal } from '@dfinity/principal';
 
 // Profile queries
@@ -90,6 +90,39 @@ export function useUpdateProfile() {
     mutationFn: async (profile: UserProfile) => {
       if (!actor) throw new Error('Actor not available');
       await actor.updateProfile(profile);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['userProfiles'] });
+    },
+  });
+}
+
+// Avatar mutations
+export function useUploadAvatar() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (avatar: UploadedAvatar) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.uploadAvatar(avatar);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['userProfiles'] });
+    },
+  });
+}
+
+export function useSelectSystemAvatar() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (avatarId: string) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.selectSystemAvatar(avatarId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });

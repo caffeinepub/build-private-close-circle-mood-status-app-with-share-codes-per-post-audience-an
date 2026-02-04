@@ -1,25 +1,62 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T22:12:10.620Z",
-  "summary": "REQ-12 appears implemented by removing the footer component from the authenticated AppLayout so no footer attribution can render. REQ-13 appears implemented by adding a small muted “Built by Abel Odoh” line directly under the “CloseCircle” (APP_NAME) title on the login screen. The diff also introduces at least one unrelated change (SoundEffectsManager added to AppLayout) that was not requested.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-04T22:26:15.846Z",
+  "summary": "Diff adds an avatar union type (system avatar id or uploaded bytes) and frontend UI/editor utilities for picking/uploading avatars, plus React Query hooks and ProfilePage wiring. However, backend upload validation and the actual bundled image assets are not evidenced, and a new Motoko file (migration.mo) appears to violate the constraint that all Motoko logic must live in backend/main.mo.",
+  "missing_requirements": [
     {
-      "description": "Added SoundEffectsManager to the authenticated AppLayout (global sound cue manager rendered in layout).",
-      "reason": "BuildRequest explicitly says not to change unrelated features; sound management is not part of the attribution relocation/removal requirements.",
+      "id": "REQ-13",
+      "requirement": "Add backend validation for uploaded avatars: allow only PNG/JPEG and enforce ≤ 1000KB; reject invalid uploads with clear error messages.",
+      "reason": "The diff shows frontend-side validation helpers and toasts, but does not show any backend validation logic or error messages for rejecting invalid uploads.",
       "evidence": [
-        "frontend/src/components/app/AppLayout.tsx (imports SoundEffectsManager and renders <SoundEffectsManager />)",
-        "frontend-file-summaries.txt (mentions AppLayout now includes SoundEffectsManager)"
+        "backend/main.mo (truncated; Avatar/UploadedAvatar types shown but no validation logic evidenced)",
+        "frontend/src/utils/profileAvatar.ts (client-side type/size validation only)"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "requirement": "Bundle a fixed set of system avatar images in the frontend as static assets (not served via backend).",
+      "reason": "A constants catalog references PNG paths under /assets/generated, but the actual image files are not shown as added/modified in the diff summary, so bundling of the required PNG assets is not evidenced.",
+      "evidence": [
+        "frontend/src/constants/systemAvatars.ts (references /assets/generated/system-avatar-0X.dim_256x256.png)"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "requirement": "Existing profile reads (getCallerUserProfile/getUserProfile/viewProfile) include the avatar data needed for rendering.",
+      "reason": "Avatar types and migration are shown, but the diff summary does not include evidence that getCallerUserProfile/getUserProfile/viewProfile were updated to return avatar data (the relevant parts of backend/main.mo are truncated).",
+      "evidence": [
+        "backend/main.mo (truncated; cannot confirm profile read methods include avatar)"
       ]
     }
   ],
-  "confidence": 0.78,
+  "hallucinated_features": [
+    {
+      "description": "Introduced a separate Motoko migration module file (backend/migration.mo) and wired it via (with migration = Migration.run).",
+      "reason": "Not requested by the BuildRequest and appears to conflict with the constraint that all Motoko logic lives in backend/main.mo.",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo (imports Migration \"migration\" and uses (with migration = Migration.run))"
+      ]
+    },
+    {
+      "description": "Added new dedicated backend-facing operations for avatar changes (uploadAvatar and selectSystemAvatar) with corresponding React Query hooks.",
+      "reason": "The BuildRequest requires avatar to be readable/writable as part of a user profile, but does not request separate backend endpoints/mutations for avatar selection/upload.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts (useUploadAvatar, useSelectSystemAvatar calling actor.uploadAvatar/selectSystemAvatar)"
+      ]
+    }
+  ],
+  "confidence": 0.66,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/app/AppFooter.tsx",
-    "frontend/src/components/app/AppLayout.tsx",
-    "frontend/src/components/auth/LoginPanel.tsx",
+    "frontend/src/components/profile/ProfileAvatarEditor.tsx",
+    "frontend/src/constants/systemAvatars.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/ProfilePage.tsx",
+    "frontend/src/utils/profileAvatar.ts",
     "project_state.json"
   ]
 }

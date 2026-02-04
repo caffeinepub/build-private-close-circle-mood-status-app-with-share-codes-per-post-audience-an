@@ -2,11 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-the-existing-footer-attribution-block-from-the-authenticated-app-layout-so-it-no-longer-renders-at-the-bottom-of-the-screen-including-removing-the-powered-by-internet-computer-line-and-icp-logo-from-the-ui",
-      "featureTitle": "Remove the existing footer attribution block from the authenticated app layout so it no longer renders at the bottom of the screen (including removing the “Powered by Internet Computer” line and ICP logo from the UI).",
+      "featureId": "feature-update-the-profile-page-ui-to-display-the-current-avatar-and-when-editing-allow-users-to-either-upload-a-new-avatar-image-png-jpeg-1000kb-or-select-from-a-fixed-set-of-bundled-system-avatars-keep-avatar-selection-only-on-the-existing-profile-edit-screen-no-onboarding-changes",
+      "featureTitle": "Update the Profile page UI to display the current avatar and, when editing, allow users to either upload a new avatar image (PNG/JPEG ≤ 1000KB) or select from a fixed set of bundled system avatars; keep avatar selection only on the existing profile edit screen (no onboarding changes).",
       "files": [
-        "frontend/src/components/app/AppFooter.tsx",
-        "frontend/src/components/app/AppLayout.tsx"
+        "frontend/src/components/profile/ProfileAvatarEditor.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/ProfilePage.tsx",
+        "frontend/src/utils/profileAvatar.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,15 +19,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-12"
+        "REQ-14"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-small-attribution-line-reading-exactly-built-by-abel-odoh-directly-under-the-closecircle-logo-title-on-the-login-screen-styled-with-a-much-smaller-muted-font-so-it-reads-like-subtle-secondary-text",
-      "featureTitle": "Add a small attribution line reading exactly “Built by Abel Odoh” directly under the “CloseCircle” logo/title on the login screen, styled with a much smaller, muted font so it reads like subtle secondary text.",
+      "featureId": "feature-bundle-a-fixed-set-of-system-avatar-images-in-the-frontend-as-static-assets-and-wire-the-profile-edit-picker-to-these-assets-using-stable-explicit-identifiers-so-the-selection-can-be-persisted-in-the-backend",
+      "featureTitle": "Bundle a fixed set of system avatar images in the frontend as static assets and wire the Profile edit picker to these assets using stable, explicit identifiers (so the selection can be persisted in the backend).",
       "files": [
-        "frontend/src/components/auth/LoginPanel.tsx"
+        "frontend/src/components/profile/ProfileAvatarEditor.tsx",
+        "frontend/src/constants/systemAvatars.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -36,7 +39,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-13"
+        "REQ-15"
       ],
       "confidence": "high"
     }

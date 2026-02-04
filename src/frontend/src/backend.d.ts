@@ -7,6 +7,18 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export type Time = bigint;
+export type Avatar = {
+    __kind__: "uploaded";
+    uploaded: UploadedAvatar;
+} | {
+    __kind__: "systemAvatar";
+    systemAvatar: string;
+};
+export interface Preferences {
+    intent: RelationshipIntent;
+    gender: Gender;
+}
 export interface StatusPost {
     id: string;
     content: string;
@@ -16,21 +28,10 @@ export interface StatusPost {
     audience: Array<Principal>;
     author: Principal;
 }
-export interface JoinRequest {
-    to: Principal;
-    from: Principal;
-    createdAt: Time;
-    shareCode: string;
-}
-export type Time = bigint;
 export interface JournalEntry {
     content: string;
     date: Time;
     createdAt: Time;
-}
-export interface Preferences {
-    intent: RelationshipIntent;
-    gender: Gender;
 }
 export interface Notification {
     id: string;
@@ -47,6 +48,10 @@ export type FeedItem = {
     __kind__: "silentSignal";
     silentSignal: SilentSignal;
 };
+export interface UploadedAvatar {
+    contentType: string;
+    image: Uint8Array;
+}
 export interface SilentSignal {
     id: string;
     content: string;
@@ -54,6 +59,12 @@ export interface SilentSignal {
     createdAt: Time;
     audience: Array<Principal>;
     author: Principal;
+}
+export interface JoinRequest {
+    to: Principal;
+    from: Principal;
+    createdAt: Time;
+    shareCode: string;
 }
 export interface UserProfile {
     dateOfBirth: bigint;
@@ -64,6 +75,7 @@ export interface UserProfile {
     relationshipIntent: RelationshipIntent;
     gender: Gender;
     shareCode: string;
+    avatar?: Avatar;
 }
 export enum Gender {
     other = "other",
@@ -157,9 +169,11 @@ export interface backendInterface {
     postStatus(status: StatusPost): Promise<void>;
     removeCircleMember(member: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    selectSystemAvatar(avatarId: string): Promise<void>;
     setSafePerson(person: Principal): Promise<void>;
     unsetSafePerson(person: Principal): Promise<void>;
     updateProfile(profile: UserProfile): Promise<void>;
     updateShareCode(code: string): Promise<string>;
+    uploadAvatar(avatar: UploadedAvatar): Promise<void>;
     viewProfile(id: Principal): Promise<UserProfile>;
 }

@@ -1,25 +1,31 @@
 import { useState, useEffect } from 'react';
-import { useGetCallerUserProfile, useUpdateProfile } from '@/hooks/useQueries';
+import { useGetCallerUserProfile, useUpdateProfile, useUploadAvatar, useSelectSystemAvatar } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { User } from 'lucide-react';
 import IconActionButton from '@/components/common/IconActionButton';
 import { Edit2, Save, X } from 'lucide-react';
 import ShareCodeCard from '@/components/circle/ShareCodeCard';
 import MoodAnalyzerCard from '@/components/profile/MoodAnalyzerCard';
+import ProfileAvatarEditor from '@/components/profile/ProfileAvatarEditor';
 import { Gender, RelationshipIntent } from '@/backend';
+import type { Avatar as AvatarType } from '@/backend';
 import { calculateAge, formatDateForInput, parseDateInput } from '@/utils/age';
 import { useFloatingJournalVisibility } from '@/contexts/FloatingJournalVisibilityContext';
 import { useSound } from '@/hooks/useSound';
+import { getAvatarSrc } from '@/utils/profileAvatar';
 
 export default function ProfilePage() {
   const { data: userProfile, isLoading } = useGetCallerUserProfile();
   const updateProfile = useUpdateProfile();
+  const uploadAvatar = useUploadAvatar();
+  const selectSystemAvatar = useSelectSystemAvatar();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
@@ -27,6 +33,7 @@ export default function ProfilePage() {
   const [showAge, setShowAge] = useState(true);
   const [relationshipIntent, setRelationshipIntent] = useState<RelationshipIntent | null>(null);
   const [preferredGender, setPreferredGender] = useState<Gender | null>(null);
+  const [editingAvatar, setEditingAvatar] = useState<AvatarType | null>(null);
 
   const { hide, show } = useFloatingJournalVisibility();
   const { enabled: soundsEnabled, setEnabled: setSoundsEnabled } = useSound();
@@ -47,12 +54,14 @@ export default function ProfilePage() {
       setShowAge(userProfile.showAge);
       setRelationshipIntent(userProfile.relationshipIntent);
       setPreferredGender(userProfile.preferences.gender);
+      setEditingAvatar(userProfile.avatar || null);
       setIsEditing(true);
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+    setEditingAvatar(null);
   };
 
   const handleSave = async () => {
@@ -69,6 +78,7 @@ export default function ProfilePage() {
     if (!userProfile) return;
 
     try {
+      // First, update the profile fields
       await updateProfile.mutateAsync({
         name: name.trim(),
         gender,
@@ -81,9 +91,21 @@ export default function ProfilePage() {
         },
         shareCode: userProfile.shareCode,
         createdAt: userProfile.createdAt,
+        avatar: userProfile.avatar,
       });
+
+      // Then, handle avatar changes if any
+      if (editingAvatar) {
+        if (editingAvatar.__kind__ === 'uploaded') {
+          await uploadAvatar.mutateAsync(editingAvatar.uploaded);
+        } else if (editingAvatar.__kind__ === 'systemAvatar') {
+          await selectSystemAvatar.mutateAsync(editingAvatar.systemAvatar);
+        }
+      }
+
       toast.success('Saved');
       setIsEditing(false);
+      setEditingAvatar(null);
     } catch (error: any) {
       toast.error(error.message || 'Save failed');
     }
@@ -129,13 +151,20 @@ export default function ProfilePage() {
   }
 
   const age = calculateAge(userProfile.dateOfBirth);
+  const avatarSrc = getAvatarSrc(userProfile.avatar);
 
   return (
     <div className="container max-w-2xl py-8 px-4 space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-full bg-primary/10 p-3">
-          <User className="h-6 w-6 text-primary" />
-        </div>
+        <Avatar className="h-12 w-12">
+          {avatarSrc ? (
+            <AvatarImage src={avatarSrc} alt={userProfile.name} />
+          ) : (
+            <AvatarFallback className="bg-primary/10">
+              <User className="h-6 w-6 text-primary" />
+            </AvatarFallback>
+          )}
+        </Avatar>
         <div>
           <h1 className="text-2xl font-semibold">Profile</h1>
           <p className="text-sm text-muted-foreground">Your info</p>
@@ -163,6 +192,13 @@ export default function ProfilePage() {
         <CardContent className="space-y-5">
           {isEditing ? (
             <>
+              <ProfileAvatarEditor
+                currentAvatar={editingAvatar}
+                onAvatarChange={setEditingAvatar}
+              />
+
+              <Separator />
+
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Name</Label>
                 <Input
@@ -312,10 +348,10 @@ export default function ProfilePage() {
                   icon={<Save className="h-4 w-4" />}
                   label="Save changes"
                   onClick={handleSave}
-                  disabled={updateProfile.isPending}
+                  disabled={updateProfile.isPending || uploadAvatar.isPending || selectSystemAvatar.isPending}
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  {updateProfile.isPending ? 'Saving...' : 'Save'}
+                  {updateProfile.isPending || uploadAvatar.isPending || selectSystemAvatar.isPending ? 'Saving...' : 'Save'}
                 </IconActionButton>
                 <IconActionButton
                   icon={<X className="h-4 w-4" />}
