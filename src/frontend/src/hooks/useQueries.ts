@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, JoinRequest, StatusPost, Notification } from '@/backend';
+import type { UserProfile, JoinRequest, StatusPost, Notification, FeedItem, SilentSignal, Mood } from '@/backend';
 import type { Principal } from '@dfinity/principal';
 
 // Profile queries
@@ -137,6 +137,7 @@ export function useGetUnprocessedJoinRequests() {
       return actor.getUnprocessedJoinRequests();
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 30000, // Poll every 30 seconds for circle activity
   });
 }
 
@@ -182,6 +183,7 @@ export function useGetCircleMembers() {
       return actor.getCircleMembers();
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 30000, // Poll every 30 seconds for circle activity
   });
 }
 
@@ -222,7 +224,7 @@ export function usePostStatus() {
 export function useGetFeed() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<StatusPost[]>({
+  return useQuery<FeedItem[]>({
     queryKey: ['feed'],
     queryFn: async () => {
       if (!actor) return [];
@@ -231,8 +233,10 @@ export function useGetFeed() {
     select: (data) => {
       // Ensure stable descending sort by createdAt (newest first)
       return [...data].sort((a, b) => {
-        if (a.createdAt > b.createdAt) return -1;
-        if (a.createdAt < b.createdAt) return 1;
+        const aTime = a.__kind__ === 'status' ? a.status.createdAt : a.silentSignal.createdAt;
+        const bTime = b.__kind__ === 'status' ? b.status.createdAt : b.silentSignal.createdAt;
+        if (aTime > bTime) return -1;
+        if (aTime < bTime) return 1;
         return 0;
       });
     },
@@ -280,6 +284,81 @@ export function useMarkNotificationAsRead() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
+// Safe People queries
+export function useGetEligibleSafePeopleCandidates() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Principal[]>({
+    queryKey: ['safePeopleCandidates'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getEligibleSafePeopleCandidates();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetSafePeople() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Principal[]>({
+    queryKey: ['safePeople'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getSafePeople();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useSetSafePerson() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (person: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.setSafePerson(person);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['safePeople'] });
+      queryClient.invalidateQueries({ queryKey: ['safePeopleCandidates'] });
+    },
+  });
+}
+
+export function useUnsetSafePerson() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (person: Principal) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.unsetSafePerson(person);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['safePeople'] });
+      queryClient.invalidateQueries({ queryKey: ['safePeopleCandidates'] });
+    },
+  });
+}
+
+// Silent Signal queries
+export function usePostSilentSignal() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ mood, content }: { mood: Mood; content: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.postSilentSignal(mood, content);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
     },
   });
 }

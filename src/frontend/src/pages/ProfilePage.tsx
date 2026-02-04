@@ -7,12 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Edit2, Save, X, User } from 'lucide-react';
+import { User } from 'lucide-react';
+import IconActionButton from '@/components/common/IconActionButton';
+import { Edit2, Save, X } from 'lucide-react';
 import ShareCodeCard from '@/components/circle/ShareCodeCard';
 import MoodAnalyzerCard from '@/components/profile/MoodAnalyzerCard';
 import { Gender, RelationshipIntent } from '@/backend';
 import { calculateAge, formatDateForInput, parseDateInput } from '@/utils/age';
 import { useFloatingJournalVisibility } from '@/contexts/FloatingJournalVisibilityContext';
+import { useSound } from '@/hooks/useSound';
 
 export default function ProfilePage() {
   const { data: userProfile, isLoading } = useGetCallerUserProfile();
@@ -26,6 +29,7 @@ export default function ProfilePage() {
   const [preferredGender, setPreferredGender] = useState<Gender | null>(null);
 
   const { hide, show } = useFloatingJournalVisibility();
+  const { enabled: soundsEnabled, setEnabled: setSoundsEnabled } = useSound();
 
   useEffect(() => {
     if (isEditing) {
@@ -53,12 +57,12 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error('Name cannot be empty');
+      toast.error('Name required');
       return;
     }
 
     if (!gender || !dateOfBirth || !relationshipIntent || !preferredGender) {
-      toast.error('Please complete all fields');
+      toast.error('Complete all fields');
       return;
     }
 
@@ -78,10 +82,10 @@ export default function ProfilePage() {
         shareCode: userProfile.shareCode,
         createdAt: userProfile.createdAt,
       });
-      toast.success('Profile updated');
+      toast.success('Saved');
       setIsEditing(false);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
+      toast.error(error.message || 'Save failed');
     }
   };
 
@@ -97,8 +101,8 @@ export default function ProfilePage() {
   const getIntentLabel = (intent: RelationshipIntent) => {
     switch (intent) {
       case RelationshipIntent.friendship: return 'Friendship';
-      case RelationshipIntent.romantic: return 'Romantic Connection';
-      case RelationshipIntent.both: return 'Open to Both';
+      case RelationshipIntent.romantic: return 'Romantic';
+      case RelationshipIntent.both: return 'Both';
     }
   };
 
@@ -133,8 +137,8 @@ export default function ProfilePage() {
           <User className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold">Your Profile</h1>
-          <p className="text-sm text-muted-foreground">Manage your personal information</p>
+          <h1 className="text-2xl font-semibold">Profile</h1>
+          <p className="text-sm text-muted-foreground">Your info</p>
         </div>
       </div>
 
@@ -142,14 +146,17 @@ export default function ProfilePage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Personal Details</CardTitle>
-              <CardDescription>Information visible to your circle</CardDescription>
+              <CardTitle>Details</CardTitle>
+              <CardDescription>Visible to your circle</CardDescription>
             </div>
             {!isEditing && (
-              <Button variant="outline" size="sm" onClick={handleEdit}>
-                <Edit2 className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
+              <IconActionButton
+                icon={<Edit2 className="h-4 w-4" />}
+                label="Edit profile"
+                variant="outline"
+                size="sm"
+                onClick={handleEdit}
+              />
             )}
           </div>
         </CardHeader>
@@ -205,7 +212,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-dob">Date of Birth</Label>
+                <Label htmlFor="edit-dob">Birthday</Label>
                 <Input
                   id="edit-dob"
                   type="date"
@@ -217,9 +224,9 @@ export default function ProfilePage() {
 
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <Label htmlFor="show-age">Show my age to circle members</Label>
+                  <Label htmlFor="show-age">Show age</Label>
                   <p className="text-xs text-muted-foreground">
-                    Your age will be visible to people in your circle
+                    Visible to circle
                   </p>
                 </div>
                 <Switch
@@ -248,7 +255,7 @@ export default function ProfilePage() {
                     className="w-full"
                     size="sm"
                   >
-                    Romantic Connection
+                    Romantic
                   </Button>
                   <Button
                     type="button"
@@ -257,7 +264,7 @@ export default function ProfilePage() {
                     className="w-full"
                     size="sm"
                   >
-                    Open to Both
+                    Both
                   </Button>
                 </div>
               </div>
@@ -301,14 +308,24 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button onClick={handleSave} disabled={updateProfile.isPending}>
+                <IconActionButton
+                  icon={<Save className="h-4 w-4" />}
+                  label="Save changes"
+                  onClick={handleSave}
+                  disabled={updateProfile.isPending}
+                >
                   <Save className="mr-2 h-4 w-4" />
                   {updateProfile.isPending ? 'Saving...' : 'Save'}
-                </Button>
-                <Button variant="outline" onClick={handleCancel}>
+                </IconActionButton>
+                <IconActionButton
+                  icon={<X className="h-4 w-4" />}
+                  label="Cancel editing"
+                  variant="outline"
+                  onClick={handleCancel}
+                >
                   <X className="mr-2 h-4 w-4" />
                   Cancel
-                </Button>
+                </IconActionButton>
               </div>
             </>
           ) : (
@@ -327,7 +344,7 @@ export default function ProfilePage() {
                   <div>
                     <Label className="text-xs text-muted-foreground">Age</Label>
                     <p className="mt-1 text-base">
-                      {age !== null ? `${age} years` : 'Not set'}
+                      {age !== null ? `${age}` : 'Not set'}
                       {!userProfile.showAge && (
                         <span className="ml-2 text-xs text-muted-foreground">(hidden)</span>
                       )}
@@ -347,6 +364,30 @@ export default function ProfilePage() {
               </div>
             </>
           )}
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+          <CardDescription>App preferences</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="sounds-toggle">Sounds</Label>
+              <p className="text-xs text-muted-foreground">
+                Play calm sounds for new activity
+              </p>
+            </div>
+            <Switch
+              id="sounds-toggle"
+              checked={soundsEnabled}
+              onCheckedChange={setSoundsEnabled}
+            />
+          </div>
         </CardContent>
       </Card>
 

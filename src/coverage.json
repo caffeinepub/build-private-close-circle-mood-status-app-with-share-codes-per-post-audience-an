@@ -1,92 +1,24 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T13:23:57.363Z",
+  "generatedAt": "2026-02-04T21:56:56.844Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-5",
-        "summary": "Audit and update all user-facing copy so it never implies the app knows, detects, or infers how the user (or the circle) feels; all language must frame insights as patterns based on what users selected/posted (e.g., “You selected low moods” / “Posts this week leaned calm”).",
+        "id": "REQ-12",
+        "summary": "Wrap the entire React app in the existing SoundProvider so any component calling useSound (including the homepage/feed via SoundEffectsManager) is always rendered within SoundProvider.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/ComposeStatusPage.tsx",
-          "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
-          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
-          "frontend/src/utils/moodAnalysis.ts",
-          "frontend/src/utils/circleEnergy.ts",
-          "frontend/src/constants/loginCopy.ts",
-          "frontend/src/components/auth/LoginPanel.tsx",
-          "frontend/src/constants/foundationCopy.ts"
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/ComposeStatusPage.tsx",
-          "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
-          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
-          "frontend/src/utils/moodAnalysis.ts",
-          "frontend/src/utils/circleEnergy.ts",
-          "frontend/src/constants/loginCopy.ts",
-          "frontend/src/components/auth/LoginPanel.tsx",
-          "frontend/src/constants/foundationCopy.ts"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Update the Mood Analyzer UI and its generated guidance text to use agency-preserving, non-inferential wording that describes distributions/trends of selected moods, not emotional states; ensure the analyzer description and guidance do not use clinical/diagnostic framing.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
-          "frontend/src/utils/moodAnalysis.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
-          "frontend/src/utils/moodAnalysis.ts"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Ensure the mood picker and check-in flow remain fully user-chosen: no default pre-selection, no auto-suggested mood, and no copy that implies a recommendation or guess; adjust surrounding copy in compose and reminder surfaces to reinforce user choice.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/status/MoodPicker.tsx",
-          "frontend/src/pages/ComposeStatusPage.tsx",
-          "frontend/src/components/feed/MoodCheckInReminderCard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/ComposeStatusPage.tsx",
-          "frontend/src/components/feed/MoodCheckInReminderCard.tsx"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "Update Circle Energy summary text to avoid claiming the system knows the circle’s feelings (remove/replace phrases like “Your circle feels…”), reframing summaries as patterns observed in posts over the last week.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/circleEnergy.ts",
-          "frontend/src/components/circle/CircleEnergyCard.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/circleEnergy.ts"
-        ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Update login/onboarding/product copy that currently emphasizes the app understanding or holding feelings so it instead emphasizes user choice and private sharing of selected moods, while keeping the existing calm tone.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/constants/loginCopy.ts",
-          "frontend/src/components/auth/LoginPanel.tsx",
-          "frontend/src/constants/foundationCopy.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/constants/loginCopy.ts",
-          "frontend/src/components/auth/LoginPanel.tsx",
-          "frontend/src/constants/foundationCopy.ts"
+          "frontend/src/App.tsx"
         ]
       }
     ]
@@ -96,14 +28,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/auth/LoginPanel.tsx",
-    "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
-    "frontend/src/components/profile/MoodAnalyzerCard.tsx",
-    "frontend/src/constants/foundationCopy.ts",
-    "frontend/src/constants/loginCopy.ts",
-    "frontend/src/pages/ComposeStatusPage.tsx",
-    "frontend/src/utils/circleEnergy.ts",
-    "frontend/src/utils/moodAnalysis.ts",
+    "frontend/src/App.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

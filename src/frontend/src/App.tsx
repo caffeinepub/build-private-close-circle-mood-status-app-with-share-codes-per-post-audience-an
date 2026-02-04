@@ -2,12 +2,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter, createRootRoute, createRoute } from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
+import { SoundProvider } from './contexts/SoundContext';
 import AuthGate from './components/auth/AuthGate';
 import ProfileGate from './components/profile/ProfileGate';
 import AppLayout from './components/app/AppLayout';
 import ProfilePage from './pages/ProfilePage';
 import CirclePage from './pages/CirclePage';
 import ComposeStatusPage from './pages/ComposeStatusPage';
+import DailyCheckInPage from './pages/DailyCheckInPage';
 import FeedPage from './pages/FeedPage';
 import NotificationsPage from './pages/NotificationsPage';
 import StatusDetailPage from './pages/StatusDetailPage';
@@ -46,6 +48,12 @@ const composeRoute = createRoute({
   component: ComposeStatusPage,
 });
 
+const dailyCheckInRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/daily-checkin',
+  component: DailyCheckInPage,
+});
+
 const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/notifications',
@@ -63,6 +71,7 @@ const routeTree = rootRoute.addChildren([
   profileRoute,
   circleRoute,
   composeRoute,
+  dailyCheckInRoute,
   notificationsRoute,
   statusDetailRoute,
 ]);
@@ -75,11 +84,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const queryClient = new QueryClient();
+
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <RouterProvider router={router} />
-      <Toaster />
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="closecircle-theme">
+      <QueryClientProvider client={queryClient}>
+        <SoundProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </SoundProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

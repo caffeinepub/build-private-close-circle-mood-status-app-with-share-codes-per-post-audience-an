@@ -1,47 +1,53 @@
-import { useNavigate, useRouterState } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Home, Users, PlusCircle, Bell } from 'lucide-react';
+import { useNavigate, useLocation } from '@tanstack/react-router';
+import { Home, Users, Bell, User } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useGetNotifications } from '@/hooks/useQueries';
+import IconActionButton from '@/components/common/IconActionButton';
 
 export default function BottomNav() {
   const navigate = useNavigate();
-  const routerState = useRouterState();
-  const currentPath = routerState.location.pathname;
-  const { data: notifications } = useGetNotifications();
+  const location = useLocation();
+  const { data: notifications = [] } = useGetNotifications();
 
-  const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
     { path: '/', icon: Home, label: 'Feed' },
     { path: '/circle', icon: Users, label: 'Circle' },
-    { path: '/compose', icon: PlusCircle, label: 'Post' },
-    { path: '/notifications', icon: Bell, label: 'Alerts', badge: unreadCount },
+    { path: '/notifications', icon: Bell, label: 'Notifications', badge: unreadCount },
+    { path: '/profile', icon: User, label: 'Profile' },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center justify-around px-1 py-1.5">
-        {navItems.map((item) => {
-          const isActive = currentPath === item.path;
-          const Icon = item.icon;
-          return (
-            <Button
-              key={item.path}
-              variant={isActive ? 'default' : 'ghost'}
-              size="sm"
-              className="relative flex-1 flex-col gap-0.5 h-auto py-2 px-2"
-              onClick={() => navigate({ to: item.path })}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="text-[10px]">{item.label}</span>
-              {item.badge && item.badge > 0 && (
-                <span className="absolute right-1 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
-                  {item.badge > 9 ? '9+' : item.badge}
-                </span>
-              )}
-            </Button>
-          );
-        })}
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-safe">
+      <div className="container max-w-2xl mx-auto px-4">
+        <div className="flex items-center justify-around h-16">
+          {navItems.map(({ path, icon: Icon, label, badge }) => (
+            <IconActionButton
+              key={path}
+              icon={
+                <div className="relative">
+                  <Icon className={`h-5 w-5 ${isActive(path) ? 'text-primary' : 'text-muted-foreground'}`} />
+                  {badge !== undefined && badge > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-5 min-w-5 flex items-center justify-center p-0 text-xs"
+                    >
+                      {badge > 9 ? '9+' : badge}
+                    </Badge>
+                  )}
+                </div>
+              }
+              label={label}
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate({ to: path })}
+              className={isActive(path) ? 'bg-primary/10' : ''}
+            />
+          ))}
+        </div>
       </div>
     </nav>
   );

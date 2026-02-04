@@ -78,8 +78,16 @@ export default function JournalEntriesPanel({ selectedDate }: JournalEntriesPane
 
       {entries.length === 0 && !isAddingNew && (
         <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            {canEdit ? 'No entries for today yet. Start writing!' : 'No entries for this date.'}
+          <CardContent className="py-8 text-center space-y-2">
+            <p className="text-muted-foreground">
+              {canEdit ? 'No entries for today yet.' : 'No entries for this date.'}
+            </p>
+            {canEdit && (
+              <>
+                <p className="text-sm text-muted-foreground/80">Want to leave one sentence?</p>
+                <p className="text-xs text-muted-foreground/70">No words is okay too.</p>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
@@ -131,6 +139,7 @@ export default function JournalEntriesPanel({ selectedDate }: JournalEntriesPane
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">New Entry</CardTitle>
+                <CardDescription className="text-xs">Want to leave one sentence? No words is okay too.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Textarea

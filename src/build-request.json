@@ -1,110 +1,39 @@
 {
   "kind": "build_request",
-  "title": "Scope 1 (Trust & Safety): Remove implied mood inference and auto-suggestion language",
+  "title": "Fix runtime error by adding global SoundProvider wrapper",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-5",
-      "text": "Audit and update all user-facing copy so it never implies the app knows, detects, or infers how the user (or the circle) feels; all language must frame insights as patterns based on what users selected/posted (e.g., “You selected low moods” / “Posts this week leaned calm”).",
+      "id": "REQ-12",
+      "text": "Wrap the entire React app in the existing SoundProvider so any component calling useSound (including the homepage/feed via SoundEffectsManager) is always rendered within SoundProvider.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
           "msg-6",
+          "msg-7",
           "msg-8"
         ],
         "quotes": [
-          "Remove any language implying the system knows how the user feels",
-          "Analyzer talks about patterns, not emotions (\"You selected low moods\" vs \"You felt low\")"
+          "fix this error in the codebase",
+          "the homepage. likely the entire app",
+          "Should be globally wrapped in the existing SoundProvider",
+          "add one"
         ]
       },
       "acceptanceCriteria": [
-        "No UI text claims or implies the system can tell how a user feels without the user explicitly selecting a mood (avoid phrases like “we know”, “you felt”, “your circle feels”, “your mood indicates distress”).",
-        "Where the app summarizes history, the text explicitly references “your selected moods”, “your entries”, “your posts”, or equivalent agency-preserving phrasing.",
-        "All updated strings are in English."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Update the Mood Analyzer UI and its generated guidance text to use agency-preserving, non-inferential wording that describes distributions/trends of selected moods, not emotional states; ensure the analyzer description and guidance do not use clinical/diagnostic framing.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4",
-          "msg-6"
-        ],
-        "quotes": [
-          "Analyzer talks about patterns, not emotions (\"You selected low moods\" vs \"You felt low\")"
-        ]
-      },
-      "acceptanceCriteria": [
-        "In frontend/src/components/profile/MoodAnalyzerCard.tsx, the card subtitle and section labels do not describe “emotional patterns” as something the system determines; they are framed as analysis of the user’s selections/entries.",
-        "In frontend/src/utils/moodAnalysis.ts, guidance text uses wording like “Based on your selected moods/entries…” and avoids “you felt…”, “emotional well-being”, “distress”, “clinical consideration”, or diagnosis-like language.",
-        "If there are 0 entries, the empty-state guidance does not instruct users to “share your feelings”; it invites them to select moods/check in to see patterns."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Ensure the mood picker and check-in flow remain fully user-chosen: no default pre-selection, no auto-suggested mood, and no copy that implies a recommendation or guess; adjust surrounding copy in compose and reminder surfaces to reinforce user choice.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Mood picker stays fully user‑chosen"
-        ]
-      },
-      "acceptanceCriteria": [
-        "In frontend/src/components/status/MoodPicker.tsx and frontend/src/pages/ComposeStatusPage.tsx, no mood is auto-selected and no “suggested mood” UI is introduced.",
-        "Compose page copy (e.g., title, description, note placeholder) is updated to reflect choosing/sharing what the user wants (not what the app thinks they feel).",
-        "Mood reminder card text is updated to avoid implying the app is checking how the user feels; it invites the user to choose a mood/check in."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Update Circle Energy summary text to avoid claiming the system knows the circle’s feelings (remove/replace phrases like “Your circle feels…”), reframing summaries as patterns observed in posts over the last week.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Remove any language implying the system knows how the user feels"
-        ]
-      },
-      "acceptanceCriteria": [
-        "In frontend/src/utils/circleEnergy.ts, generated summaries do not use “feels” language implying emotional inference; they reference posting trends (e.g., “Posts this week leaned calm/mixed…”).",
-        "A quick scan of the returned summary templates confirms no diagnostic/clinical language is introduced."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Update login/onboarding/product copy that currently emphasizes the app understanding or holding feelings so it instead emphasizes user choice and private sharing of selected moods, while keeping the existing calm tone.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Remove any language implying the system knows how the user feels"
-        ]
-      },
-      "acceptanceCriteria": [
-        "In frontend/src/constants/loginCopy.ts, rotating hero/card copy no longer says “share your feelings” in a way that could imply the app is interpreting them; it references sharing what you choose / the moods you select.",
-        "Foundation copy remains consistent with Scope 1: it should describe noticing patterns from check-ins without implying inference."
+        "Navigating to the homepage/feed no longer throws: \"useSound must be used within SoundProvider\"",
+        "SoundEffectsManager can call useSound without runtime errors on any route",
+        "The SoundProvider used is the existing provider from frontend/src/contexts/SoundContext.tsx (no duplicate/alternate sound context is introduced)"
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui (read-only UI component sources).",
-    "Do not modify frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, or frontend/src/main.tsx (immutable paths).",
-    "Respect the existing single-page React app architecture and React Query patterns; no new backend services."
+    "Do not edit any files under frontend/src/components/ui or any path listed in SYSTEM_CONTEXT.frontend.immutablePaths (including frontend/src/main.tsx and the Internet Identity/actor hooks).",
+    "Keep SoundContext logic centralized in frontend/src/contexts/SoundContext.tsx; only add the missing global provider wiring."
   ],
   "nonGoals": [
-    "Do not add any new mood recommendation, auto-suggestion, or inferred mood feature.",
-    "Do not change backend data models or canister APIs as part of Scope 1 unless strictly necessary for copy-only changes (expected: not necessary).",
-    "Do not implement new clinical safety features, crisis flows, or professional-care escalation beyond copy changes requested in Scope 1."
+    "Do not change sound assets, volumes, or cue behavior.",
+    "Do not add new sound effects or new settings beyond fixing the provider mount."
   ],
   "imageRequirements": {
     "required": [],

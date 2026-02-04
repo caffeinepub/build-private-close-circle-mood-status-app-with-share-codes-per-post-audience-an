@@ -65,6 +65,24 @@ export default {
                     'accent-foreground': 'oklch(var(--sidebar-accent-foreground))',
                     border: 'oklch(var(--sidebar-border))',
                     ring: 'oklch(var(--sidebar-ring))'
+                },
+                'mood-positive': {
+                    DEFAULT: 'oklch(var(--mood-positive) / <alpha-value>)'
+                },
+                'mood-calm': {
+                    DEFAULT: 'oklch(var(--mood-calm) / <alpha-value>)'
+                },
+                'mood-low-energy': {
+                    DEFAULT: 'oklch(var(--mood-low-energy) / <alpha-value>)'
+                },
+                'mood-stressed': {
+                    DEFAULT: 'oklch(var(--mood-stressed) / <alpha-value>)'
+                },
+                'mood-neutral': {
+                    DEFAULT: 'oklch(var(--mood-neutral) / <alpha-value>)'
+                },
+                'mood-other': {
+                    DEFAULT: 'oklch(var(--mood-other) / <alpha-value>)'
                 }
             },
             borderRadius: {

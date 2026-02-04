@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search } from 'lucide-react';
 import { MOODS, MOOD_CATEGORIES, getMoodsByCategory } from '@/constants/moods';
+import { getMoodColorClasses } from '@/utils/moodColors';
 import type { Mood } from '@/backend';
 import type { MoodOption } from '@/constants/moods';
 
@@ -50,16 +51,24 @@ export default function MoodPicker({ selectedMood, onSelectMood, autoFocus = fal
 
   const renderMoodButton = (mood: MoodOption) => {
     const isSelected = selectedMood === mood.value;
+    const colorClasses = getMoodColorClasses(mood.category);
+    
     return (
       <Button
         key={mood.value}
         type="button"
-        variant={isSelected ? 'default' : 'outline'}
-        className="h-auto flex-col gap-1.5 py-3 px-2"
+        variant="outline"
+        className={`h-auto flex-col gap-1.5 py-3 px-2 transition-all ${
+          isSelected
+            ? `${colorClasses.border} ${colorClasses.bg} ${colorClasses.ring} ring-2 shadow-sm`
+            : 'hover:border-primary/30'
+        }`}
         onClick={() => onSelectMood(mood.value)}
       >
         <span className="text-2xl">{mood.emoji}</span>
-        <span className="text-xs font-medium leading-tight text-center">{mood.label}</span>
+        <span className={`text-xs font-medium leading-tight text-center ${isSelected ? colorClasses.text : ''}`}>
+          {mood.label}
+        </span>
       </Button>
     );
   };
@@ -71,7 +80,7 @@ export default function MoodPicker({ selectedMood, onSelectMood, autoFocus = fal
         <Input
           ref={searchInputRef}
           type="text"
-          placeholder="Search moods..."
+          placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -101,7 +110,7 @@ export default function MoodPicker({ selectedMood, onSelectMood, autoFocus = fal
 
           {filteredMoods.length === 0 && (
             <div className="py-8 text-center text-sm text-muted-foreground">
-              No moods found matching "{searchQuery}"
+              No moods found
             </div>
           )}
         </div>

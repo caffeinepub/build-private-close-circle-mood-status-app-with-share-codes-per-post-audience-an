@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useState, useEffect } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { usePostStatus, useGetCircleMembers, useGetUserProfiles } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,33 +16,32 @@ import type { Mood } from '@/backend';
 import { Principal } from '@dfinity/principal';
 import { calculateAge } from '@/utils/age';
 import { useJournalOverlayController } from '@/contexts/JournalOverlayControllerContext';
+import { consumeDailyCheckInGuard } from '@/utils/dailyCheckInEntry';
+import { useMoodHistory } from '@/hooks/useMoodHistory';
 import { getMoodOption } from '@/constants/moods';
 import { getMoodGradientClasses, getMoodColorClasses } from '@/utils/moodColors';
 
-export default function ComposeStatusPage() {
+export default function DailyCheckInPage() {
   const navigate = useNavigate();
-  const search = useSearch({ strict: false }) as { from?: string };
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [content, setContent] = useState('');
   const [selectedAudience, setSelectedAudience] = useState<Set<string>>(new Set());
   const [contextTags, setContextTags] = useState<string[]>([]);
   const [showPrivateNotePrompt, setShowPrivateNotePrompt] = useState(false);
-  const moodPickerRef = useRef<HTMLDivElement>(null);
 
   const { data: circleMembers = [], isLoading: loadingMembers } = useGetCircleMembers();
   const { data: profiles = {} } = useGetUserProfiles(circleMembers);
   const postStatus = usePostStatus();
   const { openJournal } = useJournalOverlayController();
+  const { moodHistory } = useMoodHistory(14);
 
+  // Guard: redirect if not coming from reminder
   useEffect(() => {
-    if (search.from === 'mood-reminder' && moodPickerRef.current) {
-      setTimeout(() => {
-        moodPickerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        const searchInput = moodPickerRef.current?.querySelector('input[type="text"]') as HTMLInputElement;
-        searchInput?.focus();
-      }, 100);
+    const hasGuard = consumeDailyCheckInGuard();
+    if (!hasGuard) {
+      navigate({ to: '/compose' });
     }
-  }, [search.from]);
+  }, [navigate]);
 
   const handleAudienceToggle = (principalStr: string) => {
     const newSet = new Set(selectedAudience);
@@ -104,45 +103,44 @@ export default function ComposeStatusPage() {
     <>
       <div className="container max-w-2xl py-8 px-4 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Check-In</h1>
-          <p className="text-muted-foreground">Share a mood</p>
+          <h1 className="text-3xl font-bold">How are you?</h1>
+          <p className="text-muted-foreground">Pick a mood</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Pick a mood</CardTitle>
-            <CardDescription>Add an optional note</CardDescription>
+            <CardTitle>Your mood</CardTitle>
+            <CardDescription>What feels right?</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2" ref={moodPickerRef}>
-              <Label>Mood *</Label>
-              <MoodPicker selectedMood={selectedMood} onSelectMood={setSelectedMood} autoFocus={search.from === 'mood-reminder'} />
+            <div className="space-y-2">
+              <MoodPicker selectedMood={selectedMood} onSelectMood={setSelectedMood} autoFocus />
             </div>
 
             {selectedMood && (
               <>
                 <Separator />
+                <div className="space-y-2">
+                  <Label htmlFor="content">One sentence?</Label>
+                  <Textarea
+                    id="content"
+                    placeholder="No words is okay too."
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    maxLength={300}
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">{content.length}/300</p>
+                </div>
+
+                <Separator />
+
                 <ProgressiveDisclosure trigger="More options">
                   <div className="space-y-6">
                     <ContextTagsPicker
                       selectedTags={contextTags}
                       onTagsChange={setContextTags}
                     />
-
-                    <Separator />
-
-                    <div className="space-y-2">
-                      <Label htmlFor="content">Note (optional)</Label>
-                      <Textarea
-                        id="content"
-                        placeholder="Add context..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        maxLength={300}
-                        rows={4}
-                      />
-                      <p className="text-xs text-muted-foreground">{content.length}/300</p>
-                    </div>
 
                     <Separator />
 
@@ -190,21 +188,21 @@ export default function ComposeStatusPage() {
                     </div>
                   </div>
                 </ProgressiveDisclosure>
+
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={postStatus.isPending || !selectedMood}
+                    className={`flex-1 ${moodGradient} ${moodColorClasses?.border} border-2 shadow-md hover:shadow-lg transition-all`}
+                  >
+                    {postStatus.isPending ? 'Sharing...' : 'Share'}
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate({ to: '/' })}>
+                    Cancel
+                  </Button>
+                </div>
               </>
             )}
-
-            <div className="flex gap-2">
-              <Button
-                onClick={handleSubmit}
-                disabled={postStatus.isPending || !selectedMood || selectedAudience.size === 0}
-                className={`flex-1 ${moodGradient} ${moodColorClasses?.border} border-2 shadow-md hover:shadow-lg transition-all`}
-              >
-                {postStatus.isPending ? 'Sharing...' : 'Share'}
-              </Button>
-              <Button variant="outline" onClick={() => navigate({ to: '/' })}>
-                Cancel
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -213,6 +211,7 @@ export default function ComposeStatusPage() {
         isOpen={showPrivateNotePrompt}
         onOpenJournal={handleOpenJournal}
         onDismiss={handleDismissPrompt}
+        moodHistory={moodHistory}
       />
     </>
   );

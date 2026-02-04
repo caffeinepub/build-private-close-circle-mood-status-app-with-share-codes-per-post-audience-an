@@ -10,6 +10,7 @@ import { Gender, RelationshipIntent } from '@/backend';
 import { generateShareCode } from '@/utils/shareCode';
 import { parseDateInput } from '@/utils/age';
 import { FOUNDATION_PROMISE, FOUNDATION_BOUNDARY } from '@/constants/foundationCopy';
+import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
 
 type OnboardingStep = 'name' | 'gender' | 'dob' | 'intent' | 'preferences' | 'shareCode';
 
@@ -28,43 +29,43 @@ export default function ProfileSetupDialog() {
   const handleCopyShareCode = () => {
     navigator.clipboard.writeText(shareCode);
     setCopied(true);
-    toast.success('Share code copied!');
+    toast.success('Copied!');
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleNext = () => {
     if (step === 'name') {
       if (!name.trim()) {
-        toast.error('Please enter your name');
+        toast.error('Enter your name');
         return;
       }
       setStep('gender');
     } else if (step === 'gender') {
       if (!gender) {
-        toast.error('Please select your gender');
+        toast.error('Select your gender');
         return;
       }
       setStep('dob');
     } else if (step === 'dob') {
       if (!dateOfBirth) {
-        toast.error('Please enter your date of birth');
+        toast.error('Enter your birthday');
         return;
       }
       const dobDate = new Date(dateOfBirth);
       if (dobDate > new Date()) {
-        toast.error('Date of birth cannot be in the future');
+        toast.error('Birthday cannot be in the future');
         return;
       }
       setStep('intent');
     } else if (step === 'intent') {
       if (!relationshipIntent) {
-        toast.error('Please select your relationship intent');
+        toast.error('Select your intent');
         return;
       }
       setStep('preferences');
     } else if (step === 'preferences') {
       if (!preferredGender) {
-        toast.error('Please select your preference');
+        toast.error('Select your preference');
         return;
       }
       setStep('shareCode');
@@ -73,7 +74,7 @@ export default function ProfileSetupDialog() {
 
   const handleFinish = async () => {
     if (!name.trim() || !gender || !dateOfBirth || !relationshipIntent || !preferredGender) {
-      toast.error('Please complete all steps');
+      toast.error('Complete all steps');
       return;
     }
 
@@ -91,9 +92,9 @@ export default function ProfileSetupDialog() {
         shareCode: shareCode,
         createdAt: BigInt(Date.now()) * BigInt(1_000_000),
       });
-      toast.success('Welcome! Your profile is ready.');
+      toast.success('Welcome! You are all set.');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create profile');
+      toast.error(error.message || 'Setup failed');
     }
   };
 
@@ -108,23 +109,25 @@ export default function ProfileSetupDialog() {
               </div>
               <CardTitle className="text-2xl">Welcome</CardTitle>
               <CardDescription className="text-base">
-                Let's start with your name
+                What should we call you?
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
-                <p className="text-sm leading-relaxed text-foreground/90">
-                  {FOUNDATION_PROMISE}
-                </p>
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {FOUNDATION_BOUNDARY}
-                </p>
-              </div>
+              <ProgressiveDisclosure trigger="What's this?">
+                <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <p className="text-sm leading-relaxed text-foreground/90">
+                    {FOUNDATION_PROMISE}
+                  </p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {FOUNDATION_BOUNDARY}
+                  </p>
+                </div>
+              </ProgressiveDisclosure>
               <div className="space-y-3">
-                <Label htmlFor="name" className="text-base">What should we call you?</Label>
+                <Label htmlFor="name" className="text-base">Your name</Label>
                 <Input
                   id="name"
-                  placeholder="Your name"
+                  placeholder="Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={50}
@@ -145,7 +148,7 @@ export default function ProfileSetupDialog() {
             <CardHeader className="space-y-2 text-center">
               <CardTitle className="text-2xl">Your Gender</CardTitle>
               <CardDescription className="text-base">
-                Help us personalize your experience
+                Helps personalize your experience
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -192,7 +195,7 @@ export default function ProfileSetupDialog() {
             <CardHeader className="space-y-2 text-center">
               <CardTitle className="text-2xl">Your Birthday</CardTitle>
               <CardDescription className="text-base">
-                Your age will be visible to your circle
+                Visible to your circle
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -207,7 +210,7 @@ export default function ProfileSetupDialog() {
                   className="text-base h-12"
                 />
                 <p className="text-sm text-muted-foreground">
-                  You can hide your age later in settings
+                  Hide it later in settings
                 </p>
               </div>
               <Button onClick={handleNext} className="w-full h-12 text-base" size="lg">
@@ -221,9 +224,9 @@ export default function ProfileSetupDialog() {
         return (
           <>
             <CardHeader className="space-y-2 text-center">
-              <CardTitle className="text-2xl">What are you looking for?</CardTitle>
+              <CardTitle className="text-2xl">Looking for?</CardTitle>
               <CardDescription className="text-base">
-                This helps us understand your intentions
+                Your intentions
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -240,14 +243,14 @@ export default function ProfileSetupDialog() {
                   className="w-full h-16 text-base"
                   onClick={() => setRelationshipIntent(RelationshipIntent.romantic)}
                 >
-                  Romantic Connection
+                  Romantic
                 </Button>
                 <Button
                   variant={relationshipIntent === RelationshipIntent.both ? 'default' : 'outline'}
                   className="w-full h-16 text-base"
                   onClick={() => setRelationshipIntent(RelationshipIntent.both)}
                 >
-                  Open to Both
+                  Both
                 </Button>
               </div>
               <Button onClick={handleNext} className="w-full h-12 text-base" size="lg">
@@ -261,9 +264,9 @@ export default function ProfileSetupDialog() {
         return (
           <>
             <CardHeader className="space-y-2 text-center">
-              <CardTitle className="text-2xl">Your Preferences</CardTitle>
+              <CardTitle className="text-2xl">Interested In</CardTitle>
               <CardDescription className="text-base">
-                Who would you like to connect with?
+                Who you would like to connect with
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -308,15 +311,15 @@ export default function ProfileSetupDialog() {
         return (
           <>
             <CardHeader className="space-y-2 text-center">
-              <CardTitle className="text-2xl">Your Share Code</CardTitle>
+              <CardTitle className="text-2xl">Your Code</CardTitle>
               <CardDescription className="text-base">
-                Save this code to invite trusted people to your circle
+                Invite trusted people
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-6 text-center">
-                  <p className="mb-2 text-sm font-medium text-muted-foreground">Your Code</p>
+                  <p className="mb-2 text-sm font-medium text-muted-foreground">Share Code</p>
                   <p className="mb-4 text-3xl font-bold tracking-wider text-primary">{shareCode}</p>
                   <Button
                     variant="outline"
@@ -332,14 +335,14 @@ export default function ProfileSetupDialog() {
                     ) : (
                       <>
                         <Copy className="h-4 w-4" />
-                        Copy Code
+                        Copy
                       </>
                     )}
                   </Button>
                 </div>
                 <div className="rounded-lg bg-muted/50 p-4">
                   <p className="text-sm text-muted-foreground">
-                    Keep this code private. Only share it with people you trust. You can change it later in your profile settings.
+                    Keep private. Share only with people you trust. Change it later in settings.
                   </p>
                 </div>
               </div>
@@ -349,7 +352,7 @@ export default function ProfileSetupDialog() {
                 className="w-full h-12 text-base"
                 size="lg"
               >
-                {saveProfile.isPending ? 'Creating Your Space...' : 'Complete Setup'}
+                {saveProfile.isPending ? 'Setting up...' : 'Done'}
               </Button>
             </CardContent>
           </>

@@ -100,6 +100,18 @@ export const StatusPost = IDL.Record({
   'audience' : IDL.Vec(IDL.Principal),
   'author' : IDL.Principal,
 });
+export const SilentSignal = IDL.Record({
+  'id' : IDL.Text,
+  'content' : IDL.Text,
+  'mood' : Mood,
+  'createdAt' : Time,
+  'audience' : IDL.Vec(IDL.Principal),
+  'author' : IDL.Principal,
+});
+export const FeedItem = IDL.Variant({
+  'status' : StatusPost,
+  'silentSignal' : SilentSignal,
+});
 export const Notification = IDL.Record({
   'id' : IDL.Text,
   'createdAt' : Time,
@@ -126,15 +138,23 @@ export const idlService = IDL.Service({
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCircleMembers' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+  'getEligibleSafePeopleCandidates' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Principal)],
+      ['query'],
+    ),
   'getEntriesByRange' : IDL.Func(
       [Time, Time],
       [IDL.Vec(JournalEntry)],
       ['query'],
     ),
-  'getFeed' : IDL.Func([], [IDL.Vec(StatusPost)], ['query']),
+  'getFeed' : IDL.Func([], [IDL.Vec(FeedItem)], ['query']),
   'getJournalEntry' : IDL.Func([Time], [IDL.Opt(JournalEntry)], ['query']),
   'getNotifications' : IDL.Func([], [IDL.Vec(Notification)], ['query']),
+  'getOwnSilentSignals' : IDL.Func([], [IDL.Vec(SilentSignal)], ['query']),
+  'getSafePeople' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
   'getShareCodeByPrincipal' : IDL.Func([IDL.Principal], [IDL.Text], ['query']),
+  'getSilentSignals' : IDL.Func([], [IDL.Vec(SilentSignal)], ['query']),
   'getStatus' : IDL.Func([IDL.Text], [IDL.Opt(StatusPost)], ['query']),
   'getUnprocessedJoinRequests' : IDL.Func(
       [],
@@ -149,9 +169,12 @@ export const idlService = IDL.Service({
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'joinCircleFromShareCode' : IDL.Func([IDL.Text], [], []),
   'markNotificationAsRead' : IDL.Func([IDL.Text], [], []),
+  'postSilentSignal' : IDL.Func([Mood, IDL.Text], [], []),
   'postStatus' : IDL.Func([StatusPost], [], []),
   'removeCircleMember' : IDL.Func([IDL.Principal], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setSafePerson' : IDL.Func([IDL.Principal], [], []),
+  'unsetSafePerson' : IDL.Func([IDL.Principal], [], []),
   'updateProfile' : IDL.Func([UserProfile], [], []),
   'updateShareCode' : IDL.Func([IDL.Text], [IDL.Text], []),
   'viewProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),
@@ -252,6 +275,18 @@ export const idlFactory = ({ IDL }) => {
     'audience' : IDL.Vec(IDL.Principal),
     'author' : IDL.Principal,
   });
+  const SilentSignal = IDL.Record({
+    'id' : IDL.Text,
+    'content' : IDL.Text,
+    'mood' : Mood,
+    'createdAt' : Time,
+    'audience' : IDL.Vec(IDL.Principal),
+    'author' : IDL.Principal,
+  });
+  const FeedItem = IDL.Variant({
+    'status' : StatusPost,
+    'silentSignal' : SilentSignal,
+  });
   const Notification = IDL.Record({
     'id' : IDL.Text,
     'createdAt' : Time,
@@ -278,19 +313,27 @@ export const idlFactory = ({ IDL }) => {
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCircleMembers' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+    'getEligibleSafePeopleCandidates' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Principal)],
+        ['query'],
+      ),
     'getEntriesByRange' : IDL.Func(
         [Time, Time],
         [IDL.Vec(JournalEntry)],
         ['query'],
       ),
-    'getFeed' : IDL.Func([], [IDL.Vec(StatusPost)], ['query']),
+    'getFeed' : IDL.Func([], [IDL.Vec(FeedItem)], ['query']),
     'getJournalEntry' : IDL.Func([Time], [IDL.Opt(JournalEntry)], ['query']),
     'getNotifications' : IDL.Func([], [IDL.Vec(Notification)], ['query']),
+    'getOwnSilentSignals' : IDL.Func([], [IDL.Vec(SilentSignal)], ['query']),
+    'getSafePeople' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
     'getShareCodeByPrincipal' : IDL.Func(
         [IDL.Principal],
         [IDL.Text],
         ['query'],
       ),
+    'getSilentSignals' : IDL.Func([], [IDL.Vec(SilentSignal)], ['query']),
     'getStatus' : IDL.Func([IDL.Text], [IDL.Opt(StatusPost)], ['query']),
     'getUnprocessedJoinRequests' : IDL.Func(
         [],
@@ -305,9 +348,12 @@ export const idlFactory = ({ IDL }) => {
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'joinCircleFromShareCode' : IDL.Func([IDL.Text], [], []),
     'markNotificationAsRead' : IDL.Func([IDL.Text], [], []),
+    'postSilentSignal' : IDL.Func([Mood, IDL.Text], [], []),
     'postStatus' : IDL.Func([StatusPost], [], []),
     'removeCircleMember' : IDL.Func([IDL.Principal], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setSafePerson' : IDL.Func([IDL.Principal], [], []),
+    'unsetSafePerson' : IDL.Func([IDL.Principal], [], []),
     'updateProfile' : IDL.Func([UserProfile], [], []),
     'updateShareCode' : IDL.Func([IDL.Text], [IDL.Text], []),
     'viewProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),

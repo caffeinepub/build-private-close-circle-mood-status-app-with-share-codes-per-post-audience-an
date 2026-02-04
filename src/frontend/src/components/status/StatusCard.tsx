@@ -2,6 +2,7 @@ import { useGetUserProfile } from '@/hooks/useQueries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getMoodOption } from '@/constants/moods';
+import { getMoodColorClasses } from '@/utils/moodColors';
 import type { StatusPost } from '@/backend';
 import { formatDistanceToNow } from 'date-fns';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
@@ -20,11 +21,10 @@ export default function StatusCard({ status, hideAudience = false }: StatusCardP
 
   const authorName = authorProfile?.name || `User ${status.author.toString().slice(0, 8)}...`;
 
-  // Defensive: ensure context tags are never displayed in the UI
-  // (backend already filters them for non-authors, but this is an extra safeguard)
+  const moodColorClasses = moodOption ? getMoodColorClasses(moodOption.category) : null;
 
   return (
-    <Card>
+    <Card className={moodColorClasses ? `${moodColorClasses.border} border-l-4` : ''}>
       <CardContent className="pt-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
@@ -38,10 +38,12 @@ export default function StatusCard({ status, hideAudience = false }: StatusCardP
           </div>
         </div>
 
-        <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-4">
+        <div className={`flex items-center gap-3 rounded-lg p-4 ${moodColorClasses ? moodColorClasses.bg : 'bg-muted/50'}`}>
           <span className="text-4xl">{moodOption?.emoji || '😐'}</span>
           <div className="flex-1">
-            <p className="font-medium text-lg">{moodOption?.label || 'Neutral'}</p>
+            <p className={`font-medium text-lg ${moodColorClasses ? moodColorClasses.text : ''}`}>
+              {moodOption?.label || 'Neutral'}
+            </p>
             {status.content && <p className="text-sm text-muted-foreground mt-1">{status.content}</p>}
           </div>
         </div>

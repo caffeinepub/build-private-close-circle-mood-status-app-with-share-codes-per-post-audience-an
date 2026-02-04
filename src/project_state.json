@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 6,
-  "summary": "CloseCircle is a privacy-focused, invite-only mood check-in web app built as a React SPA that talks to a Motoko canister on the Internet Computer. Users authenticate with Internet Identity, complete a required onboarding profile (name, gender, DOB/age visibility, relationship intent, preferences), and use a personal share code to form a trusted “circle” via join requests. Within a circle, users post mood statuses from a categorized mood catalog, optionally add a short note and context tags, and choose a per-post audience from their circle. The app provides a feed (polled) of accessible posts, status detail pages with permission-aware UX, an in-app notifications inbox (polled) with read/unread state, circle management (members, join requests, join-by-code, share code updates), a private daily journal overlay (today editable, past view-only in UI), private mood insights (distribution/trend/conservative concern guidance + disclaimer), and a “Circle Energy” weekly vibe summary. The product also centralizes and reuses “foundation” Promise/Boundary copy across key surfaces for consistent purpose/limitations messaging.",
+  "projectStateVersion": 95,
+  "summary": "CloseCircle Scope 2 remains micro‑UX to reduce thinking and increase guidance in the daily check‑in flow. Scope 3 makes the Mood Analyzer actionable by mapping detected patterns to conservative, rule‑based, non‑clinical micro‑actions (≤2 minutes). Add Scope 4: Circles that do something day‑to‑day—make circles useful without social pressure via Safe People (1–2) and silent, no‑reply signals (e.g., “Low energy today”, “Okay, just quiet”) with no demanding notifications.",
   "existing_features": [
     {
       "id": "IF-1",
@@ -393,52 +393,256 @@
       "version": 1
     },
     {
-      "id": "feature-audit-and-update-all-user-facing-copy-so-it-never-implies-the-app-knows-detects-or-infers-how-the-user-or-the-circle-feels-all-language-must-frame-insights-as-patterns-based-on-what-users-selected-posted-e-g-you-selected-low-moods-posts-this-week-leaned-calm",
-      "title": "Audit and update all user-facing copy so it never implies the app knows, detects, or infers how the user (or the circle) feels; all language must frame insights as patterns based on what users selected/posted (e.g., “You selected low moods” / “Posts this week leaned calm”).",
+      "id": "IF-34",
+      "title": "Single daily check-in entry flow (DailyCheckInPage) routed from the once-per-day reminder",
+      "synonyms": [
+        "DailyCheckInPage",
+        "dailyCheckInEntry util",
+        "daily check-in card/flow"
+      ],
+      "description": "Introduces a dedicated Daily Check-In route/flow intended to be the single daily entry point. The existing once-per-day reminder now routes users into this focused daily check-in experience to reduce decision-making and provide clearer guidance.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-35",
+      "title": "Actionable Mood Analyzer with rule-based micro-actions (≤2 minutes)",
+      "synonyms": [
+        "MicroActionsPanel",
+        "microActions rules",
+        "actionable insights",
+        "pattern→suggestion mapping"
+      ],
+      "description": "Extends the private Mood Analyzer from descriptive insights to actionable guidance by mapping detected mood-history patterns (and related signals) to conservative, non-clinical micro-actions that take ≤2 minutes (e.g., breathing prompt, one-sentence journal, quiet reach-out). Implemented fully in the frontend via a rule-based micro-actions utility and surfaced through a dedicated UI panel alongside mood insights.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-36",
+      "title": "Safe People (max 2) backend storage and APIs",
+      "synonyms": [
+        "Safe People list",
+        "getSafePeople",
+        "setSafePeople"
+      ],
+      "description": "Motoko backend stores a per-caller Safe People list (maximum 2 principals) and exposes read/update APIs restricted so only the caller can manage their own Safe People selection.",
       "reqIds": [
         "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-mood-analyzer-ui-and-its-generated-guidance-text-to-use-agency-preserving-non-inferential-wording-that-describes-distributions-trends-of-selected-moods-not-emotional-states-ensure-the-analyzer-description-and-guidance-do-not-use-clinical-diagnostic-framing",
-      "title": "Update the Mood Analyzer UI and its generated guidance text to use agency-preserving, non-inferential wording that describes distributions/trends of selected moods, not emotional states; ensure the analyzer description and guidance do not use clinical/diagnostic framing.",
-      "reqIds": [
-        "REQ-6"
+      "id": "IF-37",
+      "title": "Global eligible circle connections API for Safe People selection",
+      "synonyms": [
+        "global circle connections",
+        "eligible Safe People list"
       ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-mood-picker-and-check-in-flow-remain-fully-user-chosen-no-default-pre-selection-no-auto-suggested-mood-and-no-copy-that-implies-a-recommendation-or-guess-adjust-surrounding-copy-in-compose-and-reminder-surfaces-to-reinforce-user-choice",
-      "title": "Ensure the mood picker and check-in flow remain fully user-chosen: no default pre-selection, no auto-suggested mood, and no copy that implies a recommendation or guess; adjust surrounding copy in compose and reminder surfaces to reinforce user choice.",
+      "description": "Backend exposes a mechanism to compute/return the caller’s eligible circle connections across circles they are part of (not only caller-owned circle) for Safe People selection and global delivery targeting.",
       "reqIds": [
         "REQ-7"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-circle-energy-summary-text-to-avoid-claiming-the-system-knows-the-circle-s-feelings-remove-replace-phrases-like-your-circle-feels-reframing-summaries-as-patterns-observed-in-posts-over-the-last-week",
-      "title": "Update Circle Energy summary text to avoid claiming the system knows the circle’s feelings (remove/replace phrases like “Your circle feels…”), reframing summaries as patterns observed in posts over the last week.",
+      "id": "IF-38",
+      "title": "Silent Signals backend feed item type with no-notification delivery rules",
+      "synonyms": [
+        "SilentSignal",
+        "postSilentSignal",
+        "silent signal feed item"
+      ],
+      "description": "Backend supports Silent Signals as a distinct feed item type that can be delivered to Safe People only by default and optionally to the entire circle, with an explicit rule that Silent Signals generate no notifications.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-39",
+      "title": "React Query hooks for Safe People, global connections, and Silent Signal posting",
+      "synonyms": [
+        "useSafePeople hooks",
+        "useGlobalConnections",
+        "usePostSilentSignal"
+      ],
+      "description": "Adds React Query hooks to fetch/update Safe People, fetch global eligible connections, and post Silent Signals, with cache invalidation so the feed updates after posting a signal.",
       "reqIds": [
         "REQ-8"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-login-onboarding-product-copy-that-currently-emphasizes-the-app-understanding-or-holding-feelings-so-it-instead-emphasizes-user-choice-and-private-sharing-of-selected-moods-while-keeping-the-existing-calm-tone",
-      "title": "Update login/onboarding/product copy that currently emphasizes the app understanding or holding feelings so it instead emphasizes user choice and private sharing of selected moods, while keeping the existing calm tone.",
+      "id": "IF-40",
+      "title": "Safe People management UI (choose up to 2)",
+      "synonyms": [
+        "SafePeoplePanel",
+        "Safe People settings UI"
+      ],
+      "description": "Implements a UI panel to manage Safe People by selecting up to two people from eligible connections, showing current selections and allowing removal/changes with low-pressure copy.",
       "reqIds": [
         "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-41",
+      "title": "Silent Signal composer UI with delivery controls",
+      "synonyms": [
+        "SilentSignalComposerCard",
+        "silent signal compose"
+      ],
+      "description": "Adds a lightweight composer for predefined Silent Signals (e.g., “Low energy today”, “Okay, just quiet”) defaulting to Safe People-only delivery with an explicit option to also share to the entire circle.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-42",
+      "title": "Silent Signals rendered as distinct lightweight feed items",
+      "synonyms": [
+        "SilentSignalCard",
+        "feed silent signal rendering"
+      ],
+      "description": "Renders Silent Signals in the feed as distinct, lightweight items minimizing social pressure and explicitly avoiding reply/comment affordances.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-43",
+      "title": "Progressive disclosure UI utility to limit visible choices by default",
+      "synonyms": [
+        "ProgressiveDisclosure",
+        "expand/collapse choice sets",
+        "reduced cognitive load"
+      ],
+      "description": "Adds a reusable ProgressiveDisclosure component to initially hide secondary/advanced options and reveal them on demand, supporting the micro-UX goal of reducing decision-making in check-in/compose-related surfaces.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-44",
+      "title": "Graceful canister/replica error handling in actor usage and join-by-code flow",
+      "synonyms": [
+        "useActorWithError",
+        "IC0508 handling",
+        "user-friendly replica errors"
+      ],
+      "description": "Introduces a dedicated actor hook with normalized error handling and updates the join-by-share-code experience to avoid raw replica errors (including IC0508 canister-stopped cases), providing clearer user-facing messaging and guardrails.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-45",
+      "title": "Mood color mapping utility for consistent mood-based UI accents",
+      "synonyms": [
+        "moodColors",
+        "mood→color mapping",
+        "visual mood cues"
+      ],
+      "description": "Adds a centralized mood color utility to map moods to a consistent color palette for UI accents, enabling more visual-first mood communication across components.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-46",
+      "title": "Footer credit line with ICP attribution and inline ICP logo",
+      "synonyms": [
+        "AppFooter",
+        "footer credits",
+        "ICP logo asset",
+        "powered by Internet Computer"
+      ],
+      "description": "Adds a persistent footer credit line including “© CloseCircle. 2026. Built by Abel Odoh (https://x.com/AbelOdoh_IC) using Caffeine AI & powered by Internet Computer”, and embeds a small inline Internet Computer (ICP) logo asset for attribution.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-47",
+      "title": "User-facing light/dark mode toggle control",
+      "synonyms": [
+        "ThemeToggleButton",
+        "theme switch",
+        "dark mode toggle"
+      ],
+      "description": "Adds an explicit UI control to let users toggle between light and dark themes at runtime, leveraging the existing next-themes setup for persistent theme preference.",
+      "reqIds": [
+        "AR-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-48",
+      "title": "Footer layering fixed and ICP footer logo asset updated (64x64)",
+      "synonyms": [
+        "Footer z-index fix",
+        "AppFooter layering",
+        "ICP logo replacement"
+      ],
+      "description": "Updates the inline ICP logo asset at /assets/generated/icp-logo.dim_64x64.png (kept at 64x64) and adjusts footer positioning/layering so the footer renders above/in front of the blurred bottom bar/menu.",
+      "reqIds": [
+        "AR-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-49",
+      "title": "Calm site sound effects with global preferences and manager",
+      "synonyms": [
+        "SoundEffectsManager",
+        "SoundContext",
+        "useSound",
+        "soundPreferences",
+        "SFX"
+      ],
+      "description": "Adds optional, gentle UI sound effects (e.g., alerts/notifications, new feed, circle/join) managed by a global SoundContext + SoundEffectsManager, with centralized sound constants and persisted user preferences/utilities for enabling/disabling sounds.",
+      "reqIds": [
+        "AR-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-wrap-the-entire-react-app-in-the-existing-soundprovider-so-any-component-calling-usesound-including-the-homepage-feed-via-soundeffectsmanager-is-always-rendered-within-soundprovider",
+      "title": "Wrap the entire React app in the existing SoundProvider so any component calling useSound (including the homepage/feed via SoundEffectsManager) is always rendered within SoundProvider.",
+      "reqIds": [
+        "REQ-12"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-1",
-      "summary": "Scope 1 trust/safety: remove any auto-suggested mood/inference language; keep mood selection fully user-chosen; update analyzer/product copy to talk about patterns based on user selections (not inferred feelings).",
+      "id": "AR-2",
+      "summary": "Replace blank/empty states across key surfaces with gentle starter prompts to guide users into action",
       "reqIds": [],
-      "status": "in_progress"
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add supportive microcopy prompts in check-in/compose flow (e.g., “Want to leave one sentence?”, “No words is okay too.”)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Revise the app’s color system/theme with better color choices so color plays a stronger role across the entire dApp UI",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Reduce on-screen text across the dApp for a more Gen Z-friendly, low-reading UI (shorter cues, progressive disclosure, more icon/visual communication)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Gen Z visual-first UI pass across the whole dApp: shorten long sentences, hide secondary info behind taps/chevrons, replace obvious labels with icons, and lean more on mood colors/visuals so text isn’t doing the work",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
   "architectural_notes": [
@@ -466,8 +670,16 @@
     "urlParams clearParamFromHash() only removes params from hash routes that include a '?' query segment; for simple '#token=value' style hashes, secrets may remain in the URL/history after extraction."
   ],
   "isFixRequest": true,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/icp-logo.dim_64x64.png",
+      "description": "Resized/dimensioned ICP logo for small inline footer use.",
+      "targetWidth": 64,
+      "targetHeight": 64
+    }
+  ],
   "gameProjectType": "none",
   "projectName": "CloseCircle",
-  "clarification_mode": "instant",
+  "clarification_mode": "pro",
   "clarification_rounds": 0
 }

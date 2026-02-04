@@ -1,13 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Update all user-facing language to avoid implied mood/emotion inference, keeping wording agency-preserving and based only on what users selected or posted.
+**Goal:** Fix the runtime error by ensuring the entire React app is always rendered within the existing `SoundProvider`, so `useSound` can be safely called anywhere (including the homepage/feed).
 
 **Planned changes:**
-- Audit and revise frontend UI copy so it never claims or implies the app “knows,” “detects,” or “infers” how the user or their circle feels; rewrite summaries to reference selected moods, entries, and posting trends.
-- Update Mood Analyzer UI copy and generated guidance text to describe distributions/trends of selected moods (non-clinical, non-diagnostic phrasing), including the 0-entries empty state.
-- Ensure mood picker and check-in/compose/reminder surfaces remain fully user-chosen: no default mood selection, no suggested mood language, and surrounding copy reinforces user choice.
-- Update Circle Energy generated summary templates to avoid “feels” language and instead describe patterns observed in posts over the last week.
-- Update login/onboarding/product copy to emphasize private sharing and user-chosen selections (calm tone), without “share your feelings” or interpretation-implying language.
+- Add the missing global app-level wiring to wrap the app tree with the existing `SoundProvider` from `frontend/src/contexts/SoundContext.tsx`.
+- Ensure routes/components that use `SoundEffectsManager` (and therefore `useSound`) render without requiring local provider wrappers or introducing any new/duplicate sound context.
 
-**User-visible outcome:** The app’s mood-related and onboarding text consistently frames insights as patterns from the user’s selections/posts, avoids clinical or diagnostic framing, and reinforces that moods are always explicitly chosen by the user.
+**User-visible outcome:** Navigating to the homepage/feed (and any other route) no longer throws `"useSound must be used within SoundProvider"`, and sound-related components run without runtime errors.

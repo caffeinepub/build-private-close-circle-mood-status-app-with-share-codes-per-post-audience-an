@@ -1,11 +1,10 @@
 import { useGetNotifications, useMarkNotificationAsRead } from '@/hooks/useQueries';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from '@tanstack/react-router';
 import { formatDistanceToNow } from 'date-fns';
-import { Bell, BellOff, Info } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Bell, BellOff } from 'lucide-react';
+import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
 
 export default function NotificationsPage() {
   const { data: notifications = [], isLoading } = useGetNotifications();
@@ -33,17 +32,16 @@ export default function NotificationsPage() {
     <div className="container max-w-2xl py-8 px-4 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Notifications</h1>
-        <p className="text-muted-foreground">Stay updated with your circle</p>
+        <p className="text-muted-foreground">Stay updated</p>
       </div>
 
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Push Notifications — Coming soon</strong>
-          <br />
-          We're working on bringing you real-time push notifications to your device.
-        </AlertDescription>
-      </Alert>
+      <ProgressiveDisclosure trigger="Push Notifications — Coming soon" variant="default">
+        <div className="rounded-lg bg-muted/50 p-4">
+          <p className="text-sm text-muted-foreground">
+            Real-time push notifications to your device are in development.
+          </p>
+        </div>
+      </ProgressiveDisclosure>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">

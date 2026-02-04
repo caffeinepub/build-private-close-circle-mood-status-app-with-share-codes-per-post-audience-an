@@ -10,10 +10,8 @@ import Order "mo:core/Order";
 import Nat32 "mo:core/Nat32";
 import Char "mo:core/Char";
 
-
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-
 
 actor {
   type Mood = {
@@ -235,6 +233,20 @@ actor {
     };
   };
 
+  // Types for Safe People System and Silent Signals
+  type SafePeopleList = {
+    people : [Principal];
+  };
+
+  type SilentSignal = {
+    id : Text;
+    author : Principal;
+    mood : Mood;
+    content : Text;
+    audience : [Principal]; // Safe People by default, optionally full circle
+    createdAt : Time.Time;
+  };
+
   func generateRandomShareCode() : Text {
     let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toArray();
     let code = Array.tabulate(
@@ -253,6 +265,8 @@ actor {
   let circles = Map.empty<Principal, List.List<Principal>>();
   let statuses = Map.empty<Text, StatusPost>();
   let journals = Map.empty<Principal, List.List<JournalEntry>>();
+  let safePeople = Map.empty<Principal, SafePeopleList>();
+  let silentSignals = Map.empty<Text, SilentSignal>();
 
   let DEFAULT_CIRCLE_SIZE_LIMIT = 10;
   let accessControlState = AccessControl.initState();
@@ -273,6 +287,66 @@ actor {
         status with contextTags = null;
       };
     };
+  };
+
+  // Helper function to check if a principal is in any circle connection with the caller
+  func isCircleConnection(caller : Principal, person : Principal) : Bool {
+    // Check if person is in caller's own circle
+    switch (circles.get(caller)) {
+      case (?circle) {
+        if (circle.contains(person)) {
+          return true;
+        };
+      };
+      case (null) {};
+    };
+
+    // Check if caller is in person's circle
+    switch (circles.get(person)) {
+      case (?circle) {
+        if (circle.contains(caller)) {
+          return true;
+        };
+      };
+      case (null) {};
+    };
+
+    false;
+  };
+
+  // Helper function to get all circle connections for a user
+  func getAllCircleConnections(user : Principal) : [Principal] {
+    var connections = List.empty<Principal>();
+
+    // Add members from user's own circle
+    switch (circles.get(user)) {
+      case (?circle) {
+        for (member in circle.toArray().values()) {
+          if (member != user and not connections.contains(member)) {
+            connections.add(member);
+          };
+        };
+      };
+      case (null) {};
+    };
+
+    // Add circles where user is a member
+    for ((owner, circle) in circles.entries()) {
+      if (owner != user and circle.contains(user)) {
+        // Add the owner
+        if (not connections.contains(owner)) {
+          connections.add(owner);
+        };
+        // Add other members of that circle
+        for (member in circle.toArray().values()) {
+          if (member != user and not connections.contains(member)) {
+            connections.add(member);
+          };
+        };
+      };
+    };
+
+    connections.toArray();
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -542,23 +616,48 @@ actor {
     };
   };
 
-  public query ({ caller }) func getFeed() : async [StatusPost] {
+  // Enhanced feed item type to unify statuses and silent signals
+  type FeedItem = {
+    #status : StatusPost;
+    #silentSignal : SilentSignal;
+  };
+
+  public query ({ caller }) func getFeed() : async [FeedItem] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view the feed");
     };
-    statuses.values().toArray().filter(
+
+    let statusFeed : [FeedItem] = statuses.values().toArray().filter(
       func(status) {
         status.author == caller or contains(status.audience, caller);
       }
     ).map(
       func(status) {
-        sanitizeStatusForViewer(status, caller);
+        #status(sanitizeStatusForViewer(status, caller));
       }
-    ).sort(
+    );
+
+    let signalFeed : [FeedItem] = silentSignals.values().toArray().filter(
+      func(signal) {
+        signal.author == caller or contains(signal.audience, caller);
+      }
+    ).map(
+      func(signal) { #silentSignal(signal) }
+    );
+
+    let combinedFeed = statusFeed.concat(signalFeed);
+
+    combinedFeed.sort(
       func(a, b) {
-        if (a.createdAt < b.createdAt) {
-          #greater;
-        } else { #less };
+        let aCreatedAt = switch (a) {
+          case (#status(s)) { s.createdAt };
+          case (#silentSignal(sig)) { sig.createdAt };
+        };
+        let bCreatedAt = switch (b) {
+          case (#status(s)) { s.createdAt };
+          case (#silentSignal(sig)) { sig.createdAt };
+        };
+        if (aCreatedAt > bCreatedAt) { #less } else { #greater };
       }
     );
   };
@@ -731,5 +830,143 @@ actor {
         );
       };
     };
+  };
+
+  // SAFE PEOPLE SYSTEM
+
+  public query ({ caller }) func getSafePeople() : async [Principal] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view Safe People lists");
+    };
+    switch (safePeople.get(caller)) {
+      case (null) { [] };
+      case (?list) { list.people };
+    };
+  };
+
+  public shared ({ caller }) func setSafePerson(person : Principal) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can set Safe People");
+    };
+    if (person == caller) {
+      Runtime.trap("You cannot set yourself as a Safe Person");
+    };
+
+    // Verify that the person is a circle connection
+    if (not isCircleConnection(caller, person)) {
+      Runtime.trap("Unauthorized: Can only set Safe People from your circle connections");
+    };
+
+    var currentList : [Principal] = switch (safePeople.get(caller)) {
+      case (null) { [] };
+      case (?existing) { existing.people };
+    };
+
+    if (currentList.size() >= 2) {
+      Runtime.trap("Safe People list can only contain up to 2 people");
+    };
+
+    // Check if the person is already set
+    for (p in currentList.values()) {
+      if (p == person) {
+        Runtime.trap("This person is already set as safe person");
+      };
+    };
+
+    // Add the new person
+    currentList := currentList.concat([person]);
+    safePeople.add(caller, {
+      people = currentList;
+    });
+  };
+
+  public shared ({ caller }) func unsetSafePerson(person : Principal) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can unset Safe People");
+    };
+    var currentList : [Principal] = switch (safePeople.get(caller)) {
+      case (null) { [] };
+      case (?existing) { existing.people };
+    };
+    currentList := currentList.filter(
+      func(p) { p != person }
+    );
+    safePeople.add(caller, {
+      people = currentList;
+    });
+  };
+
+  // CANDIDATE RETRIEVAL FOR SAFE PEOPLE
+  public query ({ caller }) func getEligibleSafePeopleCandidates() : async [Principal] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can retrieve Safe People candidates");
+    };
+    getAllCircleConnections(caller);
+  };
+
+  // SILENT SIGNALS
+  public shared ({ caller }) func postSilentSignal(mood : Mood, content : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can post silent signals");
+    };
+
+    let signalId = caller.toText() # "-" # Time.now().toText();
+    let audience = switch (safePeople.get(caller)) {
+      case (null) { [caller] };
+      case (?list) {
+        if (list.people.isEmpty()) {
+          [caller];
+        } else {
+          // Validate that all Safe People are still valid circle connections
+          for (person in list.people.values()) {
+            if (not isCircleConnection(caller, person)) {
+              Runtime.trap("Unauthorized: Safe People list contains invalid circle connections");
+            };
+          };
+          list.people;
+        };
+      };
+    };
+
+    let newSignal : SilentSignal = {
+      id = signalId;
+      author = caller;
+      mood;
+      content;
+      audience;
+      createdAt = Time.now();
+    };
+
+    silentSignals.add(signalId, newSignal);
+  };
+
+  // GET ALL SILENT SIGNALS FOR A USER
+  public query ({ caller }) func getSilentSignals() : async [SilentSignal] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view silent signals");
+    };
+    // Filter signals where caller is in the audience
+    let visibleSignals = silentSignals.values().toArray().filter(
+      func(signal) { contains(signal.audience, caller) }
+    );
+    // Sort by createdAt descending
+    visibleSignals.sort(
+      func(a, b) { if (a.createdAt < b.createdAt) { #greater } else #less }
+    );
+  };
+
+  // Get all signals posted by caller
+  public query ({ caller }) func getOwnSilentSignals() : async [SilentSignal] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view their own signals");
+    };
+
+    let userSignals = silentSignals.values().toArray().filter(
+      func(signal) { signal.author == caller }
+    );
+
+    userSignals.sort(
+      func(a, b) { if (a.createdAt < b.createdAt) { #greater } else #less }
+    );
   };
 };

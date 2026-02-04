@@ -5,7 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Copy, Edit2, Save, X, Key } from 'lucide-react';
+import { Copy, Key } from 'lucide-react';
+import IconActionButton from '@/components/common/IconActionButton';
+import { Edit2, Save, X } from 'lucide-react';
+import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
 
 export default function ShareCodeCard() {
   const { data: userProfile } = useGetCallerUserProfile();
@@ -16,7 +19,7 @@ export default function ShareCodeCard() {
   const handleCopy = () => {
     if (userProfile?.shareCode) {
       navigator.clipboard.writeText(userProfile.shareCode);
-      toast.success('Share code copied!');
+      toast.success('Copied!');
     }
   };
 
@@ -32,7 +35,7 @@ export default function ShareCodeCard() {
 
   const handleSave = async () => {
     if (!newCode.trim()) {
-      toast.error('Share code cannot be empty');
+      toast.error('Code required');
       return;
     }
 
@@ -40,11 +43,11 @@ export default function ShareCodeCard() {
       // Normalize: trim and uppercase for consistency
       const normalizedCode = newCode.trim().toUpperCase();
       await updateShareCode.mutateAsync(normalizedCode);
-      toast.success('Share code updated');
+      toast.success('Code updated');
       setIsEditing(false);
       setNewCode('');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update share code');
+      toast.error(error.message || 'Update failed');
     }
   };
 
@@ -57,15 +60,18 @@ export default function ShareCodeCard() {
           <div className="flex items-center gap-2">
             <Key className="h-5 w-5 text-primary" />
             <div>
-              <CardTitle>Your Share Code</CardTitle>
-              <CardDescription>Share with trusted people only</CardDescription>
+              <CardTitle>Share Code</CardTitle>
+              <CardDescription>Invite trusted people</CardDescription>
             </div>
           </div>
           {!isEditing && (
-            <Button variant="outline" size="sm" onClick={handleEdit}>
-              <Edit2 className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
+            <IconActionButton
+              icon={<Edit2 className="h-4 w-4" />}
+              label="Edit code"
+              variant="outline"
+              size="sm"
+              onClick={handleEdit}
+            />
           )}
         </div>
       </CardHeader>
@@ -73,39 +79,57 @@ export default function ShareCodeCard() {
         {isEditing ? (
           <>
             <div className="space-y-2">
-              <Label htmlFor="new-code">New Share Code</Label>
+              <Label htmlFor="new-code">New Code</Label>
               <Input
                 id="new-code"
-                placeholder="Enter new code"
+                placeholder="Enter code"
                 value={newCode}
                 onChange={(e) => setNewCode(e.target.value)}
                 maxLength={30}
               />
-              <p className="text-xs text-muted-foreground">
-                Changing your code will invalidate pending requests
-              </p>
             </div>
+            <ProgressiveDisclosure trigger="What happens?">
+              <p className="text-xs text-muted-foreground">
+                Changing your code invalidates pending requests.
+              </p>
+            </ProgressiveDisclosure>
             <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={updateShareCode.isPending} size="sm">
+              <IconActionButton
+                icon={<Save className="h-4 w-4" />}
+                label="Save code"
+                onClick={handleSave}
+                disabled={updateShareCode.isPending}
+                size="sm"
+              >
                 <Save className="mr-2 h-4 w-4" />
                 {updateShareCode.isPending ? 'Saving...' : 'Save'}
-              </Button>
-              <Button variant="outline" onClick={handleCancel} size="sm">
+              </IconActionButton>
+              <IconActionButton
+                icon={<X className="h-4 w-4" />}
+                label="Cancel"
+                variant="outline"
+                onClick={handleCancel}
+                size="sm"
+              >
                 <X className="mr-2 h-4 w-4" />
                 Cancel
-              </Button>
+              </IconActionButton>
             </div>
           </>
         ) : (
           <>
             <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-3">
               <code className="flex-1 text-sm font-mono tracking-wide">{userProfile.shareCode}</code>
-              <Button variant="ghost" size="sm" onClick={handleCopy}>
-                <Copy className="h-4 w-4" />
-              </Button>
+              <IconActionButton
+                icon={<Copy className="h-4 w-4" />}
+                label="Copy code"
+                variant="ghost"
+                size="sm"
+                onClick={handleCopy}
+              />
             </div>
             <p className="text-xs text-muted-foreground">
-              Keep this private. Only share with people you trust.
+              Keep private. Share only with trusted people.
             </p>
           </>
         )}

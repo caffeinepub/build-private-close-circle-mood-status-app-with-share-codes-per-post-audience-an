@@ -6,6 +6,7 @@ import { Heart, Lock, Users } from 'lucide-react';
 import { APP_NAME } from '@/constants/branding';
 import { heroSubtexts, cardSubheadings, pickRandomPhrase } from '@/constants/loginCopy';
 import { FOUNDATION_PROMISE, FOUNDATION_BOUNDARY } from '@/constants/foundationCopy';
+import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
 
 export default function LoginPanel() {
   const { login, isLoggingIn, isLoginError, loginError } = useInternetIdentity();
@@ -42,30 +43,32 @@ export default function LoginPanel() {
                 <Lock className="mt-0.5 h-5 w-5 text-primary" />
                 <div className="flex-1 text-sm">
                   <p className="font-medium">Private & Secure</p>
-                  <p className="text-muted-foreground">Invite-only access with your personal share code</p>
+                  <p className="text-muted-foreground">Invite-only with your code</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
                 <Users className="mt-0.5 h-5 w-5 text-primary" />
                 <div className="flex-1 text-sm">
-                  <p className="font-medium">Your Trusted Circle</p>
-                  <p className="text-muted-foreground">Share selected moods with chosen loved ones</p>
+                  <p className="font-medium">Your Circle</p>
+                  <p className="text-muted-foreground">Share with chosen people</p>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4">
-              <p className="text-sm leading-relaxed text-foreground/90">
-                {FOUNDATION_PROMISE}
-              </p>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                {FOUNDATION_BOUNDARY}
-              </p>
-            </div>
+            <ProgressiveDisclosure trigger="More">
+              <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {FOUNDATION_PROMISE}
+                </p>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {FOUNDATION_BOUNDARY}
+                </p>
+              </div>
+            </ProgressiveDisclosure>
 
             {isLoginError && (
               <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-                {loginError?.message || 'Login failed. Please try again.'}
+                {loginError?.message || 'Login failed. Try again.'}
               </div>
             )}
 
@@ -75,11 +78,11 @@ export default function LoginPanel() {
               className="w-full"
               size="lg"
             >
-              {isLoggingIn ? 'Logging you in...' : 'Log in to your safe space'}
+              {isLoggingIn ? 'Logging in...' : 'Log in'}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">
-              By signing in, you agree to keep this space safe and respectful
+              By signing in, you agree to keep this space safe
             </p>
           </CardContent>
         </Card>

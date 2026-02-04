@@ -40,6 +40,21 @@ export interface Notification {
     statusId?: string;
     message: string;
 }
+export type FeedItem = {
+    __kind__: "status";
+    status: StatusPost;
+} | {
+    __kind__: "silentSignal";
+    silentSignal: SilentSignal;
+};
+export interface SilentSignal {
+    id: string;
+    content: string;
+    mood: Mood;
+    createdAt: Time;
+    audience: Array<Principal>;
+    author: Principal;
+}
 export interface UserProfile {
     dateOfBirth: bigint;
     name: string;
@@ -123,20 +138,27 @@ export interface backendInterface {
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCircleMembers(): Promise<Array<Principal>>;
+    getEligibleSafePeopleCandidates(): Promise<Array<Principal>>;
     getEntriesByRange(startDate: Time, endDate: Time): Promise<Array<JournalEntry>>;
-    getFeed(): Promise<Array<StatusPost>>;
+    getFeed(): Promise<Array<FeedItem>>;
     getJournalEntry(date: Time): Promise<JournalEntry | null>;
     getNotifications(): Promise<Array<Notification>>;
+    getOwnSilentSignals(): Promise<Array<SilentSignal>>;
+    getSafePeople(): Promise<Array<Principal>>;
     getShareCodeByPrincipal(principal: Principal): Promise<string>;
+    getSilentSignals(): Promise<Array<SilentSignal>>;
     getStatus(statusId: string): Promise<StatusPost | null>;
     getUnprocessedJoinRequests(): Promise<Array<JoinRequest>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     joinCircleFromShareCode(code: string): Promise<void>;
     markNotificationAsRead(notificationId: string): Promise<void>;
+    postSilentSignal(mood: Mood, content: string): Promise<void>;
     postStatus(status: StatusPost): Promise<void>;
     removeCircleMember(member: Principal): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setSafePerson(person: Principal): Promise<void>;
+    unsetSafePerson(person: Principal): Promise<void>;
     updateProfile(profile: UserProfile): Promise<void>;
     updateShareCode(code: string): Promise<string>;
     viewProfile(id: Principal): Promise<UserProfile>;

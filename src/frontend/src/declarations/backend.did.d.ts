@@ -10,6 +10,8 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export type FeedItem = { 'status' : StatusPost } |
+  { 'silentSignal' : SilentSignal };
 export type Gender = { 'other' : null } |
   { 'female' : null } |
   { 'male' : null } |
@@ -85,6 +87,14 @@ export interface Preferences {
 export type RelationshipIntent = { 'romantic' : null } |
   { 'both' : null } |
   { 'friendship' : null };
+export interface SilentSignal {
+  'id' : string,
+  'content' : string,
+  'mood' : Mood,
+  'createdAt' : Time,
+  'audience' : Array<Principal>,
+  'author' : Principal,
+}
 export interface StatusPost {
   'id' : string,
   'content' : string,
@@ -119,20 +129,27 @@ export interface _SERVICE {
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCircleMembers' : ActorMethod<[], Array<Principal>>,
+  'getEligibleSafePeopleCandidates' : ActorMethod<[], Array<Principal>>,
   'getEntriesByRange' : ActorMethod<[Time, Time], Array<JournalEntry>>,
-  'getFeed' : ActorMethod<[], Array<StatusPost>>,
+  'getFeed' : ActorMethod<[], Array<FeedItem>>,
   'getJournalEntry' : ActorMethod<[Time], [] | [JournalEntry]>,
   'getNotifications' : ActorMethod<[], Array<Notification>>,
+  'getOwnSilentSignals' : ActorMethod<[], Array<SilentSignal>>,
+  'getSafePeople' : ActorMethod<[], Array<Principal>>,
   'getShareCodeByPrincipal' : ActorMethod<[Principal], string>,
+  'getSilentSignals' : ActorMethod<[], Array<SilentSignal>>,
   'getStatus' : ActorMethod<[string], [] | [StatusPost]>,
   'getUnprocessedJoinRequests' : ActorMethod<[], Array<JoinRequest>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'joinCircleFromShareCode' : ActorMethod<[string], undefined>,
   'markNotificationAsRead' : ActorMethod<[string], undefined>,
+  'postSilentSignal' : ActorMethod<[Mood, string], undefined>,
   'postStatus' : ActorMethod<[StatusPost], undefined>,
   'removeCircleMember' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setSafePerson' : ActorMethod<[Principal], undefined>,
+  'unsetSafePerson' : ActorMethod<[Principal], undefined>,
   'updateProfile' : ActorMethod<[UserProfile], undefined>,
   'updateShareCode' : ActorMethod<[string], string>,
   'viewProfile' : ActorMethod<[Principal], UserProfile>,

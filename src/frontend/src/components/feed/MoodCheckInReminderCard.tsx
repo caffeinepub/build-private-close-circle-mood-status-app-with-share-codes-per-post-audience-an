@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, X } from 'lucide-react';
 import { shouldShowReminder, dismissReminderForToday } from '@/utils/moodReminder';
+import { setDailyCheckInGuard } from '@/utils/dailyCheckInEntry';
 
 interface MoodCheckInReminderCardProps {
   onDismiss?: () => void;
@@ -24,7 +25,8 @@ export default function MoodCheckInReminderCard({ onDismiss }: MoodCheckInRemind
   };
 
   const handleCheckIn = () => {
-    navigate({ to: '/compose', search: { from: 'mood-reminder' } });
+    setDailyCheckInGuard();
+    navigate({ to: '/daily-checkin' });
   };
 
   if (!isVisible) {
@@ -32,11 +34,11 @@ export default function MoodCheckInReminderCard({ onDismiss }: MoodCheckInRemind
   }
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/15 via-accent/10 to-primary/5 shadow-lg">
       <CardContent className="py-4 px-5">
         <div className="flex items-start gap-3">
           <div className="shrink-0 mt-0.5">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/20 flex items-center justify-center ring-2 ring-primary/20">
               <Heart className="h-5 w-5 text-primary" />
             </div>
           </div>
@@ -45,7 +47,11 @@ export default function MoodCheckInReminderCard({ onDismiss }: MoodCheckInRemind
             <p className="text-xs text-muted-foreground mb-3">
               Choose a mood to share with your circle today.
             </p>
-            <Button size="sm" onClick={handleCheckIn} className="h-8 text-xs">
+            <Button 
+              size="sm" 
+              onClick={handleCheckIn} 
+              className="h-8 text-xs bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-md"
+            >
               Select a Mood
             </Button>
           </div>

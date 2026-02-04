@@ -8,6 +8,7 @@ export interface MoodHistoryEntry {
   mood: Mood;
   date: Date;
   content: string;
+  contextTags?: string[];
 }
 
 export function useMoodHistory(timeframeDays: number) {
@@ -21,11 +22,14 @@ export function useMoodHistory(timeframeDays: number) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - timeframeDays);
 
-    // Filter to current user's posts within timeframe
-    const userPosts = feed.filter((post) => {
-      const postDate = timeToDate(post.createdAt);
-      return post.author.toString() === currentPrincipal && postDate >= cutoffDate;
-    });
+    // Filter to current user's status posts (not silent signals) within timeframe
+    const userPosts = feed
+      .filter((item) => item.__kind__ === 'status')
+      .map((item) => item.status)
+      .filter((post) => {
+        const postDate = timeToDate(post.createdAt);
+        return post.author.toString() === currentPrincipal && postDate >= cutoffDate;
+      });
 
     // Sort by createdAt ascending (oldest-to-newest) for chronological trend analysis
     const sortedPosts = userPosts.sort((a, b) => {
@@ -34,11 +38,12 @@ export function useMoodHistory(timeframeDays: number) {
       return aTime - bTime;
     });
 
-    // Map to mood history entries
+    // Map to mood history entries, including context tags when present
     return sortedPosts.map((post) => ({
       mood: post.mood,
       date: timeToDate(post.createdAt),
       content: post.content,
+      contextTags: post.contextTags,
     }));
   }, [feed, identity, timeframeDays]);
 
