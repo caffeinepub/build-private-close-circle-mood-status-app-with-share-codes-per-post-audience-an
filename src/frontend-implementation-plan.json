@@ -1,21 +1,40 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix runtime error by globally wiring existing SoundProvider",
+  "title": "Remove authenticated footer attribution and add subtle login attribution under logo",
   "requirements": [
     {
       "id": "REQ-12",
-      "summary": "Ensure the entire React app is wrapped by the existing SoundProvider so any useSound call (including via SoundEffectsManager on the feed/homepage) is always within provider scope.",
+      "summary": "Remove the authenticated app layout footer attribution so it no longer renders (including ICP credit line and logo).",
       "acceptanceCriteria": [
-        "Navigating to the homepage/feed no longer throws: \"useSound must be used within SoundProvider\"",
-        "SoundEffectsManager can call useSound without runtime errors on any route",
-        "The SoundProvider used is the existing provider from frontend/src/contexts/SoundContext.tsx (no duplicate/alternate sound context is introduced)"
+        "No footer credit/attribution content is visible anywhere in the app layout footer area after login",
+        "The “Powered by Internet Computer” text and ICP logo are not displayed in the UI footer area"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/app/AppLayout.tsx",
           "operation": "modify",
-          "description": "Import SoundProvider from frontend/src/contexts/SoundContext.tsx and wrap the app’s existing top-level providers/content (router and related UI like Toaster) with this existing SoundProvider to make sound context available globally without changing SoundContext logic or touching frontend/src/main.tsx."
+          "description": "Stop rendering the footer attribution in the authenticated app layout by removing the AppFooter import and the <AppFooter /> usage so no footer attribution content appears after login."
+        },
+        {
+          "path": "frontend/src/components/app/AppFooter.tsx",
+          "operation": "delete",
+          "description": "Delete the footer attribution component containing the CloseCircle credits and the “Powered by Internet Computer” line + ICP logo to ensure it cannot be rendered anywhere."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Add a small muted “Built by Abel Odoh” line directly under the CloseCircle title on the login screen.",
+      "acceptanceCriteria": [
+        "On the login screen, a new line “Built by Abel Odoh” appears directly below the “CloseCircle” title",
+        "The attribution line is visually smaller than the title and uses a subdued/muted style"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/auth/LoginPanel.tsx",
+          "operation": "modify",
+          "description": "Under the existing login branding title (APP_NAME / “CloseCircle”), render a new secondary-text line reading exactly “Built by Abel Odoh”, styled smaller with muted/subtle typography so it reads as understated attribution."
         }
       ]
     }

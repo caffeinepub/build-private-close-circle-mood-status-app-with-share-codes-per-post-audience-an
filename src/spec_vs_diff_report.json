@@ -1,14 +1,25 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T21:56:56.799Z",
-  "summary": "REQ-12 appears implemented by wrapping the app’s routing (and thus all routes/components using useSound, including the feed) in the existing SoundProvider from frontend/src/contexts/SoundContext.tsx via changes in frontend/src/App.tsx.",
+  "generatedAt": "2026-02-04T22:12:10.620Z",
+  "summary": "REQ-12 appears implemented by removing the footer component from the authenticated AppLayout so no footer attribution can render. REQ-13 appears implemented by adding a small muted “Built by Abel Odoh” line directly under the “CloseCircle” (APP_NAME) title on the login screen. The diff also introduces at least one unrelated change (SoundEffectsManager added to AppLayout) that was not requested.",
   "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.9,
+  "hallucinated_features": [
+    {
+      "description": "Added SoundEffectsManager to the authenticated AppLayout (global sound cue manager rendered in layout).",
+      "reason": "BuildRequest explicitly says not to change unrelated features; sound management is not part of the attribution relocation/removal requirements.",
+      "evidence": [
+        "frontend/src/components/app/AppLayout.tsx (imports SoundEffectsManager and renders <SoundEffectsManager />)",
+        "frontend-file-summaries.txt (mentions AppLayout now includes SoundEffectsManager)"
+      ]
+    }
+  ],
+  "confidence": 0.78,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
+    "frontend/src/components/app/AppFooter.tsx",
+    "frontend/src/components/app/AppLayout.tsx",
+    "frontend/src/components/auth/LoginPanel.tsx",
     "project_state.json"
   ]
 }

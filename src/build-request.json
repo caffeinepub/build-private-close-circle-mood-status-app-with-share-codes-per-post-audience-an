@@ -1,39 +1,54 @@
 {
   "kind": "build_request",
-  "title": "Fix runtime error by adding global SoundProvider wrapper",
+  "title": "Remove footer attribution and relocate a small “Built by Abel Odoh” line under the CloseCircle logo",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-12",
-      "text": "Wrap the entire React app in the existing SoundProvider so any component calling useSound (including the homepage/feed via SoundEffectsManager) is always rendered within SoundProvider.",
+      "text": "Remove the existing footer attribution block from the authenticated app layout so it no longer renders at the bottom of the screen (including removing the “Powered by Internet Computer” line and ICP logo from the UI).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6",
-          "msg-7",
-          "msg-8"
+          "msg-8",
+          "msg-10"
         ],
         "quotes": [
-          "fix this error in the codebase",
-          "the homepage. likely the entire app",
-          "Should be globally wrapped in the existing SoundProvider",
-          "add one"
+          "Delete the footer of © CloseCircle. 2026. Built by\nAbel Odoh\nusing Caffeine AI\n\n•\nPowered by Internet Computer.",
+          "Find somewhere else to put this information",
+          "you want the footer removed"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to the homepage/feed no longer throws: \"useSound must be used within SoundProvider\"",
-        "SoundEffectsManager can call useSound without runtime errors on any route",
-        "The SoundProvider used is the existing provider from frontend/src/contexts/SoundContext.tsx (no duplicate/alternate sound context is introduced)"
+        "No footer credit/attribution content is visible anywhere in the app layout footer area after login",
+        "The “Powered by Internet Computer” text and ICP logo are not displayed in the UI footer area"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Add a small attribution line reading exactly “Built by Abel Odoh” directly under the “CloseCircle” logo/title on the login screen, styled with a much smaller, muted font so it reads like subtle secondary text.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "Maybe close to the logo CloseCircle, \"Built by\nAbel Odoh\" but with very smaller font, under the logo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On the login screen, a new line “Built by Abel Odoh” appears directly below the “CloseCircle” title",
+        "The attribution line is visually smaller than the title and uses a subdued/muted style"
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui or any path listed in SYSTEM_CONTEXT.frontend.immutablePaths (including frontend/src/main.tsx and the Internet Identity/actor hooks).",
-    "Keep SoundContext logic centralized in frontend/src/contexts/SoundContext.tsx; only add the missing global provider wiring."
+    "Frontend files listed as immutable in SYSTEM_CONTEXT must not be edited; compose changes through other files only.",
+    "No backend changes; keep the single-actor Motoko architecture unchanged."
   ],
   "nonGoals": [
-    "Do not change sound assets, volumes, or cue behavior.",
-    "Do not add new sound effects or new settings beyond fixing the provider mount."
+    "Do not add new settings/about pages or other new navigation destinations for attribution.",
+    "Do not change Internet Identity login behavior, routing, or any existing feature unrelated to attribution placement."
   ],
   "imageRequirements": {
     "required": [],

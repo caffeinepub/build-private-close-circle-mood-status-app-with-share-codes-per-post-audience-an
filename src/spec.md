@@ -1,10 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the runtime error by ensuring the entire React app is always rendered within the existing `SoundProvider`, so `useSound` can be safely called anywhere (including the homepage/feed).
+**Goal:** Remove the post-login footer attribution and reposition author attribution as subtle text on the login screen.
 
 **Planned changes:**
-- Add the missing global app-level wiring to wrap the app tree with the existing `SoundProvider` from `frontend/src/contexts/SoundContext.tsx`.
-- Ensure routes/components that use `SoundEffectsManager` (and therefore `useSound`) render without requiring local provider wrappers or introducing any new/duplicate sound context.
+- Remove the existing footer attribution block from the authenticated app layout so it no longer renders (including removing the “Powered by Internet Computer” text and ICP logo from the UI footer area).
+- Add a small, muted attribution line reading exactly “Built by Abel Odoh” directly under the “CloseCircle” logo/title on the login screen.
 
-**User-visible outcome:** Navigating to the homepage/feed (and any other route) no longer throws `"useSound must be used within SoundProvider"`, and sound-related components run without runtime errors.
+**User-visible outcome:** After login, no attribution/footer credit (including “Powered by Internet Computer” and the ICP logo) appears at the bottom of the app; on the login screen, “Built by Abel Odoh” appears subtly under the CloseCircle title.

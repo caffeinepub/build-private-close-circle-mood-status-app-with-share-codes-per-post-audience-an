@@ -25,6 +25,9 @@ export default function LoginPanel() {
             </div>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">{APP_NAME}</h1>
+          <p className="mt-1 text-[10px] text-muted-foreground/60">
+            Built by Abel Odoh
+          </p>
           <p className="mt-2 text-muted-foreground">
             {heroSubtext}
           </p>

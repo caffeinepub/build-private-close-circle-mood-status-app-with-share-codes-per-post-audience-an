@@ -1,6 +1,5 @@
 import { Outlet } from '@tanstack/react-router';
 import AppHeader from './AppHeader';
-import AppFooter from './AppFooter';
 import BottomNav from './BottomNav';
 import FloatingJournalFab from './FloatingJournalFab';
 import JournalOverlay from '../journal/JournalOverlay';
@@ -18,7 +17,6 @@ function AppLayoutContent() {
         <main className="flex-1 pb-safe-offset-16">
           <Outlet />
         </main>
-        <AppFooter />
         <BottomNav />
         <FloatingJournalFab />
         <JournalOverlay isOpen={isOpen} onClose={closeJournal} resetToToday={resetToToday} />

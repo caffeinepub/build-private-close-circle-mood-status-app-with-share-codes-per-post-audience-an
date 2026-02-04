@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 95,
-  "summary": "CloseCircle Scope 2 remains micro‑UX to reduce thinking and increase guidance in the daily check‑in flow. Scope 3 makes the Mood Analyzer actionable by mapping detected patterns to conservative, rule‑based, non‑clinical micro‑actions (≤2 minutes). Add Scope 4: Circles that do something day‑to‑day—make circles useful without social pressure via Safe People (1–2) and silent, no‑reply signals (e.g., “Low energy today”, “Okay, just quiet”) with no demanding notifications.",
+  "projectStateVersion": 102,
+  "summary": "CloseCircle focuses on a private daily check‑in that reduces thinking and increases guidance. Foundation promise/boundary copy is integrated across key surfaces; mood language preserves user agency (no auto-suggested feelings). Mood Analyzer is actionable via conservative, rule‑based micro‑actions (≤2 minutes). Circles are day‑to‑day useful without social pressure via global Safe People (1–2) and Silent Signals (no notifications). UI direction includes an expressive neon/tech palette (light + dark) with strong mood-based colors and a Gen‑Z, text‑light pass using progressive disclosure and more visual communication.",
   "existing_features": [
     {
       "id": "IF-1",
@@ -605,10 +605,18 @@
       "version": 1
     },
     {
-      "id": "feature-wrap-the-entire-react-app-in-the-existing-soundprovider-so-any-component-calling-usesound-including-the-homepage-feed-via-soundeffectsmanager-is-always-rendered-within-soundprovider",
-      "title": "Wrap the entire React app in the existing SoundProvider so any component calling useSound (including the homepage/feed via SoundEffectsManager) is always rendered within SoundProvider.",
+      "id": "feature-remove-the-existing-footer-attribution-block-from-the-authenticated-app-layout-so-it-no-longer-renders-at-the-bottom-of-the-screen-including-removing-the-powered-by-internet-computer-line-and-icp-logo-from-the-ui",
+      "title": "Remove the existing footer attribution block from the authenticated app layout so it no longer renders at the bottom of the screen (including removing the “Powered by Internet Computer” line and ICP logo from the UI).",
       "reqIds": [
         "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-small-attribution-line-reading-exactly-built-by-abel-odoh-directly-under-the-closecircle-logo-title-on-the-login-screen-styled-with-a-much-smaller-muted-font-so-it-reads-like-subtle-secondary-text",
+      "title": "Add a small attribution line reading exactly “Built by Abel Odoh” directly under the “CloseCircle” logo/title on the login screen, styled with a much smaller, muted font so it reads like subtle secondary text.",
+      "reqIds": [
+        "REQ-13"
       ],
       "version": 1
     }
@@ -643,6 +651,24 @@
       "summary": "Gen Z visual-first UI pass across the whole dApp: shorten long sentences, hide secondary info behind taps/chevrons, replace obvious labels with icons, and lean more on mood colors/visuals so text isn’t doing the work",
       "reqIds": [],
       "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Remove the footer attribution block and relocate a shorter attribution line (e.g., “© CloseCircle. 2026. Built by Abel Odoh using Caffeine AI”) under the CloseCircle logo in a much smaller font; drop the “Powered by Internet Computer” line.",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Hide all audience/recipient indicators in the Feed UI (no counts, names, or avatars) so sharing targets remain private to the poster",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Add 18+ explicit/raw-emotional mood set that is age-gated (DOB ≥ 18) and opt-in by default",
+      "reqIds": [],
+      "status": "pending"
     }
   ],
   "architectural_notes": [
@@ -669,7 +695,7 @@
     "Circle membership is stored only under the circle owner principal (one-sided), limiting member-centric features unless mirrored state is added.",
     "urlParams clearParamFromHash() only removes params from hash routes that include a '?' query segment; for simple '#token=value' style hashes, secrets may remain in the URL/history after extraction."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "generatedImages": [
     {
       "filename": "frontend/public/assets/generated/icp-logo.dim_64x64.png",

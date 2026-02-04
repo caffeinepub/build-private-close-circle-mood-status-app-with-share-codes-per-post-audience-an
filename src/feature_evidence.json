@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-wrap-the-entire-react-app-in-the-existing-soundprovider-so-any-component-calling-usesound-including-the-homepage-feed-via-soundeffectsmanager-is-always-rendered-within-soundprovider",
-      "featureTitle": "Wrap the entire React app in the existing SoundProvider so any component calling useSound (including the homepage/feed via SoundEffectsManager) is always rendered within SoundProvider.",
+      "featureId": "feature-remove-the-existing-footer-attribution-block-from-the-authenticated-app-layout-so-it-no-longer-renders-at-the-bottom-of-the-screen-including-removing-the-powered-by-internet-computer-line-and-icp-logo-from-the-ui",
+      "featureTitle": "Remove the existing footer attribution block from the authenticated app layout so it no longer renders at the bottom of the screen (including removing the “Powered by Internet Computer” line and ICP logo from the UI).",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/components/app/AppFooter.tsx",
+        "frontend/src/components/app/AppLayout.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,6 +18,25 @@
       ],
       "testIds": [
         "REQ-12"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-small-attribution-line-reading-exactly-built-by-abel-odoh-directly-under-the-closecircle-logo-title-on-the-login-screen-styled-with-a-much-smaller-muted-font-so-it-reads-like-subtle-secondary-text",
+      "featureTitle": "Add a small attribution line reading exactly “Built by Abel Odoh” directly under the “CloseCircle” logo/title on the login screen, styled with a much smaller, muted font so it reads like subtle secondary text.",
+      "files": [
+        "frontend/src/components/auth/LoginPanel.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-13"
       ],
       "confidence": "high"
     }
