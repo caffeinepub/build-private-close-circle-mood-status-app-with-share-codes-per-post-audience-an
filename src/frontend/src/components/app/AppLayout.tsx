@@ -1,25 +1,33 @@
-import { useState } from 'react';
 import { Outlet } from '@tanstack/react-router';
 import AppHeader from './AppHeader';
 import BottomNav from './BottomNav';
 import FloatingJournalFab from './FloatingJournalFab';
 import JournalOverlay from '../journal/JournalOverlay';
 import { FloatingJournalVisibilityProvider } from '@/contexts/FloatingJournalVisibilityContext';
+import { JournalOverlayControllerProvider, useJournalOverlayController } from '@/contexts/JournalOverlayControllerContext';
 
-export default function AppLayout() {
-  const [isJournalOpen, setIsJournalOpen] = useState(false);
+function AppLayoutContent() {
+  const { isOpen, resetToToday, closeJournal } = useJournalOverlayController();
 
   return (
     <FloatingJournalVisibilityProvider>
       <div className="flex min-h-screen flex-col bg-background">
-        <AppHeader onOpenJournal={() => setIsJournalOpen(true)} />
+        <AppHeader />
         <main className="flex-1 pb-16">
           <Outlet />
         </main>
         <BottomNav />
         <FloatingJournalFab />
-        <JournalOverlay isOpen={isJournalOpen} onClose={() => setIsJournalOpen(false)} />
+        <JournalOverlay isOpen={isOpen} onClose={closeJournal} resetToToday={resetToToday} />
       </div>
     </FloatingJournalVisibilityProvider>
+  );
+}
+
+export default function AppLayout() {
+  return (
+    <JournalOverlayControllerProvider>
+      <AppLayoutContent />
+    </JournalOverlayControllerProvider>
   );
 }

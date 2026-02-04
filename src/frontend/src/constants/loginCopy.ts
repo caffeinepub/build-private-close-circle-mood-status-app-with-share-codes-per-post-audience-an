@@ -4,16 +4,16 @@
  */
 
 export const heroSubtexts = [
-  "A private emotional status app for your closest circle",
-  "Your safe space to share what you're feeling",
-  "A quiet place for honest emotions",
-  "Share your heart with those who understand",
-  "Where your feelings are held with care",
+  "A private space to share the moods you choose with your closest circle",
+  "Your safe space to share what you want to share",
+  "A quiet place for the check-ins you choose",
+  "Share what you want with those who understand",
+  "Where the moods you select are held with care",
   "A gentle space for you and your circle",
 ];
 
 export const cardSubheadings = [
-  "Log in to share your feelings with those who matter most",
+  "Log in to share the moods you choose with those who matter most",
   "Welcome back. Take a breath.",
   "Your space is waiting",
   "Step into your safe space",

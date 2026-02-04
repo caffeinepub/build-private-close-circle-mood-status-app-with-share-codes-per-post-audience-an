@@ -3,10 +3,12 @@ import ShareCodeCard from '@/components/circle/ShareCodeCard';
 import JoinByCodeForm from '@/components/circle/JoinByCodeForm';
 import PendingRequestsPanel from '@/components/circle/PendingRequestsPanel';
 import CircleMembersList from '@/components/circle/CircleMembersList';
-import { useGetUnprocessedJoinRequests } from '@/hooks/useQueries';
+import CircleEnergyCard from '@/components/circle/CircleEnergyCard';
+import { useGetUnprocessedJoinRequests, useGetFeed } from '@/hooks/useQueries';
 
 export default function CirclePage() {
   const { data: requests = [] } = useGetUnprocessedJoinRequests();
+  const { data: feed = [] } = useGetFeed();
   const pendingCount = requests.length;
 
   return (
@@ -15,6 +17,8 @@ export default function CirclePage() {
         <h1 className="text-3xl font-bold">Your Circle</h1>
         <p className="text-muted-foreground">Manage your trusted connections</p>
       </div>
+
+      <CircleEnergyCard posts={feed} />
 
       <Tabs defaultValue="members" className="w-full">
         <TabsList className="grid w-full grid-cols-3">

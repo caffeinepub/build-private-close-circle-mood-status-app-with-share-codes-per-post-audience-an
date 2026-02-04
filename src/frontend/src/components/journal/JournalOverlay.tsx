@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import JournalDatePicker from './JournalDatePicker';
 import JournalEntriesPanel from './JournalEntriesPanel';
@@ -6,10 +6,17 @@ import JournalEntriesPanel from './JournalEntriesPanel';
 interface JournalOverlayProps {
   isOpen: boolean;
   onClose: () => void;
+  resetToToday?: boolean;
 }
 
-export default function JournalOverlay({ isOpen, onClose }: JournalOverlayProps) {
+export default function JournalOverlay({ isOpen, onClose, resetToToday = false }: JournalOverlayProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  useEffect(() => {
+    if (isOpen && resetToToday) {
+      setSelectedDate(new Date());
+    }
+  }, [isOpen, resetToToday]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

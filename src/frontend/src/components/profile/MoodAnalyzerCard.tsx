@@ -35,13 +35,13 @@ export default function MoodAnalyzerCard() {
   const getConcernBadge = () => {
     switch (analysis.concernLevel) {
       case 'elevated':
-        return <Badge variant="destructive">Elevated Concern</Badge>;
+        return <Badge variant="destructive">Frequent Low Moods</Badge>;
       case 'moderate':
-        return <Badge className="bg-orange-600">Moderate Concern</Badge>;
+        return <Badge className="bg-orange-600">Some Low Moods</Badge>;
       case 'mild':
-        return <Badge className="bg-yellow-600">Mild Concern</Badge>;
+        return <Badge className="bg-yellow-600">Mixed Pattern</Badge>;
       default:
-        return <Badge variant="outline">No Concerns</Badge>;
+        return <Badge variant="outline">Varied</Badge>;
     }
   };
 
@@ -87,7 +87,7 @@ export default function MoodAnalyzerCard() {
             </div>
             <div>
               <CardTitle>Mood Analyzer</CardTitle>
-              <CardDescription>Private analysis of your emotional patterns</CardDescription>
+              <CardDescription>Patterns from your selected moods</CardDescription>
             </div>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function MoodAnalyzerCard() {
             </div>
 
             <div className="space-y-2">
-              <p className="text-sm font-medium">Concern Level</p>
+              <p className="text-sm font-medium">Pattern Summary</p>
               {getConcernBadge()}
             </div>
 
@@ -136,7 +136,7 @@ export default function MoodAnalyzerCard() {
               <>
                 <Separator />
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Top Moods</p>
+                  <p className="text-sm font-medium">Most Selected Moods</p>
                   <div className="space-y-2">
                     {topMoods.map(({ mood, count, percentage, label, emoji }) => (
                       <div key={`${mood}-${label}`} className="space-y-1">
@@ -165,7 +165,7 @@ export default function MoodAnalyzerCard() {
             <Separator />
 
             <div className="space-y-3">
-              <p className="text-sm font-medium">Analysis & Guidance</p>
+              <p className="text-sm font-medium">Observations</p>
               <div className="rounded-lg bg-muted/50 p-4">
                 <p className="whitespace-pre-wrap text-sm leading-relaxed">{analysis.guidance}</p>
               </div>

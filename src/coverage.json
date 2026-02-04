@@ -1,105 +1,109 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-03T21:47:48.261Z",
+  "generatedAt": "2026-02-04T13:23:57.363Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 4,
+    "total": 5,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Extend the backend StatusPost data model to persist optional mood context tags for each status post, and accept these tags when creating a status.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Ensure mood context tags are private: they must not be returned to or observable by recipients who are not the author (including via getFeed and getStatus), while still being available to the author for personal context/internal analysis.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Add a subtle 'context tags' step/section to the Compose Status page that appears after a mood is selected, allowing multi-select tags from a predefined list and adding custom tags.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/status/ContextTagsPicker.tsx",
-          "frontend/src/constants/contextTags.ts",
-          "frontend/src/pages/ComposeStatusPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/status/ContextTagsPicker.tsx",
-          "frontend/src/constants/contextTags.ts",
-          "frontend/src/pages/ComposeStatusPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Implement a soft limit for mood context tag selection to keep the feature lightweight (e.g., gently discourage selecting more than the soft limit with calm inline guidance rather than a hard block).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/status/ContextTagsPicker.tsx",
-          "frontend/src/constants/contextTags.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/status/ContextTagsPicker.tsx",
-          "frontend/src/constants/contextTags.ts"
-        ]
-      },
-      {
         "id": "REQ-5",
-        "summary": "Include the selected context tags when posting a status from the Compose Status page, and ensure tags are not displayed anywhere in the feed UI (StatusCard/FeedPage) or to other circle members.",
+        "summary": "Audit and update all user-facing copy so it never implies the app knows, detects, or infers how the user (or the circle) feels; all language must frame insights as patterns based on what users selected/posted (e.g., “You selected low moods” / “Posts this week leaned calm”).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/pages/ComposeStatusPage.tsx",
-          "frontend/src/components/status/StatusCard.tsx",
-          "frontend/src/pages/FeedPage.tsx",
-          "frontend/src/pages/StatusDetailPage.tsx"
+          "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
+          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
+          "frontend/src/utils/moodAnalysis.ts",
+          "frontend/src/utils/circleEnergy.ts",
+          "frontend/src/constants/loginCopy.ts",
+          "frontend/src/components/auth/LoginPanel.tsx",
+          "frontend/src/constants/foundationCopy.ts"
         ],
         "matchedFiles": [
           "frontend/src/pages/ComposeStatusPage.tsx",
-          "frontend/src/components/status/StatusCard.tsx"
+          "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
+          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
+          "frontend/src/utils/moodAnalysis.ts",
+          "frontend/src/utils/circleEnergy.ts",
+          "frontend/src/constants/loginCopy.ts",
+          "frontend/src/components/auth/LoginPanel.tsx",
+          "frontend/src/constants/foundationCopy.ts"
         ]
       },
       {
         "id": "REQ-6",
-        "summary": "Add basic frontend validation/normalization for custom tags to keep them lightweight and safe (trim whitespace, prevent empty tags, avoid duplicates ignoring case, and enforce a reasonable max length).",
+        "summary": "Update the Mood Analyzer UI and its generated guidance text to use agency-preserving, non-inferential wording that describes distributions/trends of selected moods, not emotional states; ensure the analyzer description and guidance do not use clinical/diagnostic framing.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/contextTags.ts",
-          "frontend/src/components/status/ContextTagsPicker.tsx",
-          "frontend/src/constants/contextTags.ts"
+          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
+          "frontend/src/utils/moodAnalysis.ts"
         ],
         "matchedFiles": [
-          "frontend/src/utils/contextTags.ts",
-          "frontend/src/components/status/ContextTagsPicker.tsx",
-          "frontend/src/constants/contextTags.ts"
+          "frontend/src/components/profile/MoodAnalyzerCard.tsx",
+          "frontend/src/utils/moodAnalysis.ts"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Ensure the mood picker and check-in flow remain fully user-chosen: no default pre-selection, no auto-suggested mood, and no copy that implies a recommendation or guess; adjust surrounding copy in compose and reminder surfaces to reinforce user choice.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/status/MoodPicker.tsx",
+          "frontend/src/pages/ComposeStatusPage.tsx",
+          "frontend/src/components/feed/MoodCheckInReminderCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/ComposeStatusPage.tsx",
+          "frontend/src/components/feed/MoodCheckInReminderCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Update Circle Energy summary text to avoid claiming the system knows the circle’s feelings (remove/replace phrases like “Your circle feels…”), reframing summaries as patterns observed in posts over the last week.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/circleEnergy.ts",
+          "frontend/src/components/circle/CircleEnergyCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/circleEnergy.ts"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Update login/onboarding/product copy that currently emphasizes the app understanding or holding feelings so it instead emphasizes user choice and private sharing of selected moods, while keeping the existing calm tone.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/constants/loginCopy.ts",
+          "frontend/src/components/auth/LoginPanel.tsx",
+          "frontend/src/constants/foundationCopy.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/constants/loginCopy.ts",
+          "frontend/src/components/auth/LoginPanel.tsx",
+          "frontend/src/constants/foundationCopy.ts"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/status/ContextTagsPicker.tsx",
-    "frontend/src/components/status/StatusCard.tsx",
-    "frontend/src/constants/contextTags.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/components/auth/LoginPanel.tsx",
+    "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
+    "frontend/src/components/profile/MoodAnalyzerCard.tsx",
+    "frontend/src/constants/foundationCopy.ts",
+    "frontend/src/constants/loginCopy.ts",
     "frontend/src/pages/ComposeStatusPage.tsx",
-    "frontend/src/utils/contextTags.ts",
+    "frontend/src/utils/circleEnergy.ts",
+    "frontend/src/utils/moodAnalysis.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

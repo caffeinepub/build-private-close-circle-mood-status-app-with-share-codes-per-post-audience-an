@@ -13,16 +13,14 @@ import { Heart, LogOut, User, BookOpen } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useGetCallerUserProfile } from '@/hooks/useQueries';
 import { APP_NAME } from '@/constants/branding';
+import { useJournalOverlayController } from '@/contexts/JournalOverlayControllerContext';
 
-interface AppHeaderProps {
-  onOpenJournal: () => void;
-}
-
-export default function AppHeader({ onOpenJournal }: AppHeaderProps) {
+export default function AppHeader() {
   const { clear } = useInternetIdentity();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: userProfile } = useGetCallerUserProfile();
+  const { openJournal } = useJournalOverlayController();
 
   const handleLogout = async () => {
     await clear();
@@ -39,32 +37,40 @@ export default function AppHeader({ onOpenJournal }: AppHeaderProps) {
           <h1 className="text-lg font-semibold tracking-tight">{APP_NAME}</h1>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full h-9 w-9">
-              <User className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>
-              <p className="text-sm font-medium">{userProfile?.name || 'User'}</p>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate({ to: '/profile' })}>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onOpenJournal}>
-              <BookOpen className="mr-2 h-4 w-4" />
-              Journal
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full h-9 w-9"
+            onClick={() => openJournal()}
+            aria-label="Open journal"
+          >
+            <BookOpen className="h-4 w-4" />
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full h-9 w-9">
+                <User className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>
+                <p className="text-sm font-medium">{userProfile?.name || 'User'}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate({ to: '/profile' })}>
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

@@ -1,110 +1,148 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Optional private mood context tags in status compose flow (frontend)",
+  "title": "Scope 1 (Trust & Safety): Agency-preserving, non-inferential copy updates",
   "requirements": [
     {
-      "id": "REQ-3",
-      "summary": "Add a post-mood-selection Context Tags section in Compose Status with predefined multi-select and custom tag creation/removal.",
-      "acceptanceCriteria": [
-        "The tags UI is not shown until a mood is selected",
-        "Users can select multiple predefined tags",
-        "Users can add a custom tag and select it",
-        "Selected tags are shown as selected chips/badges and can be removed"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/status/ContextTagsPicker.tsx",
-          "operation": "create",
-          "description": "Create a reusable ContextTagsPicker component that renders a subtle context-tags section (only when enabled by the parent), supports multi-select predefined tags, adding custom tags, and removing selected tags via chip/badge UI. Use existing composed UI primitives (e.g., Button/Badge/Input/Label) without modifying the ui component library."
-        },
-        {
-          "path": "frontend/src/constants/contextTags.ts",
-          "operation": "create",
-          "description": "Add a predefined context tag list (e.g., work/family/health/etc.) and shared configuration values (e.g., soft limit, max custom tag length) used by the ContextTagsPicker and compose flow."
-        },
-        {
-          "path": "frontend/src/pages/ComposeStatusPage.tsx",
-          "operation": "modify",
-          "description": "Wire ContextTagsPicker into the Compose Status flow so it appears only after a mood is selected; store selected tags in ComposeStatusPage state and allow selection/removal of predefined and custom tags."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Add a calm soft-limit UX for context tag selection that discourages exceeding the recommended maximum without blocking posting.",
-      "acceptanceCriteria": [
-        "A soft limit exists and is enforced as a gentle UX constraint (not a hard error that prevents posting)",
-        "When the user exceeds the soft limit, the UI displays a subtle, calm message indicating the recommended maximum",
-        "Posting a status remains possible even if the user exceeds the soft limit"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/status/ContextTagsPicker.tsx",
-          "operation": "modify",
-          "description": "Implement soft-limit messaging within ContextTagsPicker (e.g., show a subtle inline note when selected tag count exceeds the configured soft limit) while continuing to allow additional tag selection and removals."
-        },
-        {
-          "path": "frontend/src/constants/contextTags.ts",
-          "operation": "modify",
-          "description": "Define/adjust the soft limit configuration value used to trigger the gentle UX guidance."
-        }
-      ]
-    },
-    {
       "id": "REQ-5",
-      "summary": "Send selected context tags in the Compose Status submission while ensuring the feed and status detail UIs continue to display no tag indicators.",
+      "summary": "Audit and update user-facing copy to avoid implied mood inference; frame insights as patterns based on user-selected moods/posts.",
       "acceptanceCriteria": [
-        "Compose Status submission sends the selected tags to the backend as part of the status payload",
-        "Feed UI continues to show no tag indicators (no chips/labels/metadata) for any posts",
-        "No tag indicators appear on the status detail UI for non-authors"
+        "No UI text claims or implies the system can tell how a user feels without the user explicitly selecting a mood (avoid phrases like “we know”, “you felt”, “your circle feels”, “your mood indicates distress”).",
+        "Where the app summarizes history, the text explicitly references “your selected moods”, “your entries”, “your posts”, or equivalent agency-preserving phrasing.",
+        "All updated strings are in English."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/ComposeStatusPage.tsx",
           "operation": "modify",
-          "description": "Include contextTags in the StatusPost payload passed to usePostStatus.mutateAsync (always send an array; send an empty array when none are selected) so the backend can persist them while keeping the feature optional."
+          "description": "Update user-facing copy (page title, section prompts, note placeholder, button/loading text) to avoid implying the app knows how the user feels; emphasize the user choosing a mood and optionally adding context."
         },
         {
-          "path": "frontend/src/components/status/StatusCard.tsx",
+          "path": "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
           "operation": "modify",
-          "description": "Add a defensive non-display guarantee by ensuring StatusCard does not render any context-tags-related metadata even if contextTags is present on the StatusPost object."
+          "description": "Revise reminder title/description/button label to invite a user-chosen check-in (selected mood) without implying the app is checking or assessing feelings."
         },
         {
-          "path": "frontend/src/pages/FeedPage.tsx",
+          "path": "frontend/src/components/profile/MoodAnalyzerCard.tsx",
           "operation": "modify",
-          "description": "Confirm FeedPage continues to render StatusCard without any context tags UI; ensure no new tag indicators are introduced at the feed level."
+          "description": "Adjust analyzer card subtitle and section headings to describe patterns from the user’s selected moods/entries (not inferred emotional state), and remove clinical-sounding UI labels."
         },
         {
-          "path": "frontend/src/pages/StatusDetailPage.tsx",
+          "path": "frontend/src/utils/moodAnalysis.ts",
           "operation": "modify",
-          "description": "Confirm StatusDetailPage continues to render StatusCard without any context tags UI; ensure no new tag indicators are introduced at the status-detail level."
+          "description": "Audit generated guidance/disclaimer strings to remove implied emotional inference and clinical/diagnostic framing; ensure output text consistently references selected moods/entries."
+        },
+        {
+          "path": "frontend/src/utils/circleEnergy.ts",
+          "operation": "modify",
+          "description": "Audit and update generated circle summary templates so they reference posting trends (based on posts/moods shared) and never claim to know how the circle feels."
+        },
+        {
+          "path": "frontend/src/constants/loginCopy.ts",
+          "operation": "modify",
+          "description": "Update rotating login hero/card copy to preserve agency (what you choose to share / moods you select) and remove any language implying the app interprets feelings."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginPanel.tsx",
+          "operation": "modify",
+          "description": "Update login panel static UI text (feature descriptions, primary button label, consent line if needed) to align with non-inferential, agency-preserving framing while keeping a calm tone."
+        },
+        {
+          "path": "frontend/src/constants/foundationCopy.ts",
+          "operation": "modify",
+          "description": "Refine foundation promise/boundary copy, if needed, to explicitly describe patterns as derived from user check-ins/posts and avoid any wording that could imply inference."
         }
       ]
     },
     {
       "id": "REQ-6",
-      "summary": "Normalize and validate custom context tags on the frontend (trim, disallow empty, prevent case-insensitive duplicates, enforce max length with inline messaging).",
+      "summary": "Update Mood Analyzer UI and generated guidance to be agency-preserving, trend/distribution-focused, and non-clinical.",
       "acceptanceCriteria": [
-        "Empty/whitespace-only custom tags cannot be added",
-        "Duplicate tags (case-insensitive) cannot be added",
-        "Custom tags longer than the configured maximum cannot be added (user gets a clear inline message)"
+        "In frontend/src/components/profile/MoodAnalyzerCard.tsx, the card subtitle and section labels do not describe “emotional patterns” as something the system determines; they are framed as analysis of the user’s selections/entries.",
+        "In frontend/src/utils/moodAnalysis.ts, guidance text uses wording like “Based on your selected moods/entries…” and avoids “you felt…”, “emotional well-being”, “distress”, “clinical consideration”, or diagnosis-like language.",
+        "If there are 0 entries, the empty-state guidance does not instruct users to “share your feelings”; it invites them to select moods/check in to see patterns."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/contextTags.ts",
-          "operation": "create",
-          "description": "Add utility helpers to normalize and validate custom tags (trim, collapse whitespace if desired, compare case-insensitively for duplicates, and enforce max length), returning user-friendly validation results for inline UI messaging."
+          "path": "frontend/src/components/profile/MoodAnalyzerCard.tsx",
+          "operation": "modify",
+          "description": "Revise analyzer subtitle ('Private analysis of your emotional patterns') and section labels (e.g., 'Concern Level', 'Analysis & Guidance') to explicitly refer to 'selected moods'/'entries' and remove clinical/diagnostic framing from labels/badges."
         },
         {
-          "path": "frontend/src/components/status/ContextTagsPicker.tsx",
+          "path": "frontend/src/utils/moodAnalysis.ts",
           "operation": "modify",
-          "description": "Use the context tag normalization/validation utilities to prevent adding empty/duplicate/too-long custom tags and display a clear inline message when validation fails."
+          "description": "Rewrite generateGuidance() output to be distribution/trend-based and agency-preserving (e.g., 'Based on your selected moods...'); remove diagnosis-like headings and phrases ('clinical consideration', 'distress', 'recommendation'); update empty-state text to invite check-ins/selected moods rather than 'share your feelings'; adjust disclaimer language to remain non-clinical and non-diagnostic."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Ensure mood picker and check-in flow remain fully user-chosen with no defaults, auto-suggestions, or recommendation-like copy.",
+      "acceptanceCriteria": [
+        "In frontend/src/components/status/MoodPicker.tsx and frontend/src/pages/ComposeStatusPage.tsx, no mood is auto-selected and no “suggested mood” UI is introduced.",
+        "Compose page copy (e.g., title, description, note placeholder) is updated to reflect choosing/sharing what the user wants (not what the app thinks they feel).",
+        "Mood reminder card text is updated to avoid implying the app is checking how the user feels; it invites the user to choose a mood/check in."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/status/MoodPicker.tsx",
+          "operation": "modify",
+          "description": "Confirm and preserve fully user-chosen selection behavior (keep selectedMood nullable, no default selection); adjust any surrounding picker microcopy (e.g., search placeholder) if it implies suggestion/recommendation."
         },
         {
-          "path": "frontend/src/constants/contextTags.ts",
+          "path": "frontend/src/pages/ComposeStatusPage.tsx",
           "operation": "modify",
-          "description": "Define/adjust the maximum custom tag length configuration used by the validation utilities and the ContextTagsPicker UI."
+          "description": "Update compose page headings, prompts, and textarea placeholder to emphasize user choice (select a mood you want to share; add an optional note you choose) and avoid 'How are you feeling' inference-style language; ensure no default mood is set."
+        },
+        {
+          "path": "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
+          "operation": "modify",
+          "description": "Update reminder copy to invite a user-led check-in (choose a mood) rather than implying the app is checking on or assessing the user’s feelings."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Reframe Circle Energy summaries as patterns observed in posts from the last week (no 'your circle feels' phrasing).",
+      "acceptanceCriteria": [
+        "In frontend/src/utils/circleEnergy.ts, generated summaries do not use “feels” language implying emotional inference; they reference posting trends (e.g., “Posts this week leaned calm/mixed…”).",
+        "A quick scan of the returned summary templates confirms no diagnostic/clinical language is introduced."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/circleEnergy.ts",
+          "operation": "modify",
+          "description": "Replace summary templates that say 'Your circle feels...' / 'Things feel...' with trend-based, evidence-referencing phrasing (e.g., 'Posts this week leaned calm/mixed...' or 'This week’s posts had a calm/steady mix...'); keep the existing non-clinical banned-terms safety check aligned with the new templates."
+        },
+        {
+          "path": "frontend/src/components/circle/CircleEnergyCard.tsx",
+          "operation": "modify",
+          "description": "If needed, adjust the displayed label/intro around the summary so it clarifies the text reflects patterns in recent posts (without adding new routes or pages)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Update login/onboarding/product copy to emphasize user choice and private sharing of selected moods while keeping the calm tone.",
+      "acceptanceCriteria": [
+        "In frontend/src/constants/loginCopy.ts, rotating hero/card copy no longer says “share your feelings” in a way that could imply the app is interpreting them; it references sharing what you choose / the moods you select.",
+        "Foundation copy remains consistent with Scope 1: it should describe noticing patterns from check-ins without implying inference."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/constants/loginCopy.ts",
+          "operation": "modify",
+          "description": "Rewrite heroSubtexts and cardSubheadings to remove 'share your feelings' and any implication the app 'holds/understands' feelings; replace with calm, agency-forward phrasing focused on chosen check-ins and selected moods."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginPanel.tsx",
+          "operation": "modify",
+          "description": "Update login CTA/button text and any supporting copy that implies emotional inference (e.g., 'safe space to share your feelings') to align with user choice and selected moods; keep tone calm and consistent with updated constants."
+        },
+        {
+          "path": "frontend/src/constants/foundationCopy.ts",
+          "operation": "modify",
+          "description": "Ensure foundation promise/boundary explicitly describes patterns as derived from user check-ins/posts and avoids any wording that implies the app detects or infers emotions."
         }
       ]
     }

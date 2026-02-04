@@ -14,7 +14,7 @@ export interface MoodAnalysisResult {
 }
 
 const DISCLAIMER =
-  '⚠️ Important: This analysis is not a medical diagnosis and is not a substitute for professional mental health care. If you are experiencing persistent distress, please consult a qualified healthcare provider.';
+  '⚠️ This analysis reflects patterns in the moods you selected. It is not a diagnosis or substitute for professional support. If you need help, please reach out to a trusted person or professional.';
 
 /**
  * Classify mood into sentiment category
@@ -201,38 +201,38 @@ function generateGuidance(
   timeframeDays: number
 ): string {
   if (totalEntries === 0) {
-    return 'No mood data available for the selected timeframe. Start sharing your feelings to see insights.';
+    return 'No entries yet. Select moods to check in and see patterns over time.';
   }
 
   if (totalEntries < 5) {
-    return `Limited data available (${totalEntries} entries over ${timeframeDays} days). Continue tracking your moods for more meaningful insights.`;
+    return `Based on ${totalEntries} entries over ${timeframeDays} days. Keep checking in to see more patterns.`;
   }
 
   let guidance = '';
 
-  // Clinical-style analysis with conservative language
+  // Pattern-based observations with agency-preserving language
   if (concernLevel === 'elevated') {
-    guidance = `**Pattern Analysis:** Over the past ${timeframeDays} days, your mood data indicates a sustained pattern of distress (${Math.round(negativePercentage)}% negative affect). This pattern may warrant professional attention.\n\n`;
-    guidance += `**Clinical Consideration:** Persistent low mood or elevated stress lasting two weeks or more can be indicative of underlying mental health concerns. While this analysis cannot diagnose conditions, the pattern observed suggests you may benefit from consultation with a mental health professional.\n\n`;
-    guidance += `**Recommendation:** Strongly consider scheduling an appointment with a licensed therapist, counselor, or psychiatrist. Many evidence-based treatments are available and effective.`;
+    guidance = `Based on your selected moods over the past ${timeframeDays} days, you've chosen low moods frequently (${Math.round(negativePercentage)}% of entries).\n\n`;
+    guidance += `This pattern might be worth noticing. If you're finding things difficult, reaching out to someone you trust or a professional could help.\n\n`;
+    guidance += `You're not alone, and support is available when you're ready.`;
   } else if (concernLevel === 'moderate') {
-    guidance = `**Pattern Analysis:** Your mood tracking over ${timeframeDays} days shows a notable pattern of negative affect (${Math.round(negativePercentage)}% negative entries).\n\n`;
-    guidance += `**Observation:** While brief periods of low mood are part of normal human experience, sustained patterns may benefit from intervention. Consider whether external stressors, life changes, or other factors may be contributing.\n\n`;
-    guidance += `**Suggestion:** If this pattern continues or worsens, consider reaching out to a mental health professional. Early intervention can be highly effective.`;
+    guidance = `Looking at your selected moods over ${timeframeDays} days, you've chosen low moods often (${Math.round(negativePercentage)}% of entries).\n\n`;
+    guidance += `If this pattern continues or things feel harder, consider talking to someone you trust or reaching out for support.\n\n`;
+    guidance += `Taking care of yourself matters.`;
   } else if (concernLevel === 'mild') {
-    guidance = `**Pattern Analysis:** Your recent mood data (${timeframeDays} days) shows a tendency toward negative affect (${Math.round(negativePercentage)}% negative entries).\n\n`;
-    guidance += `**Context:** Fluctuations in mood are normal, especially during challenging periods. However, if you notice this pattern persisting or interfering with daily functioning, it may be worth exploring further.\n\n`;
-    guidance += `**Self-Care:** Consider stress management techniques, social connection, physical activity, and adequate sleep. If concerns persist, professional support is available.`;
+    guidance = `Based on your selected moods over ${timeframeDays} days, you've chosen low moods somewhat frequently (${Math.round(negativePercentage)}% of entries).\n\n`;
+    guidance += `If you notice this continuing, it might help to check in with yourself about what's going on. Reaching out to someone you trust can make a difference.\n\n`;
+    guidance += `Small steps toward support can help.`;
   } else {
-    // No concern - provide positive or neutral feedback
+    // No concern - provide neutral feedback
     if (trend === 'improving') {
-      guidance = `**Positive Trend:** Your mood appears to be improving over the past ${timeframeDays} days. `;
+      guidance = `Based on your selected moods over ${timeframeDays} days, your entries show an upward trend. `;
     } else if (trend === 'stable') {
-      guidance = `**Stable Pattern:** Your mood has been relatively consistent over ${timeframeDays} days. `;
+      guidance = `Based on your selected moods over ${timeframeDays} days, your entries have been fairly consistent. `;
     } else if (trend === 'declining') {
-      guidance = `**Observation:** Your mood shows a slight downward trend over ${timeframeDays} days. `;
+      guidance = `Based on your selected moods over ${timeframeDays} days, your entries show a slight downward trend. `;
     } else {
-      guidance = `**Current Status:** Based on ${totalEntries} entries over ${timeframeDays} days. `;
+      guidance = `Based on ${totalEntries} entries over ${timeframeDays} days. `;
     }
 
     if (dominantMood) {
@@ -241,11 +241,11 @@ function generateGuidance(
       const moodPercentage = Math.round(positivePercentage);
 
       if (sentiment === 'positive') {
-        guidance += `Your dominant mood is ${moodLabel} (${moodPercentage}% positive overall), which suggests generally positive emotional well-being. Continue practices that support your mental health.`;
+        guidance += `You've selected ${moodLabel} most often (${moodPercentage}% positive overall). Keep noticing what supports you.`;
       } else if (sentiment === 'neutral') {
-        guidance += `Your mood is predominantly neutral (${Math.round(neutralPercentage)}%). This may indicate emotional stability or, alternatively, emotional numbing. Reflect on whether you feel engaged with your experiences.`;
+        guidance += `You've selected neutral moods most often (${Math.round(neutralPercentage)}%). This might reflect steadiness, or it might be worth checking in with yourself about how you're really doing.`;
       } else {
-        guidance += `Your dominant mood is ${moodLabel} (${Math.round(negativePercentage)}% negative overall). While temporary periods of difficult emotions are normal, monitor this pattern. If it persists or worsens, consider seeking support.`;
+        guidance += `You've selected ${moodLabel} most often (${Math.round(negativePercentage)}% low moods overall). If this continues, consider reaching out to someone you trust.`;
       }
     }
   }

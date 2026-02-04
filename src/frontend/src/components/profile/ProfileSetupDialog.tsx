@@ -9,6 +9,7 @@ import { Heart, Copy, Check } from 'lucide-react';
 import { Gender, RelationshipIntent } from '@/backend';
 import { generateShareCode } from '@/utils/shareCode';
 import { parseDateInput } from '@/utils/age';
+import { FOUNDATION_PROMISE, FOUNDATION_BOUNDARY } from '@/constants/foundationCopy';
 
 type OnboardingStep = 'name' | 'gender' | 'dob' | 'intent' | 'preferences' | 'shareCode';
 
@@ -111,6 +112,14 @@ export default function ProfileSetupDialog() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="space-y-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {FOUNDATION_PROMISE}
+                </p>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {FOUNDATION_BOUNDARY}
+                </p>
+              </div>
               <div className="space-y-3">
                 <Label htmlFor="name" className="text-base">What should we call you?</Label>
                 <Input

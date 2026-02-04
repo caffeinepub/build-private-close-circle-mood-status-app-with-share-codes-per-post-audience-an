@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Heart, Lock, Users } from 'lucide-react';
 import { APP_NAME } from '@/constants/branding';
 import { heroSubtexts, cardSubheadings, pickRandomPhrase } from '@/constants/loginCopy';
+import { FOUNDATION_PROMISE, FOUNDATION_BOUNDARY } from '@/constants/foundationCopy';
 
 export default function LoginPanel() {
   const { login, isLoggingIn, isLoginError, loginError } = useInternetIdentity();
@@ -48,9 +49,18 @@ export default function LoginPanel() {
                 <Users className="mt-0.5 h-5 w-5 text-primary" />
                 <div className="flex-1 text-sm">
                   <p className="font-medium">Your Trusted Circle</p>
-                  <p className="text-muted-foreground">Share moods and updates with selected loved ones</p>
+                  <p className="text-muted-foreground">Share selected moods with chosen loved ones</p>
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4">
+              <p className="text-sm leading-relaxed text-foreground/90">
+                {FOUNDATION_PROMISE}
+              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {FOUNDATION_BOUNDARY}
+              </p>
             </div>
 
             {isLoginError && (

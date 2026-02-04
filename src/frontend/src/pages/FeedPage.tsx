@@ -7,6 +7,7 @@ import MoodCheckInReminderCard from '@/components/feed/MoodCheckInReminderCard';
 import { RefreshCw, PlusCircle } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { shouldShowReminder } from '@/utils/moodReminder';
+import { FOUNDATION_PROMISE, FOUNDATION_BOUNDARY } from '@/constants/foundationCopy';
 
 export default function FeedPage() {
   const { data: feed = [], isLoading, refetch, isRefetching } = useGetFeed();
@@ -53,10 +54,20 @@ export default function FeedPage() {
           <CardContent className="py-12 text-center space-y-4">
             <p className="text-muted-foreground">No status updates yet</p>
             <p className="text-sm text-muted-foreground/80">Quiet days are okay too.</p>
-            <Button onClick={() => navigate({ to: '/compose' })}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Post Your First Status
-            </Button>
+            <div className="space-y-3 pt-4">
+              <div className="mx-auto max-w-md space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4 text-left">
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {FOUNDATION_PROMISE}
+                </p>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {FOUNDATION_BOUNDARY}
+                </p>
+              </div>
+              <Button onClick={() => navigate({ to: '/compose' })}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Share Your First Check‑in
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (

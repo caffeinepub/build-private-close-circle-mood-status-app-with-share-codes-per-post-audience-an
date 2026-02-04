@@ -1,14 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Add optional, private mood context tags to the status compose flow, stored with each post but only visible to the author.
+**Goal:** Update all user-facing language to avoid implied mood/emotion inference, keeping wording agency-preserving and based only on what users selected or posted.
 
 **Planned changes:**
-- Extend the backend StatusPost model to store an optional list of context tags per post, and accept/persist tags when creating a status (default to an empty list when not provided).
-- Ensure context tags remain private by omitting/emptying them in getFeed and getStatus responses for any caller who is not the post author, while returning them for the author.
-- Update the Compose Status page to show a subtle “context tags” section only after a mood is selected, supporting multi-select from predefined tags plus adding/removing custom tags.
-- Add a soft-limit UX for tag selection with calm inline guidance when exceeded (posting still allowed).
-- Add lightweight frontend validation/normalization for custom tags (trim, block empty, prevent case-insensitive duplicates, enforce a max length with an inline message).
-- Ensure tags are sent with status submissions but are not displayed anywhere in feed/status UI for non-authors.
+- Audit and revise frontend UI copy so it never claims or implies the app “knows,” “detects,” or “infers” how the user or their circle feels; rewrite summaries to reference selected moods, entries, and posting trends.
+- Update Mood Analyzer UI copy and generated guidance text to describe distributions/trends of selected moods (non-clinical, non-diagnostic phrasing), including the 0-entries empty state.
+- Ensure mood picker and check-in/compose/reminder surfaces remain fully user-chosen: no default mood selection, no suggested mood language, and surrounding copy reinforces user choice.
+- Update Circle Energy generated summary templates to avoid “feels” language and instead describe patterns observed in posts over the last week.
+- Update login/onboarding/product copy to emphasize private sharing and user-chosen selections (calm tone), without “share your feelings” or interpretation-implying language.
 
-**User-visible outcome:** After selecting a mood while composing a status, the author can optionally add private context tags (predefined or custom) to help personal context; these tags are saved with the post but are not shown to other users in the feed or status views.
+**User-visible outcome:** The app’s mood-related and onboarding text consistently frames insights as patterns from the user’s selections/posts, avoids clinical or diagnostic framing, and reinforces that moods are always explicitly chosen by the user.

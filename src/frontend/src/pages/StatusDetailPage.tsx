@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import StatusCard from '@/components/status/StatusCard';
 import { ArrowLeft } from 'lucide-react';
+import { FOUNDATION_BOUNDARY } from '@/constants/foundationCopy';
 
 export default function StatusDetailPage() {
   const { statusId } = useParams({ from: '/status/$statusId' });
@@ -28,10 +29,15 @@ export default function StatusDetailPage() {
           Back to Feed
         </Button>
         <Card>
-          <CardContent className="py-12 text-center space-y-2">
+          <CardContent className="py-12 text-center space-y-4">
             <p className="text-muted-foreground">
               {error ? 'You do not have permission to view this status' : 'Status not found'}
             </p>
+            <div className="mx-auto max-w-md space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-4 text-left">
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {FOUNDATION_BOUNDARY}
+              </p>
+            </div>
             <Button variant="outline" onClick={() => navigate({ to: '/' })}>
               Return to Feed
             </Button>

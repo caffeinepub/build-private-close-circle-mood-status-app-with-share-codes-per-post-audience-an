@@ -1,39 +1,36 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-03T21:47:48.208Z",
-  "summary": "Frontend adds a context tags picker UI (predefined + custom tags) that appears after mood selection, validates custom tags, and includes contextTags in the post payload. Backend adds a migration module introducing a contextTags field on the stored status type, but the diff summary does not show backend create/read logic changes needed to ensure privacy and the required empty-list storage behavior.",
-  "missing_requirements": [
+  "generatedAt": "2026-02-04T13:23:57.319Z",
+  "summary": "Diff primarily updates user-facing copy to be agency-preserving (\"selected moods\", \"choose\") across login, compose/reminder surfaces, and Mood Analyzer; also adjusts Circle Energy generation to avoid clinical/inferential terms via a banned-terms filter. No clear evidence of mood auto-selection or new recommendation UI being introduced.",
+  "missing_requirements": [],
+  "hallucinated_features": [
     {
-      "id": "REQ-1",
-      "requirement": "StatusPost includes a field for context tags (stored with the post); postStatus accepts and persists the provided tags for the post; If no tags are provided, the stored tags value is an empty list (not null/undefined).",
-      "reason": "The only explicit backend evidence shows `contextTags` as an optional (`?[Text]`) field (suggesting it can be null/undefined) rather than being stored as an always-present empty list when absent. Also, the diff summary for backend/main.mo is truncated and does not show postStatus persisting tags or defaulting to an empty list.",
+      "description": "Added a guidance disclaimer in mood analysis that advises reaching out to a trusted person or professional (support escalation language) beyond the specified Scope 1 copy updates.",
+      "reason": "BuildRequest Scope 1 focuses on removing implied inference/auto-suggestion language and avoiding clinical/diagnostic framing; it does not request adding new help-seeking/professional-support guidance text.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo"
+        "frontend/src/utils/moodAnalysis.ts"
       ]
     },
     {
-      "id": "REQ-2",
-      "requirement": "Ensure mood context tags are private: when caller is not the author, getFeed/getStatus returns posts with context tags removed/empty; when caller is the author, getFeed/getStatus includes the author’s saved context tags.",
-      "reason": "The diff summary does not provide evidence of getFeed/getStatus filtering behavior in the backend. StatusCard includes a comment about not displaying tags, but that does not satisfy backend privacy requirements (non-authors must not be able to observe tags via API responses).",
+      "description": "Introduced a banned-terms filtering mechanism for Circle Energy summaries (including a term list and detection function).",
+      "reason": "REQ-8 requires updating summary templates to avoid “feels”/clinical language, but does not explicitly request implementing a generalized banned-terms filter mechanism (implementation detail not requested).",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/components/status/StatusCard.tsx"
+        "frontend/src/utils/circleEnergy.ts"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.66,
+  "confidence": 0.56,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/status/ContextTagsPicker.tsx",
-    "frontend/src/components/status/StatusCard.tsx",
-    "frontend/src/constants/contextTags.ts",
+    "frontend/src/components/auth/LoginPanel.tsx",
+    "frontend/src/components/feed/MoodCheckInReminderCard.tsx",
+    "frontend/src/components/profile/MoodAnalyzerCard.tsx",
+    "frontend/src/constants/foundationCopy.ts",
+    "frontend/src/constants/loginCopy.ts",
     "frontend/src/pages/ComposeStatusPage.tsx",
-    "frontend/src/utils/contextTags.ts",
+    "frontend/src/utils/circleEnergy.ts",
+    "frontend/src/utils/moodAnalysis.ts",
     "project_state.json"
   ]
 }
