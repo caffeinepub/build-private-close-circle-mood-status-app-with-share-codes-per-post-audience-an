@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useGetEligibleSafePeopleCandidates, useGetSafePeople, useSetSafePerson, useUnsetSafePerson, useGetUserProfiles } from '@/hooks/useQueries';
-import { Heart, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useGetEligibleSafePeopleCandidates, useGetSafePeople, useSetSafePerson, useUnsetSafePerson, useGetUserProfiles, useGetClosestConnections } from '@/hooks/useQueries';
+import { Heart, Info, Sparkles, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from '@tanstack/react-router';
 import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
 import { Principal } from '@dfinity/principal';
 
@@ -12,12 +15,16 @@ export default function SafePeoplePanel() {
   const { data: candidates = [], isLoading: candidatesLoading } = useGetEligibleSafePeopleCandidates();
   const { data: safePeople = [], isLoading: safePeopleLoading } = useGetSafePeople();
   const { data: profiles = {} } = useGetUserProfiles(candidates);
+  const { data: recommendations = [] } = useGetClosestConnections();
   const setSafePerson = useSetSafePerson();
   const unsetSafePerson = useUnsetSafePerson();
 
   const [pendingChanges, setPendingChanges] = useState<Set<string>>(new Set());
 
   const isLoading = candidatesLoading || safePeopleLoading;
+
+  // Get top 2 recommended principals
+  const recommendedPrincipals = recommendations.slice(0, 2).map((r) => r.principal.toString());
 
   const handleToggle = async (principal: string, isCurrentlySelected: boolean) => {
     if (pendingChanges.has(principal)) return;
@@ -72,6 +79,14 @@ export default function SafePeoplePanel() {
     );
   }
 
+  // Separate recommended and other candidates
+  const recommendedCandidates = candidates.filter((c) =>
+    recommendedPrincipals.includes(c.toString())
+  );
+  const otherCandidates = candidates.filter(
+    (c) => !recommendedPrincipals.includes(c.toString())
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -98,35 +113,86 @@ export default function SafePeoplePanel() {
             No connections. Join or create a circle first.
           </p>
         ) : (
-          <div className="space-y-2">
-            {candidates.map((candidate) => {
-              const principalStr = candidate.toString();
-              const isSelected = safePeople.some((p) => p.toString() === principalStr);
-              const isPending = pendingChanges.has(principalStr);
-              const isDisabled = !isSelected && safePeople.length >= 2;
-
-              return (
-                <div
-                  key={principalStr}
-                  className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                    isSelected ? 'bg-primary/5 border-primary/20' : 'bg-background border-border'
-                  } ${isDisabled ? 'opacity-50' : ''}`}
-                >
-                  <Checkbox
-                    checked={isSelected}
-                    disabled={isPending || isDisabled}
-                    onCheckedChange={() => handleToggle(principalStr, isSelected)}
-                  />
-                  <div className="flex-1">
-                    <p className="font-medium">{getDisplayName(principalStr)}</p>
-                    <p className="text-xs text-muted-foreground">{principalStr.slice(0, 16)}...</p>
-                  </div>
-                  {isSelected && (
-                    <Heart className="h-4 w-4 text-primary fill-primary" />
-                  )}
+          <div className="space-y-4">
+            {/* Recommended section */}
+            {recommendedCandidates.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-semibold">Recommended</h3>
                 </div>
-              );
-            })}
+                {recommendedCandidates.map((candidate) => {
+                  const principalStr = candidate.toString();
+                  const isSelected = safePeople.some((p) => p.toString() === principalStr);
+                  const isPending = pendingChanges.has(principalStr);
+                  const isDisabled = !isSelected && safePeople.length >= 2;
+
+                  return (
+                    <div
+                      key={principalStr}
+                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                        isSelected ? 'bg-primary/5 border-primary/20' : 'bg-accent/5 border-primary/30'
+                      } ${isDisabled ? 'opacity-50' : ''}`}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        disabled={isPending || isDisabled}
+                        onCheckedChange={() => handleToggle(principalStr, isSelected)}
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{getDisplayName(principalStr)}</p>
+                          <Badge variant="secondary" className="text-xs">
+                            Suggested
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{principalStr.slice(0, 16)}...</p>
+                      </div>
+                      {isSelected && (
+                        <Heart className="h-4 w-4 text-primary fill-primary" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Other candidates section */}
+            {otherCandidates.length > 0 && (
+              <div className="space-y-2">
+                {recommendedCandidates.length > 0 && (
+                  <h3 className="text-sm font-semibold text-muted-foreground">Other connections</h3>
+                )}
+                {otherCandidates.map((candidate) => {
+                  const principalStr = candidate.toString();
+                  const isSelected = safePeople.some((p) => p.toString() === principalStr);
+                  const isPending = pendingChanges.has(principalStr);
+                  const isDisabled = !isSelected && safePeople.length >= 2;
+
+                  return (
+                    <div
+                      key={principalStr}
+                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                        isSelected ? 'bg-primary/5 border-primary/20' : 'bg-background border-border'
+                      } ${isDisabled ? 'opacity-50' : ''}`}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        disabled={isPending || isDisabled}
+                        onCheckedChange={() => handleToggle(principalStr, isSelected)}
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium">{getDisplayName(principalStr)}</p>
+                        <p className="text-xs text-muted-foreground">{principalStr.slice(0, 16)}...</p>
+                      </div>
+                      {isSelected && (
+                        <Heart className="h-4 w-4 text-primary fill-primary" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -136,6 +202,17 @@ export default function SafePeoplePanel() {
               Max 2 selected. Remove one to add someone else.
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Navigation to Closest Connections viewer */}
+        {candidates.length > 0 && (
+          <Link to="/closest-connections">
+            <Button variant="outline" className="w-full" size="sm">
+              <Sparkles className="h-4 w-4 mr-2" />
+              View all connection insights
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
         )}
       </CardContent>
     </Card>

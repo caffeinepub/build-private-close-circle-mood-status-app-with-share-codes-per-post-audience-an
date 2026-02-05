@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useGetCallerUserProfile, useUpdateProfile, useUploadAvatar, useSelectSystemAvatar } from '@/hooks/useQueries';
+import { useGetCallerUserProfile, useUpdateProfile, useUploadAvatar, useSelectSystemAvatar, useGetCallerPulseScore } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { User } from 'lucide-react';
+import { User, Zap } from 'lucide-react';
 import IconActionButton from '@/components/common/IconActionButton';
 import { Edit2, Save, X } from 'lucide-react';
 import ShareCodeCard from '@/components/circle/ShareCodeCard';
@@ -16,20 +17,18 @@ import MoodAnalyzerCard from '@/components/profile/MoodAnalyzerCard';
 import ProfileAvatarEditor from '@/components/profile/ProfileAvatarEditor';
 import { Gender, RelationshipIntent } from '@/backend';
 import type { Avatar as AvatarType } from '@/backend';
-import { calculateAge, formatDateForInput, parseDateInput } from '@/utils/age';
+import { calculateAge, formatDateForInput } from '@/utils/age';
 import { useFloatingJournalVisibility } from '@/contexts/FloatingJournalVisibilityContext';
 import { useSound } from '@/hooks/useSound';
 import { getAvatarSrc } from '@/utils/profileAvatar';
 
 export default function ProfilePage() {
   const { data: userProfile, isLoading } = useGetCallerUserProfile();
+  const { data: pulseScore = 0, isLoading: pulseLoading } = useGetCallerPulseScore();
   const updateProfile = useUpdateProfile();
   const uploadAvatar = useUploadAvatar();
   const selectSystemAvatar = useSelectSystemAvatar();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState('');
-  const [gender, setGender] = useState<Gender | null>(null);
-  const [dateOfBirth, setDateOfBirth] = useState('');
   const [showAge, setShowAge] = useState(true);
   const [relationshipIntent, setRelationshipIntent] = useState<RelationshipIntent | null>(null);
   const [preferredGender, setPreferredGender] = useState<Gender | null>(null);
@@ -48,9 +47,6 @@ export default function ProfilePage() {
 
   const handleEdit = () => {
     if (userProfile) {
-      setName(userProfile.name);
-      setGender(userProfile.gender);
-      setDateOfBirth(formatDateForInput(userProfile.dateOfBirth));
       setShowAge(userProfile.showAge);
       setRelationshipIntent(userProfile.relationshipIntent);
       setPreferredGender(userProfile.preferences.gender);
@@ -65,12 +61,7 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      toast.error('Name required');
-      return;
-    }
-
-    if (!gender || !dateOfBirth || !relationshipIntent || !preferredGender) {
+    if (!relationshipIntent || !preferredGender) {
       toast.error('Complete all fields');
       return;
     }
@@ -78,11 +69,8 @@ export default function ProfilePage() {
     if (!userProfile) return;
 
     try {
-      // First, update the profile fields
+      // Update only the mutable profile fields
       await updateProfile.mutateAsync({
-        name: name.trim(),
-        gender,
-        dateOfBirth: parseDateInput(dateOfBirth),
         showAge,
         relationshipIntent,
         preferences: {
@@ -90,8 +78,6 @@ export default function ProfilePage() {
           gender: preferredGender,
         },
         shareCode: userProfile.shareCode,
-        createdAt: userProfile.createdAt,
-        avatar: userProfile.avatar,
       });
 
       // Then, handle avatar changes if any
@@ -200,63 +186,36 @@ export default function ProfilePage() {
               <Separator />
 
               <div className="space-y-2">
-                <Label htmlFor="edit-name">Name</Label>
-                <Input
-                  id="edit-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={50}
-                />
+                <Label className="text-xs text-muted-foreground">Name</Label>
+                <p className="mt-1 text-base font-medium text-muted-foreground">
+                  {userProfile.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Name cannot be changed
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label>Gender</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant={gender === Gender.male ? 'default' : 'outline'}
-                    onClick={() => setGender(Gender.male)}
-                    size="sm"
-                  >
-                    Male
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={gender === Gender.female ? 'default' : 'outline'}
-                    onClick={() => setGender(Gender.female)}
-                    size="sm"
-                  >
-                    Female
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={gender === Gender.nonBinary ? 'default' : 'outline'}
-                    onClick={() => setGender(Gender.nonBinary)}
-                    size="sm"
-                  >
-                    Non-Binary
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={gender === Gender.other ? 'default' : 'outline'}
-                    onClick={() => setGender(Gender.other)}
-                    size="sm"
-                  >
-                    Other
-                  </Button>
-                </div>
+                <Label className="text-xs text-muted-foreground">Gender</Label>
+                <p className="mt-1 text-base text-muted-foreground">
+                  {getGenderLabel(userProfile.gender)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Gender cannot be changed
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-dob">Birthday</Label>
-                <Input
-                  id="edit-dob"
-                  type="date"
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
-                />
+                <Label className="text-xs text-muted-foreground">Birthday</Label>
+                <p className="mt-1 text-base text-muted-foreground">
+                  {formatDateForInput(userProfile.dateOfBirth)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Birthday cannot be changed
+                </p>
               </div>
+
+              <Separator />
 
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
@@ -396,6 +355,27 @@ export default function ProfilePage() {
                 <div>
                   <Label className="text-xs text-muted-foreground">Interested In</Label>
                   <p className="mt-1 text-base">{getGenderLabel(userProfile.preferences.gender)}</p>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <Label className="text-xs text-muted-foreground">Pulse</Label>
+                  <div className="mt-2 flex items-center gap-2">
+                    {pulseLoading ? (
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    ) : (
+                      <>
+                        <Badge variant="secondary" className="text-base font-semibold px-3 py-1">
+                          <Zap className="h-4 w-4 mr-1.5 text-primary" />
+                          {pulseScore}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground">
+                          Earned by sharing moods with your circle
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </>

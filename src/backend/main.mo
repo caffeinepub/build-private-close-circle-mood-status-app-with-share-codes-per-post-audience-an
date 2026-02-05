@@ -9,7 +9,6 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Nat32 "mo:core/Nat32";
 import Char "mo:core/Char";
-
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
@@ -175,6 +174,13 @@ actor {
     avatar : ?Avatar;
   };
 
+  type UpdateUserProfile = {
+    showAge : Bool;
+    relationshipIntent : RelationshipIntent;
+    preferences : Preferences;
+    shareCode : Text;
+  };
+
   module UserProfile {
     public func compare(a : UserProfile, b : UserProfile) : Order.Order {
       switch (Text.compare(a.name, b.name)) {
@@ -274,10 +280,12 @@ actor {
   let requests = Map.empty<Text, JoinRequest>();
   let notifications = Map.empty<Text, Notification>();
   let circles = Map.empty<Principal, List.List<Principal>>();
+  let memberCircles = Map.empty<Principal, List.List<Principal>>();
   let statuses = Map.empty<Text, StatusPost>();
   let journals = Map.empty<Principal, List.List<JournalEntry>>();
   let safePeople = Map.empty<Principal, SafePeopleList>();
   let silentSignals = Map.empty<Text, SilentSignal>();
+  var pulseScores = Map.empty<Principal, Nat>();
 
   let DEFAULT_CIRCLE_SIZE_LIMIT = 10;
   let accessControlState = AccessControl.initState();
@@ -319,6 +327,15 @@ actor {
       case (null) {};
     };
 
+    switch (memberCircles.get(caller)) {
+      case (?owners) {
+        if (owners.contains(person)) {
+          return true;
+        };
+      };
+      case (null) {};
+    };
+
     false;
   };
 
@@ -336,17 +353,15 @@ actor {
       case (null) {};
     };
 
-    for ((owner, circle) in circles.entries()) {
-      if (owner != user and circle.contains(user)) {
-        if (not connections.contains(owner)) {
-          connections.add(owner);
-        };
-        for (member in circle.toArray().values()) {
-          if (member != user and not connections.contains(member)) {
-            connections.add(member);
+    switch (memberCircles.get(user)) {
+      case (?owners) {
+        for (owner in owners.values()) {
+          if (not connections.contains(owner)) {
+            connections.add(owner);
           };
         };
       };
+      case (null) {};
     };
 
     connections.toArray();
@@ -370,6 +385,44 @@ actor {
     switch (profiles.get(user)) {
       case (?_) { true };
       case (null) { false };
+    };
+  };
+
+  public query ({ caller }) func getCallerCircleOwners() : async [Principal] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view circle information");
+    };
+
+    switch (memberCircles.get(caller)) {
+      case (?owners) { owners.toArray() };
+      case (null) { [] };
+    };
+  };
+
+  public query ({ caller }) func getUserPulseScore(user : Principal) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view Pulse score.");
+    };
+
+    let isAuthorized = caller == user or AccessControl.isAdmin(accessControlState, caller) or isCircleConnection(caller, user) or hasPendingJoinRequestFrom(caller, user);
+    if (not isAuthorized) {
+      Runtime.trap("Unauthorized: Can only view your own Pulse score, circle connections, or pending requesters.");
+    };
+
+    switch (pulseScores.get(user)) {
+      case (?score) { score };
+      case (null) { 0 };
+    };
+  };
+
+  public query ({ caller }) func getCallerPulseScore() : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view their Pulse score.");
+    };
+
+    switch (pulseScores.get(caller)) {
+      case (?score) { score };
+      case (null) { 0 };
     };
   };
 
@@ -404,17 +457,39 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
 
+    let existingProfile = profiles.get(caller);
+
     let shareCode = if (profile.shareCode == "") {
       generateRandomShareCode();
     } else {
       profile.shareCode;
     };
 
-    let entry : UserProfile = {
-      profile with
-      shareCode;
-      createdAt = Time.now();
+    let entry : UserProfile = switch (existingProfile) {
+      case (null) {
+        // New profile creation: use all provided fields and set createdAt to now
+        {
+          profile with
+          shareCode;
+          createdAt = Time.now();
+        };
+      };
+      case (?existing) {
+        // Profile update: preserve immutable fields (name, gender, dateOfBirth, createdAt)
+        {
+          name = existing.name;
+          gender = existing.gender;
+          dateOfBirth = existing.dateOfBirth;
+          showAge = profile.showAge;
+          relationshipIntent = profile.relationshipIntent;
+          preferences = profile.preferences;
+          shareCode;
+          createdAt = existing.createdAt;
+          avatar = profile.avatar;
+        };
+      };
     };
+
     profiles.add(caller, entry);
   };
 
@@ -493,17 +568,25 @@ actor {
     grouped.filterMap(func(x) { x });
   };
 
-  public shared ({ caller }) func updateProfile(profile : UserProfile) : async () {
+  public shared ({ caller }) func updateProfile(updates : UpdateUserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update a profile");
     };
 
-    let entry : UserProfile = {
-      profile with
-      shareCode = profile.shareCode;
-      createdAt = Time.now();
+    let current = switch (profiles.get(caller)) {
+      case (null) { Runtime.trap("Profile not found") };
+      case (?profile) { profile };
     };
-    profiles.add(caller, entry);
+
+    let updatedProfile : UserProfile = {
+      current with
+      showAge = updates.showAge;
+      relationshipIntent = updates.relationshipIntent;
+      preferences = updates.preferences;
+      shareCode = updates.shareCode;
+    };
+
+    profiles.add(caller, updatedProfile);
   };
 
   public query ({ caller }) func viewProfile(id : Principal) : async UserProfile {
@@ -624,6 +707,22 @@ actor {
         circle.add(from);
         circles.add(caller, circle);
 
+        // Update memberCircles (mirrored index)
+        let ownerList = switch (memberCircles.get(from)) {
+          case (null) {
+            let l = List.empty<Principal>();
+            l.add(caller);
+            l;
+          };
+          case (?existing) {
+            if (not existing.contains(caller)) {
+              existing.add(caller);
+            };
+            existing;
+          };
+        };
+        memberCircles.add(from, ownerList);
+
         requests.remove(key);
       };
     };
@@ -661,6 +760,19 @@ actor {
           let filteredMembers = circle.toArray().filter(func(m) { m != member });
           let newCircle = List.fromArray(filteredMembers);
           circles.add(caller, newCircle);
+
+          // Update memberCircles (mirrored index)
+          let updatedOwners = switch (memberCircles.get(member)) {
+            case (null) { List.empty<Principal>() }; // No owners
+            case (?owners) {
+              owners.filter(func(owner) { owner != caller });
+            };
+          };
+          if (updatedOwners.isEmpty()) {
+            memberCircles.remove(member);
+          } else {
+            memberCircles.add(member, updatedOwners);
+          };
         } else {
           Runtime.trap("Member not found in your circle");
         };
@@ -680,6 +792,7 @@ actor {
     let enhancedAudience = [caller].concat(filtered);
 
     let isSelfOnly = enhancedAudience.size() == 1 and enhancedAudience[0] == caller;
+    let pulseIncrement = if (isSelfOnly) { 0 } else { enhancedAudience.size() - 1 };
 
     if (isSelfOnly) {
     } else {
@@ -708,6 +821,14 @@ actor {
       audience = enhancedAudience;
       createdAt = Time.now();
     });
+
+    if (pulseIncrement > 0) {
+      let currentScore = switch (pulseScores.get(caller)) {
+        case (?score) { score };
+        case (null) { 0 };
+      };
+      pulseScores.add(caller, currentScore + pulseIncrement);
+    };
 
     for (recipient in enhancedAudience.values()) {
       if (recipient != caller) {
@@ -779,24 +900,6 @@ actor {
         notification.user == caller;
       }
     ).sort();
-  };
-
-  public shared ({ caller }) func markNotificationAsRead(notificationId : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can mark notifications as read");
-    };
-    switch (notifications.get(notificationId)) {
-      case (null) { Runtime.trap("Notification not found") };
-      case (?notification) {
-        if (notification.user != caller) {
-          Runtime.trap("Unauthorized: Can only mark your own notifications as read");
-        };
-        let updatedNotification : Notification = {
-          notification with isRead = true
-        };
-        notifications.add(notificationId, updatedNotification);
-      };
-    };
   };
 
   public query ({ caller }) func getCircleMembers() : async [Principal] {
@@ -1073,5 +1176,43 @@ actor {
     userSignals.sort(
       func(a, b) { if (a.createdAt < b.createdAt) { #greater } else #less }
     );
+  };
+
+  type ConnectionWhyExplanation = {
+    principal : Principal;
+    name : Text;
+    why : Text;
+    sharedConnections : Nat;
+    interaction : Nat;
+  };
+
+  public query ({ caller }) func getBestCircleConnectionsWithWhyExplanation() : async [ConnectionWhyExplanation] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view connection recommendations");
+    };
+    let directConnections = switch (circles.get(caller)) {
+      case (null) { List.empty<Principal>() };
+      case (?circle) { circle };
+    };
+
+    let directConnectionCount = directConnections.size();
+
+    if (directConnectionCount > 0) {
+      directConnections.toArray().map(
+        func(person) {
+          let name = switch (profiles.get(person)) {
+            case (?p) { p.name };
+            case (null) { "Unknown" };
+          };
+          {
+            principal = person;
+            name;
+            why = "Friend already in circle";
+            sharedConnections = 1;
+            interaction = 0;
+          };
+        }
+      );
+    } else { [] : [ConnectionWhyExplanation] };
   };
 };

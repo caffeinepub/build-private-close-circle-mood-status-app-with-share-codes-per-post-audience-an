@@ -1,7 +1,82 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 180,
-  "summary": "CloseCircle Scope 2 remains micro‑UX to reduce thinking and increase guidance in the daily check‑in flow. Scope 3 makes the Mood Analyzer actionable by mapping detected patterns to conservative, rule‑based, non‑clinical micro‑actions (≤2 minutes). Add Scope 4: Circles that do something day‑to‑day—make circles useful without social pressure via Safe People (1–2) and silent, no‑reply signals (e.g., “Low energy today”, “Okay, just quiet”) with no demanding notifications.",
+  "projectStateVersion": 218,
+  "summary": "CloseCircle will transition circle membership from one-sided (stored only under the owner) to a two-sided model by adding mirrored member→circles storage. Rollout will be gradual, starting with a backend-only storage change (no UI yet), with later planned member-side surfaces like “circles I’m in”, “people who have me in their circle”, a lightweight private relationship viewer, and smarter Safe People suggestions derived from existing relationship/interaction data.",
+  "architectural_notes": [
+    "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
+    "Authentication is handled via Internet Identity (@dfinity/auth-client) with a context provider exposing login/logout and granular status flags.",
+    "Backend access uses a typed canister actor created by useActor; actor instances are keyed by principal and trigger broad query invalidation/refetch when identity changes.",
+    "Motoko backend uses a mixin-based RBAC layer (AccessControl + MixinAuthorization) to gate canister methods by role.",
+    "Near-real-time updates are implemented via polling (feed ~30s, notifications ~15s) plus manual refresh on the feed.",
+    "UI is composed with Tailwind CSS + shadcn/ui primitives + lucide-react icons; next-themes provides light/dark theme support.",
+    "Privacy enforcement is primarily server-side (per-post audience checks; contextTags sanitized for non-authors) with additional defensive UI choices (e.g., never rendering contextTags).",
+    "Client-side insights (mood analyzer, mood history, circle energy) are derived from cached feed data and update automatically as queries refresh.",
+    "Journal functionality is implemented as a global Sheet overlay controlled via React context to allow opening from multiple app surfaces.",
+    "Sensitive bootstrap secrets (admin token) are read from the URL hash and persisted in sessionStorage to reduce accidental leakage from query strings."
+  ],
+  "known_issues": [
+    "Backend generateRandomShareCode() is deterministic (index mod 36), making server-generated share codes predictable and potentially collision-prone if empty codes are allowed.",
+    "Backend createOrUpdateJournalEntry() uses Time.now() as the entry “date” key and filters by exact equality, so repeated saves won’t reliably update/replace same-day entries; backend also doesn’t enforce the UI rule that past days are locked.",
+    "Multiple frontend paths convert bigint nanosecond timestamps to Number for sorting/date-fns, risking precision loss and subtle ordering/time display issues.",
+    "Share code updates do not purge stale join-request records keyed by the previous share code, despite UI copy implying pending requests are invalidated.",
+    "Canister state is stored in non-stable variables (Map/List) with no upgrade persistence shown; data may be lost on canister upgrades.",
+    "Circle membership is stored only under the circle owner principal (one-sided), limiting member-centric features unless mirrored state is added.",
+    "Deployment: build/deploy pipeline encountered an unspecified deployment error during push to the network. Needs error details/log capture to diagnose.",
+    "Logout does not consistently redirect users away from authenticated-only routes; after logout, protected pages can still render a logged-in-only error state instead of returning to the public homepage.",
+    "UI layout: Fixed bottom footer/bottom bar overlaps page body content across multiple screens. Footer should remain fixed/visible, but scrollable page content must include sufficient bottom safe-area/padding so key controls (e.g., Check-In “Share” button) are never hidden; button does not need to be sticky.",
+    "Profile update currently overwrites creation date (createdAt); backend should preserve original createdAt and ignore any client-supplied createdAt during updates."
+  ],
+  "isFixRequest": false,
+  "generatedImages": [
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
+      "description": "Bundled default system avatar option #01.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-02.dim_256x256.png",
+      "description": "Bundled default system avatar option #02.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-03.dim_256x256.png",
+      "description": "Bundled default system avatar option #03.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-04.dim_256x256.png",
+      "description": "Bundled default system avatar option #04.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-05.dim_256x256.png",
+      "description": "Bundled default system avatar option #05.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-06.dim_256x256.png",
+      "description": "Bundled default system avatar option #06.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-07.dim_256x256.png",
+      "description": "Bundled default system avatar option #07.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    },
+    {
+      "filename": "frontend/public/assets/generated/system-avatar-08.dim_256x256.png",
+      "description": "Bundled default system avatar option #08.",
+      "targetWidth": 256,
+      "targetHeight": 256
+    }
+  ],
   "existing_features": [
     {
       "id": "IF-1",
@@ -736,26 +811,50 @@
       "version": 1
     },
     {
-      "id": "feature-update-the-compose-status-ui-composestatuspage-so-users-with-zero-selectable-circle-members-can-still-post-with-the-audience-effectively-defaulting-to-self-only-private-and-communicated-in-the-ui-using-english-copy",
-      "title": "Update the Compose status UI (ComposeStatusPage) so users with zero selectable circle members can still post, with the audience effectively defaulting to self-only/private and communicated in the UI using English copy.",
+      "id": "feature-add-a-new-authenticated-deep-link-only-route-and-page-that-lists-all-circle-owners-the-current-user-belongs-to-showing-only-each-owner-s-name-and-avatar-with-no-navigation-actions-when-an-entry-is-tapped-clicked",
+      "title": "Add a new authenticated, deep-link-only route and page that lists all circle owners the current user belongs to, showing only each owner’s name and avatar, with no navigation/actions when an entry is tapped/clicked.",
       "reqIds": [
-        "REQ-14"
+        "REQ-20"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-daily-check-in-ui-dailycheckinpage-so-users-with-zero-selectable-circle-members-can-still-post-defaulting-to-self-only-private-audience-with-clear-english-microcopy",
-      "title": "Update the Daily check-in UI (DailyCheckInPage) so users with zero selectable circle members can still post, defaulting to self-only/private audience with clear English microcopy.",
+      "id": "feature-add-a-centralized-react-query-hook-to-fetch-the-caller-s-circles-i-m-in-owner-list-and-integrate-it-into-the-new-page-with-appropriate-caching-invalidation-behavior",
+      "title": "Add a centralized React Query hook to fetch the caller’s “circles I’m in” owner list and integrate it into the new page with appropriate caching/invalidation behavior.",
       "reqIds": [
-        "REQ-15"
+        "REQ-21"
       ],
       "version": 1
     },
     {
-      "id": "feature-preserve-privacy-of-self-only-posts-after-the-user-later-joins-a-circle-self-only-posts-must-remain-visible-only-to-the-author-and-must-not-automatically-become-visible-to-new-circle-members",
-      "title": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts must remain visible only to the author and must not automatically become visible to new circle members.",
+      "id": "feature-in-the-circle-tab-s-members-view-frontend-src-pages-circlepage-tsx-add-a-visible-navigation-link-directly-below-the-members-list-that-routes-to-the-existing-authenticated-page-at-authenticated-circles-im-in-circlesiminpage-the-link-text-must-be-exactly-view-people-who-have-me-in-their-circle",
+      "title": "In the Circle tab’s Members view (frontend/src/pages/CirclePage.tsx), add a visible navigation link directly below the members list that routes to the existing authenticated page at /authenticated/circles-im-in (CirclesImInPage). The link text must be exactly: \"View people who have me in their circle\".",
       "reqIds": [
-        "REQ-16"
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-authenticated-deep-link-only-frontend-route-and-page-for-a-lightweight-private-closest-connections-viewer-that-displays-the-ranked-recommendations-and-shows-the-explanation-text-for-each-ranked-person-reasoning-visible-here-only",
+      "title": "Add a new authenticated, deep-link-only frontend route and page for a lightweight private “Closest connections” viewer that displays the ranked recommendations and shows the explanation text for each ranked person (reasoning visible here only).",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-centralized-react-query-hook-to-fetch-the-caller-s-closest-connection-recommendations-from-the-backend-with-caching-and-invalidation-wired-to-existing-mutations-that-can-change-relationship-interaction-signals",
+      "title": "Add a centralized React Query hook to fetch the caller’s closest-connection recommendations from the backend, with caching and invalidation wired to existing mutations that can change relationship/interaction signals.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-safe-people-selection-ui-to-show-smarter-recommendations-that-influence-what-the-user-sees-when-choosing-manually-max-2-without-automatically-setting-overwriting-safe-people-selections-and-without-showing-explanation-text-inside-the-safe-people-ui",
+      "title": "Update the existing Safe People selection UI to show smarter recommendations that influence what the user sees when choosing manually (max 2), without automatically setting/overwriting Safe People selections and without showing explanation text inside the Safe People UI.",
+      "reqIds": [
+        "REQ-26"
       ],
       "version": 1
     }
@@ -799,99 +898,123 @@
     },
     {
       "id": "AR-26",
-      "summary": "Allow users with no circle members to post a mood/status (self-only/default audience); posts appear in their own feed/history and remain private even after later joining a circle",
+      "summary": "Allow users with no circle members to post a mood/status (e.g., self-only/default audience)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Implement a Snapscore-like cumulative engagement metric named “Pulse”: increases by the number of circle members selected when posting a mood status (e.g., +1 for 1 recipient, +5 for 5 recipients); no increase for self-only/private posts with no recipients and no increase for Silent Signals. Pulse should apply in all posting entry points (including daily check-in) and be visible to circle members somewhere in the app.",
       "reqIds": [],
       "status": "in_progress"
     },
     {
-      "id": "AR-27",
-      "summary": "Update backend status posting validation so a user with zero circle members can successfully post a mood/status when the post audience is self-only (i.e., the audience list contains only the caller/author).",
+      "id": "AR-29",
+      "summary": "Backend-enforce profile immutability: name, DOB, and gender cannot be changed after creation; only age-visibility, intent, preferred-gender, and share code remain editable. Also preserve original createdAt on any update (ignore client-supplied createdAt).",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Implement two-sided circle membership storage (backend-only first step): maintain synced owner→members and member→circles indexes on join/remove to enable future member-side lists and relationship features",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Add a mirrored member→circles index in the Motoko backend so circle membership is stored in a two-sided model: (1) the existing owner→members circle list, and (2) a new member→owners list that records which circle owners a principal belongs to.",
       "reqIds": [
         "REQ-12"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-28",
-      "summary": "Ensure backend normalizes/enforces self-visibility for status posts by always including the caller in the stored audience (deduplicated), without requiring circle membership for this self-only case.",
+      "id": "AR-32",
+      "summary": "Keep the two circle indexes in sync on membership changes: when a join request is accepted, update both owner→members and member→circles; when a circle owner removes a member, remove the relationship from both indexes.",
       "reqIds": [
         "REQ-13"
       ],
       "status": "pending"
-    }
-  ],
-  "architectural_notes": [
-    "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
-    "Authentication is handled via Internet Identity (@dfinity/auth-client) with a context provider exposing login/logout and granular status flags.",
-    "Backend access uses a typed canister actor created by useActor; actor instances are keyed by principal and trigger broad query invalidation/refetch when identity changes.",
-    "Motoko backend uses a mixin-based RBAC layer (AccessControl + MixinAuthorization) to gate canister methods by role.",
-    "Near-real-time updates are implemented via polling (feed ~30s, notifications ~15s) plus manual refresh on the feed.",
-    "UI is composed with Tailwind CSS + shadcn/ui primitives + lucide-react icons; next-themes provides light/dark theme support.",
-    "Privacy enforcement is primarily server-side (per-post audience checks; contextTags sanitized for non-authors) with additional defensive UI choices (e.g., never rendering contextTags).",
-    "Client-side insights (mood analyzer, mood history, circle energy) are derived from cached feed data and update automatically as queries refresh.",
-    "Journal functionality is implemented as a global Sheet overlay controlled via React context to allow opening from multiple app surfaces.",
-    "Sensitive bootstrap secrets (admin token) are read from the URL hash and persisted in sessionStorage to reduce accidental leakage from query strings."
-  ],
-  "known_issues": [
-    "Backend generateRandomShareCode() is deterministic (index mod 36), making server-generated share codes predictable and potentially collision-prone if empty codes are allowed.",
-    "Backend createOrUpdateJournalEntry() uses Time.now() as the entry “date” key and filters by exact equality, so repeated saves won’t reliably update/replace same-day entries; backend also doesn’t enforce the UI rule that past days are locked.",
-    "Multiple frontend paths convert bigint nanosecond timestamps to Number for sorting/date-fns, risking precision loss and subtle ordering/time display issues.",
-    "Backend updateProfile() overwrites createdAt with Time.now(), losing original profile creation timestamp semantics even if the client supplies createdAt.",
-    "Share code updates do not purge stale join-request records keyed by the previous share code, despite UI copy implying pending requests are invalidated.",
-    "Canister state is stored in non-stable variables (Map/List) with no upgrade persistence shown; data may be lost on canister upgrades.",
-    "Circle membership is stored only under the circle owner principal (one-sided), limiting member-centric features unless mirrored state is added.",
-    "Deployment: build/deploy pipeline encountered an unspecified deployment error during push to the network. Needs error details/log capture to diagnose.",
-    "Logout does not consistently redirect users away from authenticated-only routes; after logout, protected pages can still render a logged-in-only error state instead of returning to the public homepage."
-  ],
-  "isFixRequest": false,
-  "generatedImages": [
-    {
-      "filename": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
-      "description": "Bundled default system avatar option #01.",
-      "targetWidth": 256,
-      "targetHeight": 256
     },
     {
-      "filename": "frontend/public/assets/generated/system-avatar-02.dim_256x256.png",
-      "description": "Bundled default system avatar option #02.",
-      "targetWidth": 256,
-      "targetHeight": 256
+      "id": "AR-33",
+      "summary": "Update backend authorization/relationship checks that currently require scanning every circle (e.g., circle connection checks and global connection derivation) to use the new member→circles index where applicable, while preserving the existing user-visible behavior.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/system-avatar-03.dim_256x256.png",
-      "description": "Bundled default system avatar option #03.",
-      "targetWidth": 256,
-      "targetHeight": 256
+      "id": "AR-34",
+      "summary": "If the canister already has existing circle data stored under the one-sided model, add an upgrade-safe migration/backfill so the new member→circles index is populated from existing owner→members circle data on upgrade.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/system-avatar-04.dim_256x256.png",
-      "description": "Bundled default system avatar option #04.",
-      "targetWidth": 256,
-      "targetHeight": 256
+      "id": "AR-35",
+      "summary": "Ensure circle membership is always kept in sync across both indexes on all membership-changing operations: (1) owner → members (the existing `circles` map) and (2) member → circle owners (the `memberCircles` map). Specifically: when a join request is accepted, add entries to both indexes; when a circle owner removes a member, remove entries from both indexes; and prevent duplicate entries in either index.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/system-avatar-05.dim_256x256.png",
-      "description": "Bundled default system avatar option #05.",
-      "targetWidth": 256,
-      "targetHeight": 256
+      "id": "AR-36",
+      "summary": "Update backend relationship/authorization checks that currently scan all circles to use the `memberCircles` reverse index where applicable, while preserving the existing user-visible behavior. This includes at minimum `isCircleConnection(...)` and `getAllCircleConnections(...)` logic so that it no longer depends on iterating `circles.entries()` to discover who has the user in their circle.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/system-avatar-06.dim_256x256.png",
-      "description": "Bundled default system avatar option #06.",
-      "targetWidth": 256,
-      "targetHeight": 256
+      "id": "AR-37",
+      "summary": "Add (or confirm) an upgrade-safe migration/backfill so that if the canister already has existing one-sided circle data (owner → members) at upgrade time, the `memberCircles` index is populated accordingly on upgrade, without changing the existing owner → members data.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "status": "pending"
     },
     {
-      "filename": "frontend/public/assets/generated/system-avatar-07.dim_256x256.png",
-      "description": "Bundled default system avatar option #07.",
-      "targetWidth": 256,
-      "targetHeight": 256
+      "id": "AR-38",
+      "summary": "Add a deep-link-only, view-only screen listing all circle owners the user belongs to (member-side “circles I’m in”), showing name + avatar only",
+      "reqIds": [],
+      "status": "in_progress"
     },
     {
-      "filename": "frontend/public/assets/generated/system-avatar-08.dim_256x256.png",
-      "description": "Bundled default system avatar option #08.",
-      "targetWidth": 256,
-      "targetHeight": 256
+      "id": "AR-39",
+      "summary": "Add a backend query method that returns the list of circle owners the caller belongs to (member-side reverse index), using the existing `memberCircles` storage.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Add a visible link in the Circle tab (below the members list) to the deep-link-only page that lists “people who have me in their circle” (member-side owners list)",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Smarter Safe People suggestions: compute ranked recommendations (purely from existing relationship/interaction data like mutual circles and interaction frequency) to influence manual Safe People selection UI (max 2) without auto-setting or overwriting selections.",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-42",
+      "summary": "Add a lightweight, private “Closest connections” viewer: show ranked people plus explanation of why they rank high (reasoning text shown here only), using existing relationship/interaction data; view-only with no automatic Safe People changes.",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Add a backend query API that returns ranked “closest connections” recommendations for the caller using only existing relationship/interaction data (e.g., mutual circle relationship signals and interaction frequency derived from existing posts/signals), and include per-person explanation strings describing why each person ranked highly.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "status": "pending"
     }
   ],
   "gameProjectType": "none",

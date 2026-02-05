@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-compose-status-ui-composestatuspage-so-users-with-zero-selectable-circle-members-can-still-post-with-the-audience-effectively-defaulting-to-self-only-private-and-communicated-in-the-ui-using-english-copy",
-      "featureTitle": "Update the Compose status UI (ComposeStatusPage) so users with zero selectable circle members can still post, with the audience effectively defaulting to self-only/private and communicated in the UI using English copy.",
+      "featureId": "feature-add-a-new-authenticated-deep-link-only-frontend-route-and-page-for-a-lightweight-private-closest-connections-viewer-that-displays-the-ranked-recommendations-and-shows-the-explanation-text-for-each-ranked-person-reasoning-visible-here-only",
+      "featureTitle": "Add a new authenticated, deep-link-only frontend route and page for a lightweight private “Closest connections” viewer that displays the ranked recommendations and shows the explanation text for each ranked person (reasoning visible here only).",
       "files": [
-        "frontend/src/pages/ComposeStatusPage.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/pages/ClosestConnectionsPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,15 +17,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-14"
+        "REQ-24"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-daily-check-in-ui-dailycheckinpage-so-users-with-zero-selectable-circle-members-can-still-post-defaulting-to-self-only-private-audience-with-clear-english-microcopy",
-      "featureTitle": "Update the Daily check-in UI (DailyCheckInPage) so users with zero selectable circle members can still post, defaulting to self-only/private audience with clear English microcopy.",
+      "featureId": "feature-add-a-centralized-react-query-hook-to-fetch-the-caller-s-closest-connection-recommendations-from-the-backend-with-caching-and-invalidation-wired-to-existing-mutations-that-can-change-relationship-interaction-signals",
+      "featureTitle": "Add a centralized React Query hook to fetch the caller’s closest-connection recommendations from the backend, with caching and invalidation wired to existing mutations that can change relationship/interaction signals.",
       "files": [
-        "frontend/src/pages/DailyCheckInPage.tsx"
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -35,16 +36,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-15"
+        "REQ-25"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-preserve-privacy-of-self-only-posts-after-the-user-later-joins-a-circle-self-only-posts-must-remain-visible-only-to-the-author-and-must-not-automatically-become-visible-to-new-circle-members",
-      "featureTitle": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts must remain visible only to the author and must not automatically become visible to new circle members.",
+      "featureId": "feature-update-the-existing-safe-people-selection-ui-to-show-smarter-recommendations-that-influence-what-the-user-sees-when-choosing-manually-max-2-without-automatically-setting-overwriting-safe-people-selections-and-without-showing-explanation-text-inside-the-safe-people-ui",
+      "featureTitle": "Update the existing Safe People selection UI to show smarter recommendations that influence what the user sees when choosing manually (max 2), without automatically setting/overwriting Safe People selections and without showing explanation text inside the Safe People UI.",
       "files": [
-        "frontend/src/components/status/StatusCard.tsx",
-        "frontend/src/pages/StatusDetailPage.tsx"
+        "frontend/src/components/circle/SafePeoplePanel.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -55,7 +55,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-26"
       ],
       "confidence": "high"
     }

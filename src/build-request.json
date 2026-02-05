@@ -1,114 +1,104 @@
 {
   "kind": "build_request",
-  "title": "Allow users with zero circle members to post self-only mood updates",
+  "title": "Add Closest Connections viewer + smarter Safe People recommendations",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-12",
-      "text": "Update backend status posting validation so a user with zero circle members can successfully post a mood/status when the post audience is self-only (i.e., the audience list contains only the caller/author).",
+      "id": "REQ-23",
+      "text": "Add a backend query API that returns ranked “closest connections” recommendations for the caller using only existing relationship/interaction data (e.g., mutual circle relationship signals and interaction frequency derived from existing posts/signals), and include per-person explanation strings describing why each person ranked highly.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6",
-          "msg-8"
+          "recent-messages"
         ],
         "quotes": [
-          "Enable a user without a circle member to be able to post a mode",
-          "1. Yes",
-          "They should remain private/self-only"
+          "Add smarter Safe People suggestions, relationship exploration,  picture a lightweight, private viewer (e.g., “your closest connections”)",
+          "purely from existing relationship data (e.g., mutual circles, interaction frequency)",
+          "ranked people & an explanation of why they rank high",
+          "in the new lightweight “closest connections” viewer only"
         ]
       },
       "acceptanceCriteria": [
-        "Given a caller with no circle (circles.get(caller) is null), calling postStatus with audience == [caller] succeeds (no trap).",
-        "Given a caller with no circle, calling postStatus with audience containing any principal other than caller traps with an unauthorized error (audience recipients must be in the caller's circle).",
-        "Backend continues to enforce that the caller must have a profile before posting statuses."
+        "A new backend query method exists that can be called by an authenticated user to fetch a ranked list of recommended connections for that caller.",
+        "Each recommendation item includes: (1) the recommended person principal, and (2) an ordered list of human-readable explanation strings (English) that justify the ranking based on existing stored data (no new external data sources).",
+        "The recommendation list is limited to a caller-provided limit (or a safe default) and is deterministically sorted (highest rank first).",
+        "The method does not modify Safe People selections and has no side effects.",
+        "Unauthorized callers (non-#user) are rejected consistently with existing backend auth patterns."
       ]
     },
     {
-      "id": "REQ-13",
-      "text": "Ensure backend normalizes/enforces self-visibility for status posts by always including the caller in the stored audience (deduplicated), without requiring circle membership for this self-only case.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "Yes"
-        ]
-      },
-      "acceptanceCriteria": [
-        "If a client submits a status with an audience that does not include the caller, the stored status audience still includes the caller (no duplicates).",
-        "If a client submits audience == [], the stored status audience becomes [caller] and the post succeeds even when the caller has no circle members."
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "text": "Update the Compose status UI (ComposeStatusPage) so users with zero selectable circle members can still post, with the audience effectively defaulting to self-only/private and communicated in the UI using English copy.",
+      "id": "REQ-24",
+      "text": "Add a new authenticated, deep-link-only frontend route and page for a lightweight private “Closest connections” viewer that displays the ranked recommendations and shows the explanation text for each ranked person (reasoning visible here only).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "recent-messages"
         ],
         "quotes": [
-          "Enable a user without a circle member to be able to post a mode",
-          "1. Yes"
+          "picture a lightweight, private viewer (e.g., “your closest connections”)",
+          "ranked people & an explanation of why they rank high",
+          "in the new lightweight “closest connections” viewer only"
         ]
       },
       "acceptanceCriteria": [
-        "On /compose, when selectableMembers.length === 0, the UI does not block submission and posting succeeds (no backend audience validation error).",
-        "The audience section clearly indicates the post will be private/self-only when there are no circle members (English user-facing text).",
-        "The submitted audience for this case results in a self-only audience on the backend (caller-only)."
+        "A new authenticated route is added under the existing authenticated layout (no BottomNav item added).",
+        "The page fetches closest-connection recommendations via a centralized React Query hook and renders a ranked list.",
+        "Each list row shows the person’s avatar and name (and may fall back gracefully if profile data is unavailable).",
+        "Each list row provides a way to view the explanation text (e.g., collapsible/accordion), and the explanation text is shown only on this page (not inside Safe People selection UI).",
+        "The page has loading, error, and empty states consistent with existing page patterns."
       ]
     },
     {
-      "id": "REQ-15",
-      "text": "Update the Daily check-in UI (DailyCheckInPage) so users with zero selectable circle members can still post, defaulting to self-only/private audience with clear English microcopy.",
+      "id": "REQ-25",
+      "text": "Add a centralized React Query hook to fetch the caller’s closest-connection recommendations from the backend, with caching and invalidation wired to existing mutations that can change relationship/interaction signals.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-6"
+          "recent-messages"
         ],
         "quotes": [
-          "Enable a user without a circle member to be able to post a mode",
-          "1. Yes"
+          "implement it now",
+          "Smarter Safe People suggestions: compute ranked recommendations (purely from existing relationship/interaction data like mutual circles and interaction frequency)"
         ]
       },
       "acceptanceCriteria": [
-        "On /daily-check-in, when selectableMembers.length === 0, the UI does not block submission and posting succeeds (no backend audience validation error).",
-        "The audience section indicates the post will be private/self-only when there are no circle members (English user-facing text).",
-        "The submitted audience for this case results in a self-only audience on the backend (caller-only)."
+        "A new hook exists (in the existing query hooks module) that queries the backend closest-connections API and returns typed data usable by both the Safe People UI and the Closest Connections page.",
+        "The hook uses a stable queryKey (including limit) and does not run until the actor is ready, matching existing patterns in frontend/src/hooks/useQueries.ts.",
+        "The query is invalidated (directly or via existing invalidations) after relevant mutations at minimum: posting a status (interaction frequency), accepting a join request, and removing a circle member (relationship graph changes)."
       ]
     },
     {
-      "id": "REQ-16",
-      "text": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts must remain visible only to the author and must not automatically become visible to new circle members.",
-      "target": "both",
+      "id": "REQ-26",
+      "text": "Update the existing Safe People selection UI to show smarter recommendations that influence what the user sees when choosing manually (max 2), without automatically setting/overwriting Safe People selections and without showing explanation text inside the Safe People UI.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "recent-messages"
         ],
         "quotes": [
-          "They should remain private/self-only"
+          "it should only influence what you see when choosing manually",
+          "simply show the recommendation without modifying anything",
+          "yes it should affect the existing Safe People limit (max 2)",
+          "in the new lightweight “closest connections” viewer only"
         ]
       },
       "acceptanceCriteria": [
-        "After a user posts a self-only status (audience caller-only) and later joins a circle, other circle members cannot access that status via getFeed or getStatus.",
-        "The author continues to see the self-only status in their own feed/history."
+        "SafePeoplePanel continues to enforce a maximum of 2 selected Safe People and never auto-selects or overwrites existing selections.",
+        "SafePeoplePanel visually highlights or prioritizes recommended candidates (e.g., a “Recommended” section or badge) based on the recommendations hook, while still allowing manual selection as before.",
+        "SafePeoplePanel does not display the per-person explanation text (reasoning) anywhere in the Safe People UI.",
+        "SafePeoplePanel provides a simple in-app navigation affordance to open the Closest Connections viewer page (the viewer remains absent from global navigation like BottomNav)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor; implement all logic changes in backend/main.mo.",
-    "Do not edit any files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT.",
-    "Use English for any user-facing text."
+    "Backend must remain single-actor (all Motoko logic in backend/main.mo).",
+    "Do not edit files under frontend immutablePaths (compose existing components instead).",
+    "Use English for all user-facing text."
   ],
   "nonGoals": [
-    "Changing how circle membership is modeled or adding new circle concepts.",
-    "Adding new authentication methods beyond existing Internet Identity.",
-    "Creating new feed/history screens; rely on existing feed behavior to show the author their own posts."
+    "Do not automatically set or overwrite a user’s Safe People selections based on recommendations.",
+    "Do not display recommendation reasoning text inside the Safe People selection UI; reasoning is shown only in the Closest Connections viewer.",
+    "Do not add third-party services, analytics, external databases, or real-time sockets for interaction tracking."
   ],
   "imageRequirements": {
     "required": [],

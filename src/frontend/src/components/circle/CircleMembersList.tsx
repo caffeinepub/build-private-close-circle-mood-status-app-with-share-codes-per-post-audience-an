@@ -1,5 +1,6 @@
-import { useGetCircleMembers, useRemoveCircleMember, useGetUserProfiles } from '@/hooks/useQueries';
+import { useGetCircleMembers, useRemoveCircleMember, useGetUserProfiles, useGetUserPulseScores } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -13,7 +14,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { UserMinus, Users } from 'lucide-react';
+import { UserMinus, Users, Zap } from 'lucide-react';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { calculateAge } from '@/utils/age';
 import { Gender, RelationshipIntent } from '@/backend';
@@ -23,6 +24,7 @@ export default function CircleMembersList() {
   const { data: members = [], isLoading } = useGetCircleMembers();
   const removeMember = useRemoveCircleMember();
   const { data: profiles = {} } = useGetUserProfiles(members);
+  const { data: pulseScores = {}, isLoading: pulseLoading } = useGetUserPulseScores(members);
 
   const currentUserPrincipal = identity?.getPrincipal().toString();
   const otherMembers = members.filter((m) => m.toString() !== currentUserPrincipal);
@@ -89,13 +91,14 @@ export default function CircleMembersList() {
               const displayName = profile?.name || `User ${principalStr.slice(0, 8)}...`;
               const age = profile?.dateOfBirth ? calculateAge(profile.dateOfBirth) : null;
               const showAge = profile?.showAge && age !== null;
+              const pulse = pulseScores[principalStr] ?? 0;
 
               return (
                 <div
                   key={principalStr}
                   className="flex items-start justify-between gap-3 rounded-lg border p-4"
                 >
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{displayName}</p>
                       {showAge && (
@@ -109,6 +112,16 @@ export default function CircleMembersList() {
                         <span>{getIntentLabel(profile.relationshipIntent)}</span>
                       </div>
                     )}
+                    <div className="flex items-center gap-1.5">
+                      {pulseLoading ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      ) : (
+                        <Badge variant="outline" className="text-xs font-medium">
+                          <Zap className="h-3 w-3 mr-1 text-primary" />
+                          {pulse}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

@@ -101,6 +101,12 @@ export interface Preferences {
     intent: RelationshipIntent;
     gender: Gender;
 }
+export interface UpdateUserProfile {
+    preferences: Preferences;
+    showAge: boolean;
+    relationshipIntent: RelationshipIntent;
+    shareCode: string;
+}
 export interface StatusPost {
     id: string;
     content: string;
@@ -138,6 +144,13 @@ export type FeedItem = {
 export interface UploadedAvatar {
     contentType: string;
     image: Uint8Array;
+}
+export interface ConnectionWhyExplanation {
+    why: string;
+    principal: Principal;
+    interaction: bigint;
+    name: string;
+    sharedConnections: bigint;
 }
 export interface SilentSignal {
     id: string;
@@ -235,6 +248,9 @@ export interface backendInterface {
     declineJoinRequest(user: Principal, code: string): Promise<void>;
     deleteJournalEntry(date: Time): Promise<void>;
     getAllJournalEntries(): Promise<Array<JournalEntry>>;
+    getBestCircleConnectionsWithWhyExplanation(): Promise<Array<ConnectionWhyExplanation>>;
+    getCallerCircleOwners(): Promise<Array<Principal>>;
+    getCallerPulseScore(): Promise<bigint>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCircleMembers(): Promise<Array<Principal>>;
@@ -250,9 +266,9 @@ export interface backendInterface {
     getStatus(statusId: string): Promise<StatusPost | null>;
     getUnprocessedJoinRequests(): Promise<Array<PendingRequestWithProfile>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserPulseScore(user: Principal): Promise<bigint>;
     isCallerAdmin(): Promise<boolean>;
     joinCircleFromShareCode(code: string): Promise<void>;
-    markNotificationAsRead(notificationId: string): Promise<void>;
     postSilentSignal(mood: Mood, content: string): Promise<void>;
     postStatus(status: StatusPost): Promise<void>;
     removeCircleMember(member: Principal): Promise<void>;
@@ -260,12 +276,12 @@ export interface backendInterface {
     selectSystemAvatar(avatarId: string): Promise<void>;
     setSafePerson(person: Principal): Promise<void>;
     unsetSafePerson(person: Principal): Promise<void>;
-    updateProfile(profile: UserProfile): Promise<void>;
+    updateProfile(updates: UpdateUserProfile): Promise<void>;
     updateShareCode(code: string): Promise<string>;
     uploadAvatar(avatar: UploadedAvatar): Promise<void>;
     viewProfile(id: Principal): Promise<UserProfile>;
 }
-import type { Avatar as _Avatar, FeedItem as _FeedItem, Gender as _Gender, JoinRequest as _JoinRequest, JournalEntry as _JournalEntry, Mood as _Mood, Notification as _Notification, PendingRequestWithProfile as _PendingRequestWithProfile, Preferences as _Preferences, RelationshipIntent as _RelationshipIntent, SilentSignal as _SilentSignal, StatusPost as _StatusPost, Time as _Time, UploadedAvatar as _UploadedAvatar, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { Avatar as _Avatar, FeedItem as _FeedItem, Gender as _Gender, JoinRequest as _JoinRequest, JournalEntry as _JournalEntry, Mood as _Mood, Notification as _Notification, PendingRequestWithProfile as _PendingRequestWithProfile, Preferences as _Preferences, RelationshipIntent as _RelationshipIntent, SilentSignal as _SilentSignal, StatusPost as _StatusPost, Time as _Time, UpdateUserProfile as _UpdateUserProfile, UploadedAvatar as _UploadedAvatar, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -363,6 +379,48 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getAllJournalEntries();
+            return result;
+        }
+    }
+    async getBestCircleConnectionsWithWhyExplanation(): Promise<Array<ConnectionWhyExplanation>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBestCircleConnectionsWithWhyExplanation();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBestCircleConnectionsWithWhyExplanation();
+            return result;
+        }
+    }
+    async getCallerCircleOwners(): Promise<Array<Principal>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCallerCircleOwners();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCallerCircleOwners();
+            return result;
+        }
+    }
+    async getCallerPulseScore(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCallerPulseScore();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCallerPulseScore();
             return result;
         }
     }
@@ -576,6 +634,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getUserPulseScore(arg0: Principal): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserPulseScore(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserPulseScore(arg0);
+            return result;
+        }
+    }
     async isCallerAdmin(): Promise<boolean> {
         if (this.processError) {
             try {
@@ -601,20 +673,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.joinCircleFromShareCode(arg0);
-            return result;
-        }
-    }
-    async markNotificationAsRead(arg0: string): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.markNotificationAsRead(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.markNotificationAsRead(arg0);
             return result;
         }
     }
@@ -716,17 +774,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async updateProfile(arg0: UserProfile): Promise<void> {
+    async updateProfile(arg0: UpdateUserProfile): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateProfile(to_candid_UserProfile_n41(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.updateProfile(to_candid_UpdateUserProfile_n51(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateProfile(to_candid_UserProfile_n41(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.updateProfile(to_candid_UpdateUserProfile_n51(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
@@ -1152,6 +1210,9 @@ function to_candid_RelationshipIntent_n45(_uploadFile: (file: ExternalBlob) => P
 function to_candid_StatusPost_n39(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: StatusPost): _StatusPost {
     return to_candid_record_n40(_uploadFile, _downloadFile, value);
 }
+function to_candid_UpdateUserProfile_n51(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UpdateUserProfile): _UpdateUserProfile {
+    return to_candid_record_n52(_uploadFile, _downloadFile, value);
+}
 function to_candid_UserProfile_n41(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
     return to_candid_record_n42(_uploadFile, _downloadFile, value);
 }
@@ -1228,6 +1289,24 @@ function to_candid_record_n44(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     return {
         intent: to_candid_RelationshipIntent_n45(_uploadFile, _downloadFile, value.intent),
         gender: to_candid_Gender_n47(_uploadFile, _downloadFile, value.gender)
+    };
+}
+function to_candid_record_n52(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    preferences: Preferences;
+    showAge: boolean;
+    relationshipIntent: RelationshipIntent;
+    shareCode: string;
+}): {
+    preferences: _Preferences;
+    showAge: boolean;
+    relationshipIntent: _RelationshipIntent;
+    shareCode: string;
+} {
+    return {
+        preferences: to_candid_Preferences_n43(_uploadFile, _downloadFile, value.preferences),
+        showAge: value.showAge,
+        relationshipIntent: to_candid_RelationshipIntent_n45(_uploadFile, _downloadFile, value.relationshipIntent),
+        shareCode: value.shareCode
     };
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {

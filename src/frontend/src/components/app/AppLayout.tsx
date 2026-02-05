@@ -18,7 +18,7 @@ function AppLayoutContent({ children }: AppLayoutProps) {
     <FloatingJournalVisibilityProvider>
       <div className="flex min-h-screen flex-col bg-background">
         <AppHeader />
-        <main className="flex-1 pb-safe-offset-16">
+        <main className="flex-1 pb-bottom-nav-safe">
           {children || <Outlet />}
         </main>
         <BottomNav />

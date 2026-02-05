@@ -6,7 +6,8 @@ import CircleMembersList from '@/components/circle/CircleMembersList';
 import CircleEnergyCard from '@/components/circle/CircleEnergyCard';
 import SafePeoplePanel from '@/components/circle/SafePeoplePanel';
 import { useGetUnprocessedJoinRequests, useGetFeed } from '@/hooks/useQueries';
-import { useSearch } from '@tanstack/react-router';
+import { useSearch, Link } from '@tanstack/react-router';
+import { ArrowRight } from 'lucide-react';
 
 export default function CirclePage() {
   const { data: requests = [] } = useGetUnprocessedJoinRequests();
@@ -42,6 +43,13 @@ export default function CirclePage() {
 
         <TabsContent value="members" className="space-y-4">
           <CircleMembersList />
+          <Link
+            to="/circles-im-in"
+            className="flex items-center justify-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors py-3 px-4 rounded-lg hover:bg-accent/50"
+          >
+            <span>View people who have me in their circle</span>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </TabsContent>
 
         <TabsContent value="requests" className="space-y-4">

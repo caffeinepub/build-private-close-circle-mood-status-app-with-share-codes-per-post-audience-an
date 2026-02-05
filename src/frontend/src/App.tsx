@@ -11,6 +11,8 @@ import ComposeStatusPage from './pages/ComposeStatusPage';
 import DailyCheckInPage from './pages/DailyCheckInPage';
 import NotificationsPage from './pages/NotificationsPage';
 import StatusDetailPage from './pages/StatusDetailPage';
+import CirclesImInPage from './pages/CirclesImInPage';
+import ClosestConnectionsPage from './pages/ClosestConnectionsPage';
 import HomeRoutePage from './pages/HomeRoutePage';
 import InviteCodeAuthStepPage from './pages/InviteCodeAuthStepPage';
 import StartAuthPage from './pages/StartAuthPage';
@@ -87,6 +89,18 @@ const statusDetailRoute = createRoute({
   component: StatusDetailPage,
 });
 
+const circlesImInRoute = createRoute({
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: '/circles-im-in',
+  component: CirclesImInPage,
+});
+
+const closestConnectionsRoute = createRoute({
+  getParentRoute: () => authenticatedLayoutRoute,
+  path: '/closest-connections',
+  component: ClosestConnectionsPage,
+});
+
 // Build the route tree with a single root
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -99,6 +113,8 @@ const routeTree = rootRoute.addChildren([
     dailyCheckInRoute,
     notificationsRoute,
     statusDetailRoute,
+    circlesImInRoute,
+    closestConnectionsRoute,
   ]),
 ]);
 

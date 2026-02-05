@@ -1,57 +1,66 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Self-only status posting UX when a user has zero circle members",
+  "title": "Closest Connections viewer + smarter Safe People recommendations (frontend)",
   "requirements": [
     {
-      "id": "REQ-14",
-      "summary": "Update ComposeStatusPage to allow posting with zero circle members by defaulting audience to self-only/private and clearly communicating this in English.",
+      "id": "REQ-24",
+      "summary": "Add an authenticated, deep-link-only Closest Connections viewer page that displays ranked recommendations with per-person explanation text.",
       "acceptanceCriteria": [
-        "On /compose, when selectableMembers.length === 0, the UI does not block submission and posting succeeds (no backend audience validation error).",
-        "The audience section clearly indicates the post will be private/self-only when there are no circle members (English user-facing text).",
-        "The submitted audience for this case results in a self-only audience on the backend (caller-only)."
+        "A new authenticated route is added under the existing authenticated layout (no BottomNav item added).",
+        "The page fetches closest-connection recommendations via a centralized React Query hook and renders a ranked list.",
+        "Each list row shows the person’s avatar and name (and may fall back gracefully if profile data is unavailable).",
+        "Each list row provides a way to view the explanation text (e.g., collapsible/accordion), and the explanation text is shown only on this page (not inside Safe People selection UI).",
+        "The page has loading, error, and empty states consistent with existing page patterns."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ComposeStatusPage.tsx",
-          "operation": "modify",
-          "description": "When selectableMembers.length === 0, replace the current empty-state copy with explicit English microcopy that the post will be private/self-only (only you can see it). Ensure submission remains enabled. Add logic to prune/clear selectedAudience when circleMembers/selectableMembers changes so stale selections cannot cause an unauthorized audience submission."
-        }
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "summary": "Update DailyCheckInPage to allow posting with zero circle members by defaulting audience to self-only/private and clearly communicating this in English.",
-      "acceptanceCriteria": [
-        "On /daily-check-in, when selectableMembers.length === 0, the UI does not block submission and posting succeeds (no backend audience validation error).",
-        "The audience section indicates the post will be private/self-only when there are no circle members (English user-facing text).",
-        "The submitted audience for this case results in a self-only audience on the backend (caller-only)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/DailyCheckInPage.tsx",
-          "operation": "modify",
-          "description": "When selectableMembers.length === 0, replace the current empty-state copy with explicit English microcopy that the post will be private/self-only (only you can see it). Ensure submission remains enabled. Add logic to prune/clear selectedAudience when circleMembers/selectableMembers changes so stale selections cannot cause an unauthorized audience submission."
-        }
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "summary": "Preserve and communicate privacy for self-only posts after joining a circle by reflecting self-only visibility in the UI and handling inaccessible status views gracefully.",
-      "acceptanceCriteria": [
-        "After a user posts a self-only status (audience caller-only) and later joins a circle, other circle members cannot access that status via getFeed or getStatus.",
-        "The author continues to see the self-only status in their own feed/history."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/status/StatusCard.tsx",
-          "operation": "modify",
-          "description": "Add a small, English visibility indicator for the author when a status is self-only (e.g., when isOwnStatus is true and the status audience indicates caller-only), so that self-only posts remain clearly labeled as private even after the user later joins a circle."
+          "path": "frontend/src/pages/ClosestConnectionsPage.tsx",
+          "operation": "create",
+          "description": "Create the authenticated Closest Connections viewer page that calls the new closest-connections React Query hook, renders a ranked list with avatar/name fallbacks, and uses the existing ProgressiveDisclosure collapsible UI to show explanation strings per person (reasoning visible only on this page). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pages/StatusDetailPage.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Adjust the error/empty-state messaging to clearly distinguish private/self-only access denial (English copy), ensuring that if a user cannot access a status they are told it may be private and they do not have permission—without revealing any status content."
+          "description": "Register a new deep-link-only authenticated child route (under the existing authenticated layout) that renders ClosestConnectionsPage, without adding any BottomNav navigation item."
+        }
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "summary": "Add a centralized React Query hook for closest-connection recommendations with stable caching and invalidation after relationship/interaction mutations.",
+      "acceptanceCriteria": [
+        "A new hook exists (in the existing query hooks module) that queries the backend closest-connections API and returns typed data usable by both the Safe People UI and the Closest Connections page.",
+        "The hook uses a stable queryKey (including limit) and does not run until the actor is ready, matching existing patterns in frontend/src/hooks/useQueries.ts.",
+        "The query is invalidated (directly or via existing invalidations) after relevant mutations at minimum: posting a status (interaction frequency), accepting a join request, and removing a circle member (relationship graph changes)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/backend.d.ts",
+          "operation": "modify",
+          "description": "Update the frontend backend interface typings to include the new backend closest-connections query method and its return type (including per-person ordered explanation strings), so the new React Query hook and Closest Connections page can be strongly typed."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new centralized React Query hook (in this module) to fetch closest-connection recommendations with a stable queryKey that includes the requested limit and is enabled only when the actor is ready. Also wire invalidation of this query in onSuccess handlers for usePostStatus, useAcceptJoinRequest, and useRemoveCircleMember so recommendations refresh after interaction/relationship signal changes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "summary": "Update Safe People selection UI to prioritize smarter recommendations (max 2) without auto-selecting or showing reasoning; add navigation to the Closest Connections viewer.",
+      "acceptanceCriteria": [
+        "SafePeoplePanel continues to enforce a maximum of 2 selected Safe People and never auto-selects or overwrites existing selections.",
+        "SafePeoplePanel visually highlights or prioritizes recommended candidates (e.g., a “Recommended” section or badge) based on the recommendations hook, while still allowing manual selection as before.",
+        "SafePeoplePanel does not display the per-person explanation text (reasoning) anywhere in the Safe People UI.",
+        "SafePeoplePanel provides a simple in-app navigation affordance to open the Closest Connections viewer page (the viewer remains absent from global navigation like BottomNav)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/circle/SafePeoplePanel.tsx",
+          "operation": "modify",
+          "description": "Integrate the closest-connections recommendations hook to visually prioritize/highlight recommended candidates (e.g., reorder into a 'Recommended' section and/or add a badge) while preserving the existing manual selection flow and max-2 enforcement. Do not render any explanation/reasoning text here. Add an in-panel Link/button that navigates to the deep-link Closest Connections viewer route. Verify the component's usage instructions before implementing."
         }
       ]
     }

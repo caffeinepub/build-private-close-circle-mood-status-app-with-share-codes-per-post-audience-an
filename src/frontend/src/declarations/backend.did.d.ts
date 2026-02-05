@@ -12,6 +12,13 @@ import type { Principal } from '@icp-sdk/core/principal';
 
 export type Avatar = { 'uploaded' : UploadedAvatar } |
   { 'systemAvatar' : string };
+export interface ConnectionWhyExplanation {
+  'why' : string,
+  'principal' : Principal,
+  'interaction' : bigint,
+  'name' : string,
+  'sharedConnections' : bigint,
+}
 export type FeedItem = { 'status' : StatusPost } |
   { 'silentSignal' : SilentSignal };
 export type Gender = { 'other' : null } |
@@ -112,6 +119,12 @@ export interface StatusPost {
   'author' : Principal,
 }
 export type Time = bigint;
+export interface UpdateUserProfile {
+  'preferences' : Preferences,
+  'showAge' : boolean,
+  'relationshipIntent' : RelationshipIntent,
+  'shareCode' : string,
+}
 export interface UploadedAvatar { 'contentType' : string, 'image' : Uint8Array }
 export interface UserProfile {
   'dateOfBirth' : bigint,
@@ -135,6 +148,12 @@ export interface _SERVICE {
   'declineJoinRequest' : ActorMethod<[Principal, string], undefined>,
   'deleteJournalEntry' : ActorMethod<[Time], undefined>,
   'getAllJournalEntries' : ActorMethod<[], Array<JournalEntry>>,
+  'getBestCircleConnectionsWithWhyExplanation' : ActorMethod<
+    [],
+    Array<ConnectionWhyExplanation>
+  >,
+  'getCallerCircleOwners' : ActorMethod<[], Array<Principal>>,
+  'getCallerPulseScore' : ActorMethod<[], bigint>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCircleMembers' : ActorMethod<[], Array<Principal>>,
@@ -153,9 +172,9 @@ export interface _SERVICE {
     Array<PendingRequestWithProfile>
   >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getUserPulseScore' : ActorMethod<[Principal], bigint>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'joinCircleFromShareCode' : ActorMethod<[string], undefined>,
-  'markNotificationAsRead' : ActorMethod<[string], undefined>,
   'postSilentSignal' : ActorMethod<[Mood, string], undefined>,
   'postStatus' : ActorMethod<[StatusPost], undefined>,
   'removeCircleMember' : ActorMethod<[Principal], undefined>,
@@ -163,7 +182,7 @@ export interface _SERVICE {
   'selectSystemAvatar' : ActorMethod<[string], undefined>,
   'setSafePerson' : ActorMethod<[Principal], undefined>,
   'unsetSafePerson' : ActorMethod<[Principal], undefined>,
-  'updateProfile' : ActorMethod<[UserProfile], undefined>,
+  'updateProfile' : ActorMethod<[UpdateUserProfile], undefined>,
   'updateShareCode' : ActorMethod<[string], string>,
   'uploadAvatar' : ActorMethod<[UploadedAvatar], undefined>,
   'viewProfile' : ActorMethod<[Principal], UserProfile>,

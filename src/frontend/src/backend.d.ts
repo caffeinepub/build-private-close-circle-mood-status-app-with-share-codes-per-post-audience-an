@@ -19,6 +19,12 @@ export interface Preferences {
     intent: RelationshipIntent;
     gender: Gender;
 }
+export interface UpdateUserProfile {
+    preferences: Preferences;
+    showAge: boolean;
+    relationshipIntent: RelationshipIntent;
+    shareCode: string;
+}
 export interface StatusPost {
     id: string;
     content: string;
@@ -56,6 +62,13 @@ export type FeedItem = {
 export interface UploadedAvatar {
     contentType: string;
     image: Uint8Array;
+}
+export interface ConnectionWhyExplanation {
+    why: string;
+    principal: Principal;
+    interaction: bigint;
+    name: string;
+    sharedConnections: bigint;
 }
 export interface SilentSignal {
     id: string;
@@ -152,6 +165,9 @@ export interface backendInterface {
     declineJoinRequest(user: Principal, code: string): Promise<void>;
     deleteJournalEntry(date: Time): Promise<void>;
     getAllJournalEntries(): Promise<Array<JournalEntry>>;
+    getBestCircleConnectionsWithWhyExplanation(): Promise<Array<ConnectionWhyExplanation>>;
+    getCallerCircleOwners(): Promise<Array<Principal>>;
+    getCallerPulseScore(): Promise<bigint>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCircleMembers(): Promise<Array<Principal>>;
@@ -167,9 +183,9 @@ export interface backendInterface {
     getStatus(statusId: string): Promise<StatusPost | null>;
     getUnprocessedJoinRequests(): Promise<Array<PendingRequestWithProfile>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserPulseScore(user: Principal): Promise<bigint>;
     isCallerAdmin(): Promise<boolean>;
     joinCircleFromShareCode(code: string): Promise<void>;
-    markNotificationAsRead(notificationId: string): Promise<void>;
     postSilentSignal(mood: Mood, content: string): Promise<void>;
     postStatus(status: StatusPost): Promise<void>;
     removeCircleMember(member: Principal): Promise<void>;
@@ -177,7 +193,7 @@ export interface backendInterface {
     selectSystemAvatar(avatarId: string): Promise<void>;
     setSafePerson(person: Principal): Promise<void>;
     unsetSafePerson(person: Principal): Promise<void>;
-    updateProfile(profile: UserProfile): Promise<void>;
+    updateProfile(updates: UpdateUserProfile): Promise<void>;
     updateShareCode(code: string): Promise<string>;
     uploadAvatar(avatar: UploadedAvatar): Promise<void>;
     viewProfile(id: Principal): Promise<UserProfile>;

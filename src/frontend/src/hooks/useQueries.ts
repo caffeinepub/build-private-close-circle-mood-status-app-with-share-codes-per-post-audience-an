@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, JoinRequest, StatusPost, Notification, FeedItem, SilentSignal, Mood, Avatar, UploadedAvatar, PendingRequestWithProfile } from '@/backend';
+import type { UserProfile, JoinRequest, StatusPost, Notification, FeedItem, SilentSignal, Mood, Avatar, UploadedAvatar, PendingRequestWithProfile, UpdateUserProfile, ConnectionWhyExplanation } from '@/backend';
 import type { Principal } from '@dfinity/principal';
 
 // Profile queries
@@ -87,9 +87,9 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (profile: UserProfile) => {
+    mutationFn: async (updates: UpdateUserProfile) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.updateProfile(profile);
+      await actor.updateProfile(updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
@@ -151,11 +151,15 @@ export function useUpdateShareCode() {
 // Join request queries
 export function useJoinCircleFromShareCode() {
   const { actor } = useActor();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (code: string) => {
       if (!actor) throw new Error('Actor not available');
       await actor.joinCircleFromShareCode(code);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['circlesImIn'] });
     },
   });
 }
@@ -186,6 +190,8 @@ export function useAcceptJoinRequest() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['joinRequests'] });
       queryClient.invalidateQueries({ queryKey: ['circleMembers'] });
+      queryClient.invalidateQueries({ queryKey: ['circlesImIn'] });
+      queryClient.invalidateQueries({ queryKey: ['closestConnections'] });
     },
   });
 }
@@ -233,7 +239,98 @@ export function useRemoveCircleMember() {
       queryClient.invalidateQueries({ queryKey: ['circleMembers'] });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['userProfiles'] });
+      queryClient.invalidateQueries({ queryKey: ['circlesImIn'] });
+      queryClient.invalidateQueries({ queryKey: ['closestConnections'] });
     },
+  });
+}
+
+// Circles I'm in query
+export function useGetCirclesImInOwners() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Array<{ principal: Principal; profile: UserProfile }>>({
+    queryKey: ['circlesImIn'],
+    queryFn: async () => {
+      if (!actor) return [];
+      const ownerPrincipals = await actor.getCallerCircleOwners();
+      
+      // Fetch profiles for all owners
+      const ownersWithProfiles = await Promise.all(
+        ownerPrincipals.map(async (principal) => {
+          try {
+            const profile = await actor.getUserProfile(principal);
+            if (profile) {
+              return { principal, profile };
+            }
+            return null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      // Filter out any null results
+      return ownersWithProfiles.filter((item): item is { principal: Principal; profile: UserProfile } => item !== null);
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// Pulse queries
+export function useGetCallerPulseScore() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<number>({
+    queryKey: ['callerPulseScore'],
+    queryFn: async () => {
+      if (!actor) return 0;
+      const score = await actor.getCallerPulseScore();
+      return Number(score);
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetUserPulseScore(user: Principal) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<number>({
+    queryKey: ['userPulseScore', user.toString()],
+    queryFn: async () => {
+      if (!actor) return 0;
+      try {
+        const score = await actor.getUserPulseScore(user);
+        return Number(score);
+      } catch {
+        return 0;
+      }
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useGetUserPulseScores(users: Principal[]) {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Record<string, number>>({
+    queryKey: ['userPulseScores', users.map((u) => u.toString()).sort()],
+    queryFn: async () => {
+      if (!actor) return {};
+      const scores: Record<string, number> = {};
+      await Promise.all(
+        users.map(async (user) => {
+          try {
+            const score = await actor.getUserPulseScore(user);
+            scores[user.toString()] = Number(score);
+          } catch {
+            scores[user.toString()] = 0;
+          }
+        })
+      );
+      return scores;
+    },
+    enabled: !!actor && !isFetching && users.length > 0,
   });
 }
 
@@ -251,6 +348,9 @@ export function usePostStatus() {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['status'] });
+      queryClient.invalidateQueries({ queryKey: ['callerPulseScore'] });
+      queryClient.invalidateQueries({ queryKey: ['userPulseScores'] });
+      queryClient.invalidateQueries({ queryKey: ['closestConnections'] });
     },
   });
 }
@@ -307,18 +407,17 @@ export function useGetNotifications() {
   });
 }
 
-export function useMarkNotificationAsRead() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
+// Closest Connections query
+export function useGetClosestConnections() {
+  const { actor, isFetching } = useActor();
 
-  return useMutation({
-    mutationFn: async (notificationId: string) => {
-      if (!actor) throw new Error('Actor not available');
-      await actor.markNotificationAsRead(notificationId);
+  return useQuery<ConnectionWhyExplanation[]>({
+    queryKey: ['closestConnections'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getBestCircleConnectionsWithWhyExplanation();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-    },
+    enabled: !!actor && !isFetching,
   });
 }
 

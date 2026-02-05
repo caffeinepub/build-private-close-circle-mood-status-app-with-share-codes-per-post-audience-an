@@ -1,4 +1,4 @@
-import { useGetNotifications, useMarkNotificationAsRead } from '@/hooks/useQueries';
+import { useGetNotifications } from '@/hooks/useQueries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from '@tanstack/react-router';
@@ -8,21 +8,12 @@ import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
 
 export default function NotificationsPage() {
   const { data: notifications = [], isLoading } = useGetNotifications();
-  const markAsRead = useMarkNotificationAsRead();
   const navigate = useNavigate();
 
   const unreadNotifications = notifications.filter((n) => !n.isRead);
   const readNotifications = notifications.filter((n) => n.isRead);
 
-  const handleNotificationClick = async (notification: typeof notifications[0]) => {
-    if (!notification.isRead) {
-      try {
-        await markAsRead.mutateAsync(notification.id);
-      } catch (error) {
-        console.error('Failed to mark as read:', error);
-      }
-    }
-
+  const handleNotificationClick = (notification: typeof notifications[0]) => {
     if (notification.statusId) {
       navigate({ to: '/status/$statusId', params: { statusId: notification.statusId } });
     }

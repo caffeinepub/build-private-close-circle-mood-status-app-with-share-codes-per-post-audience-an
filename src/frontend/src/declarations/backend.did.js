@@ -19,6 +19,13 @@ export const JournalEntry = IDL.Record({
   'date' : Time,
   'createdAt' : Time,
 });
+export const ConnectionWhyExplanation = IDL.Record({
+  'why' : IDL.Text,
+  'principal' : IDL.Principal,
+  'interaction' : IDL.Nat,
+  'name' : IDL.Text,
+  'sharedConnections' : IDL.Nat,
+});
 export const RelationshipIntent = IDL.Variant({
   'romantic' : IDL.Null,
   'both' : IDL.Null,
@@ -140,6 +147,12 @@ export const PendingRequestWithProfile = IDL.Record({
   'request' : JoinRequest,
   'profile' : UserProfile,
 });
+export const UpdateUserProfile = IDL.Record({
+  'preferences' : Preferences,
+  'showAge' : IDL.Bool,
+  'relationshipIntent' : RelationshipIntent,
+  'shareCode' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -149,6 +162,13 @@ export const idlService = IDL.Service({
   'declineJoinRequest' : IDL.Func([IDL.Principal, IDL.Text], [], []),
   'deleteJournalEntry' : IDL.Func([Time], [], []),
   'getAllJournalEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
+  'getBestCircleConnectionsWithWhyExplanation' : IDL.Func(
+      [],
+      [IDL.Vec(ConnectionWhyExplanation)],
+      ['query'],
+    ),
+  'getCallerCircleOwners' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+  'getCallerPulseScore' : IDL.Func([], [IDL.Nat], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCircleMembers' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
@@ -180,9 +200,9 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'getUserPulseScore' : IDL.Func([IDL.Principal], [IDL.Nat], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'joinCircleFromShareCode' : IDL.Func([IDL.Text], [], []),
-  'markNotificationAsRead' : IDL.Func([IDL.Text], [], []),
   'postSilentSignal' : IDL.Func([Mood, IDL.Text], [], []),
   'postStatus' : IDL.Func([StatusPost], [], []),
   'removeCircleMember' : IDL.Func([IDL.Principal], [], []),
@@ -190,7 +210,7 @@ export const idlService = IDL.Service({
   'selectSystemAvatar' : IDL.Func([IDL.Text], [], []),
   'setSafePerson' : IDL.Func([IDL.Principal], [], []),
   'unsetSafePerson' : IDL.Func([IDL.Principal], [], []),
-  'updateProfile' : IDL.Func([UserProfile], [], []),
+  'updateProfile' : IDL.Func([UpdateUserProfile], [], []),
   'updateShareCode' : IDL.Func([IDL.Text], [IDL.Text], []),
   'uploadAvatar' : IDL.Func([UploadedAvatar], [], []),
   'viewProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),
@@ -209,6 +229,13 @@ export const idlFactory = ({ IDL }) => {
     'content' : IDL.Text,
     'date' : Time,
     'createdAt' : Time,
+  });
+  const ConnectionWhyExplanation = IDL.Record({
+    'why' : IDL.Text,
+    'principal' : IDL.Principal,
+    'interaction' : IDL.Nat,
+    'name' : IDL.Text,
+    'sharedConnections' : IDL.Nat,
   });
   const RelationshipIntent = IDL.Variant({
     'romantic' : IDL.Null,
@@ -331,6 +358,12 @@ export const idlFactory = ({ IDL }) => {
     'request' : JoinRequest,
     'profile' : UserProfile,
   });
+  const UpdateUserProfile = IDL.Record({
+    'preferences' : Preferences,
+    'showAge' : IDL.Bool,
+    'relationshipIntent' : RelationshipIntent,
+    'shareCode' : IDL.Text,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -340,6 +373,13 @@ export const idlFactory = ({ IDL }) => {
     'declineJoinRequest' : IDL.Func([IDL.Principal, IDL.Text], [], []),
     'deleteJournalEntry' : IDL.Func([Time], [], []),
     'getAllJournalEntries' : IDL.Func([], [IDL.Vec(JournalEntry)], ['query']),
+    'getBestCircleConnectionsWithWhyExplanation' : IDL.Func(
+        [],
+        [IDL.Vec(ConnectionWhyExplanation)],
+        ['query'],
+      ),
+    'getCallerCircleOwners' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
+    'getCallerPulseScore' : IDL.Func([], [IDL.Nat], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCircleMembers' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
@@ -375,9 +415,9 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'getUserPulseScore' : IDL.Func([IDL.Principal], [IDL.Nat], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'joinCircleFromShareCode' : IDL.Func([IDL.Text], [], []),
-    'markNotificationAsRead' : IDL.Func([IDL.Text], [], []),
     'postSilentSignal' : IDL.Func([Mood, IDL.Text], [], []),
     'postStatus' : IDL.Func([StatusPost], [], []),
     'removeCircleMember' : IDL.Func([IDL.Principal], [], []),
@@ -385,7 +425,7 @@ export const idlFactory = ({ IDL }) => {
     'selectSystemAvatar' : IDL.Func([IDL.Text], [], []),
     'setSafePerson' : IDL.Func([IDL.Principal], [], []),
     'unsetSafePerson' : IDL.Func([IDL.Principal], [], []),
-    'updateProfile' : IDL.Func([UserProfile], [], []),
+    'updateProfile' : IDL.Func([UpdateUserProfile], [], []),
     'updateShareCode' : IDL.Func([IDL.Text], [IDL.Text], []),
     'uploadAvatar' : IDL.Func([UploadedAvatar], [], []),
     'viewProfile' : IDL.Func([IDL.Principal], [UserProfile], ['query']),

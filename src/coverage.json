@@ -1,62 +1,57 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T12:00:12.828Z",
+  "generatedAt": "2026-02-05T16:49:41.152Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
+    "total": 4,
     "implemented": 3,
     "items": [
       {
-        "id": "REQ-12",
-        "summary": "Update backend status posting validation so a user with zero circle members can successfully post a mood/status when the post audience is self-only (i.e., the audience list contains only the caller/author).",
+        "id": "REQ-23",
+        "summary": "Add a backend query API that returns ranked “closest connections” recommendations for the caller using only existing relationship/interaction data (e.g., mutual circle relationship signals and interaction frequency derived from existing posts/signals), and include per-person explanation strings describing why each person ranked highly.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-13",
-        "summary": "Ensure backend normalizes/enforces self-visibility for status posts by always including the caller in the stored audience (deduplicated), without requiring circle membership for this self-only case.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-14",
-        "summary": "Update the Compose status UI (ComposeStatusPage) so users with zero selectable circle members can still post, with the audience effectively defaulting to self-only/private and communicated in the UI using English copy.",
+        "id": "REQ-24",
+        "summary": "Add a new authenticated, deep-link-only frontend route and page for a lightweight private “Closest connections” viewer that displays the ranked recommendations and shows the explanation text for each ranked person (reasoning visible here only).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/ComposeStatusPage.tsx"
+          "frontend/src/pages/ClosestConnectionsPage.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/ComposeStatusPage.tsx"
+          "frontend/src/pages/ClosestConnectionsPage.tsx",
+          "frontend/src/App.tsx"
         ]
       },
       {
-        "id": "REQ-15",
-        "summary": "Update the Daily check-in UI (DailyCheckInPage) so users with zero selectable circle members can still post, defaulting to self-only/private audience with clear English microcopy.",
+        "id": "REQ-25",
+        "summary": "Add a centralized React Query hook to fetch the caller’s closest-connection recommendations from the backend, with caching and invalidation wired to existing mutations that can change relationship/interaction signals.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/DailyCheckInPage.tsx"
+          "frontend/src/backend.d.ts",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/DailyCheckInPage.tsx"
+          "frontend/src/backend.d.ts",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-16",
-        "summary": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts must remain visible only to the author and must not automatically become visible to new circle members.",
+        "id": "REQ-26",
+        "summary": "Update the existing Safe People selection UI to show smarter recommendations that influence what the user sees when choosing manually (max 2), without automatically setting/overwriting Safe People selections and without showing explanation text inside the Safe People UI.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/status/StatusCard.tsx",
-          "frontend/src/pages/StatusDetailPage.tsx"
+          "frontend/src/components/circle/SafePeoplePanel.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/status/StatusCard.tsx",
-          "frontend/src/pages/StatusDetailPage.tsx"
+          "frontend/src/components/circle/SafePeoplePanel.tsx"
         ]
       }
     ]
@@ -67,10 +62,14 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/status/StatusCard.tsx",
-    "frontend/src/pages/ComposeStatusPage.tsx",
-    "frontend/src/pages/DailyCheckInPage.tsx",
-    "frontend/src/pages/StatusDetailPage.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/circle/SafePeoplePanel.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/ClosestConnectionsPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
