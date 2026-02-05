@@ -1,20 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { usePostStatus, useGetCircleMembers, useGetUserProfiles } from '@/hooks/useQueries';
+import { usePostStatus, useGetCircleMembers, useGetUserProfiles, useGetSafePeople } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import MoodPicker from '@/components/status/MoodPicker';
 import ContextTagsPicker from '@/components/status/ContextTagsPicker';
 import PostStatusPrivateNotePrompt from '@/components/status/PostStatusPrivateNotePrompt';
 import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
+import AudienceSelector from '@/components/status/AudienceSelector';
 import type { Mood } from '@/backend';
 import { Principal } from '@dfinity/principal';
-import { calculateAge } from '@/utils/age';
 import { useJournalOverlayController } from '@/contexts/JournalOverlayControllerContext';
 import { consumeDailyCheckInGuard } from '@/utils/dailyCheckInEntry';
 import { useMoodHistory } from '@/hooks/useMoodHistory';
@@ -23,17 +22,21 @@ import { getMoodGradientClasses, getMoodColorClasses } from '@/utils/moodColors'
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { buildAudienceWithAuthor } from '@/utils/audience';
 
+type AudienceOption = 'wholeCircle' | 'specificPeople' | 'safePeople' | 'justMe';
+
 export default function DailyCheckInPage() {
   const navigate = useNavigate();
   const { identity } = useInternetIdentity();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [content, setContent] = useState('');
-  const [selectedAudience, setSelectedAudience] = useState<Set<string>>(new Set());
+  const [audienceOption, setAudienceOption] = useState<AudienceOption>('wholeCircle');
+  const [selectedPeople, setSelectedPeople] = useState<Set<string>>(new Set());
   const [contextTags, setContextTags] = useState<string[]>([]);
   const [showPrivateNotePrompt, setShowPrivateNotePrompt] = useState(false);
 
   const { data: circleMembers = [], isLoading: loadingMembers } = useGetCircleMembers();
   const { data: profiles = {} } = useGetUserProfiles(circleMembers);
+  const { data: safePeople = [] } = useGetSafePeople();
   const postStatus = usePostStatus();
   const { openJournal } = useJournalOverlayController();
   const { moodHistory } = useMoodHistory(14);
@@ -45,13 +48,13 @@ export default function DailyCheckInPage() {
     (member) => member.toString() !== currentUserPrincipal
   );
 
-  // Prune selectedAudience when selectableMembers changes to prevent stale selections
+  // Prune selectedPeople when selectableMembers changes to prevent stale selections
   useEffect(() => {
     if (selectableMembers.length === 0) {
-      setSelectedAudience(new Set());
+      setSelectedPeople(new Set());
     } else {
       const validPrincipals = new Set(selectableMembers.map(m => m.toString()));
-      setSelectedAudience(prev => {
+      setSelectedPeople(prev => {
         const filtered = new Set(Array.from(prev).filter(p => validPrincipals.has(p)));
         return filtered.size !== prev.size ? filtered : prev;
       });
@@ -66,16 +69,6 @@ export default function DailyCheckInPage() {
     }
   }, [navigate]);
 
-  const handleAudienceToggle = (principalStr: string) => {
-    const newSet = new Set(selectedAudience);
-    if (newSet.has(principalStr)) {
-      newSet.delete(principalStr);
-    } else {
-      newSet.add(principalStr);
-    }
-    setSelectedAudience(newSet);
-  };
-
   const handleSubmit = async () => {
     if (!selectedMood) {
       toast.error('Pick a mood');
@@ -88,8 +81,24 @@ export default function DailyCheckInPage() {
     }
 
     try {
-      const selectedRecipients = Array.from(selectedAudience).map((p) => Principal.fromText(p));
-      const audienceWithAuthor = buildAudienceWithAuthor(selectedRecipients, identity.getPrincipal());
+      let recipients: Principal[] = [];
+
+      switch (audienceOption) {
+        case 'wholeCircle':
+          recipients = selectableMembers;
+          break;
+        case 'specificPeople':
+          recipients = Array.from(selectedPeople).map((p) => Principal.fromText(p));
+          break;
+        case 'safePeople':
+          recipients = safePeople;
+          break;
+        case 'justMe':
+          recipients = [];
+          break;
+      }
+
+      const audienceWithAuthor = buildAudienceWithAuthor(recipients, identity.getPrincipal());
 
       await postStatus.mutateAsync({
         id: '',
@@ -168,50 +177,17 @@ export default function DailyCheckInPage() {
 
                     <Separator />
 
-                    <div className="space-y-3">
-                      <Label>Who sees this? (optional)</Label>
-                      {loadingMembers ? (
-                        <div className="py-4 text-center text-sm text-muted-foreground">Loading...</div>
-                      ) : selectableMembers.length === 0 ? (
-                        <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-                          No circle members yet — this post will be private (only you can see it)
-                        </div>
-                      ) : (
-                        <div className="space-y-2 rounded-lg border p-4 max-h-64 overflow-y-auto">
-                          {selectableMembers.map((member) => {
-                            const principalStr = member.toString();
-                            const profile = profiles[principalStr];
-                            const displayName = profile?.name || `User ${principalStr.slice(0, 8)}...`;
-                            const age = profile?.dateOfBirth ? calculateAge(profile.dateOfBirth) : null;
-                            const showAge = profile?.showAge && age !== null;
-
-                            return (
-                              <div key={principalStr} className="flex items-center space-x-2">
-                                <Checkbox
-                                  id={principalStr}
-                                  checked={selectedAudience.has(principalStr)}
-                                  onCheckedChange={() => handleAudienceToggle(principalStr)}
-                                />
-                                <label
-                                  htmlFor={principalStr}
-                                  className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                >
-                                  <span className="flex items-center gap-1.5">
-                                    {displayName}
-                                    {showAge && <span className="text-xs text-muted-foreground font-normal">• {age}</span>}
-                                  </span>
-                                </label>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        {selectableMembers.length === 0 
-                          ? 'Posts stay private until you join a circle'
-                          : 'You always see your own posts'}
-                      </p>
-                    </div>
+                    <AudienceSelector
+                      selectedOption={audienceOption}
+                      onOptionChange={setAudienceOption}
+                      selectedPeople={selectedPeople}
+                      onPeopleChange={setSelectedPeople}
+                      circleMembers={circleMembers}
+                      profiles={profiles}
+                      safePeopleCount={safePeople.length}
+                      isLoadingMembers={loadingMembers}
+                      currentUserPrincipal={currentUserPrincipal}
+                    />
                   </div>
                 </ProgressiveDisclosure>
 

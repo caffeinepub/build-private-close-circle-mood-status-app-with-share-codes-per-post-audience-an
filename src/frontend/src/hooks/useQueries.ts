@@ -407,6 +407,39 @@ export function useGetNotifications() {
   });
 }
 
+export function useMarkNotificationAsRead() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (notificationId: string) => {
+      if (!actor) throw new Error('Actor not available');
+      const success = await actor.markNotificationAsRead(notificationId);
+      if (!success) {
+        throw new Error('Failed to mark notification as read');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
+export function useMarkAllNotificationsAsRead() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.markAllNotificationsAsRead();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
 // Closest Connections query
 export function useGetClosestConnections() {
   const { actor, isFetching } = useActor();

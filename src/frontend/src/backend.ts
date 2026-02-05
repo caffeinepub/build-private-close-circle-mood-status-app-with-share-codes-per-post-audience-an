@@ -269,6 +269,8 @@ export interface backendInterface {
     getUserPulseScore(user: Principal): Promise<bigint>;
     isCallerAdmin(): Promise<boolean>;
     joinCircleFromShareCode(code: string): Promise<void>;
+    markAllNotificationsAsRead(): Promise<void>;
+    markNotificationAsRead(notificationId: string): Promise<boolean>;
     postSilentSignal(mood: Mood, content: string): Promise<void>;
     postStatus(status: StatusPost): Promise<void>;
     removeCircleMember(member: Principal): Promise<void>;
@@ -673,6 +675,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.joinCircleFromShareCode(arg0);
+            return result;
+        }
+    }
+    async markAllNotificationsAsRead(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.markAllNotificationsAsRead();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.markAllNotificationsAsRead();
+            return result;
+        }
+    }
+    async markNotificationAsRead(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.markNotificationAsRead(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.markNotificationAsRead(arg0);
             return result;
         }
     }

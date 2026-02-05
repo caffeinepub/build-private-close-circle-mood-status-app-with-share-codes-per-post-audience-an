@@ -1,59 +1,97 @@
 {
   "kind": "build_request",
-  "title": "Fix logout redirect to always return to public homepage (/)",
-  "priority": "high",
+  "title": "Add “Mark all as read” button on Notifications page",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-29",
-      "text": "Update the Sign Out action in the authenticated header so that after a successful logout it always redirects the user to the public root route \"/\" (homepage), regardless of the current page.",
+      "id": "REQ-34",
+      "text": "Add a “Mark all as read” button at the top of the Notifications/Alerts page (frontend/src/pages/NotificationsPage.tsx). When tapped, it must instantly mark every unread notification as read and the unread badge/counter must clear immediately after success.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-8",
+          "msg-12"
         ],
         "quotes": [
-          "Let's fix the logout issue that doesn't take me back to homepage once again",
-          "1. Yes, always back to root route “/”",
-          "implement now"
+          "I also want a \"Mark all as read\" button",
+          "At the top of the alerts page\n\ntapping it should mark every unread notification as read instantly\n\n3. yes"
         ]
       },
       "acceptanceCriteria": [
-        "From any authenticated route (e.g., /circle, /profile, /closest-connections), clicking “Sign Out” navigates to \"/\" after logout completes.",
-        "The navigation uses a replace-style redirect (no back-navigation into authenticated pages after logout).",
-        "React Query cache is cleared on logout as it is today, and the redirect still occurs."
+        "On NotificationsPage, a visible button with user-facing text exactly \"Mark all as read\" appears near the top of the page content (above the unread list).",
+        "The button is only shown (or is disabled) when there is at least 1 unread notification (isRead === false).",
+        "Clicking the button marks all currently-unread notifications as read without requiring confirmation.",
+        "After successful completion, the unread section count becomes 0 and unread items move into the read section (or otherwise render as read).",
+        "After successful completion, the bottom navigation unread badge disappears immediately (i.e., the notifications query is invalidated/refetched so unread count becomes 0).",
+        "The button shows an in-progress state (disabled + loading indicator or text) while the operation is running, and errors are surfaced via the app’s standard toast/error UI."
       ]
     },
     {
-      "id": "REQ-30",
-      "text": "Ensure authenticated-only routes cannot remain visible after identity is cleared: when the app is currently rendering under the authenticated layout and the Internet Identity becomes undefined (and initialization is not in progress), immediately redirect to \"/\".",
-      "target": "frontend",
+      "id": "REQ-35",
+      "text": "Implement a backend API to mark all of the caller’s notifications as read, and wire it to a new centralized React Query mutation hook that the Notifications page uses for the “Mark all as read” button.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-12"
         ],
         "quotes": [
-          "Logout does not consistently redirect users away from authenticated-only routes; after logout, protected pages can still render a logged-in-only error state instead of returning to the public homepage.",
-          "1. Yes, always back to root route “/”"
+          "tapping it should mark every unread notification as read instantly"
         ]
       },
       "acceptanceCriteria": [
-        "If a user logs out while on an authenticated route, the app does not remain on that route showing any protected/error state; it redirects to \"/\".",
-        "If the user manually visits an authenticated URL after logout (e.g., pasting /profile), they are redirected to \"/\".",
-        "No infinite redirect loop occurs during initial identity loading (i.e., do not redirect while identity is still initializing)."
+        "Backend (backend/main.mo) exposes a shared method that, for the authenticated caller, updates stored notifications so any notification with notification.user == caller isRead becomes true (leaving other users’ notifications unchanged).",
+        "Backend method enforces the same authorization pattern as existing notifications methods (user permission required; traps if unauthorized).",
+        "Frontend adds a React Query mutation hook in frontend/src/hooks/useQueries.ts for the new backend method.",
+        "On mutation success, the hook invalidates the ['notifications'] query so UI and bottom-nav badge update immediately.",
+        "The feature works even when there are many notifications (no partial updates; all caller notifications become read in one action)."
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "text": "Ensure tapping an individual notification marks it as read before navigating (to preserve existing expected behavior that tapping clears unread count), using the existing per-notification mark-as-read behavior if present, or by adding a backend API + React Query mutation if it does not exist yet.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-3",
+          "msg-4",
+          "msg-12"
+        ],
+        "quotes": [
+          "In CloseCircle, notifications are marked as read automatically when you tap them in the Alerts page.",
+          "That clears the unread count, and the bottom‑nav badge disappears as soon as there are zero unread items.",
+          "tapping it should mark every unread notification as read instantly"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When a user taps a single unread notification card on NotificationsPage, that notification becomes read (isRead=true) and the unread count decreases accordingly.",
+        "If the notification navigates to a status detail route, the mark-as-read action occurs before/alongside navigation (no requirement for a second visit to clear the badge).",
+        "Mark-as-read for a single notification updates the bottom-nav badge immediately once unread count reaches 0 (by invalidating/refetching ['notifications']).",
+        "No notification belonging to other users can be marked read by the caller."
       ]
     }
   ],
   "constraints": [
-    "Frontend must not modify any files under frontend/src/components/ui or other immutablePaths listed in SYSTEM_CONTEXT.",
-    "Backend remains single-actor; no backend changes are required for this logout redirect fix."
+    "Do not edit files under frontend/src/components/ui (Shadcn UI sources are read-only and must be composed).",
+    "Do not modify any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Backend must remain a single Motoko actor; keep logic in backend/main.mo and only add backend/migration.mo changes if a stable upgrade migration is required."
   ],
   "nonGoals": [
-    "Do not redesign the public homepage or login flow UI.",
-    "Do not change authentication provider behavior (Internet Identity / AuthClient configuration) beyond what is necessary to perform the redirect.",
-    "Do not add new routes or change existing route paths."
+    "Do not implement real-time push notifications.",
+    "Do not change notification polling intervals unless required for correctness of the new mark-all behavior.",
+    "Do not add confirmation dialogs for the “Mark all as read” action."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

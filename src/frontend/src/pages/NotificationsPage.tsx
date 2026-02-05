@@ -1,21 +1,46 @@
-import { useGetNotifications } from '@/hooks/useQueries';
+import { useGetNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from '@/hooks/useQueries';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from '@tanstack/react-router';
 import { formatDistanceToNow } from 'date-fns';
-import { Bell, BellOff } from 'lucide-react';
+import { Bell, BellOff, CheckCheck } from 'lucide-react';
 import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
+import { toast } from 'sonner';
 
 export default function NotificationsPage() {
   const { data: notifications = [], isLoading } = useGetNotifications();
+  const markAsReadMutation = useMarkNotificationAsRead();
+  const markAllAsReadMutation = useMarkAllNotificationsAsRead();
   const navigate = useNavigate();
 
   const unreadNotifications = notifications.filter((n) => !n.isRead);
   const readNotifications = notifications.filter((n) => n.isRead);
 
-  const handleNotificationClick = (notification: typeof notifications[0]) => {
+  const handleNotificationClick = async (notification: typeof notifications[0]) => {
+    // Mark as read if unread
+    if (!notification.isRead) {
+      try {
+        await markAsReadMutation.mutateAsync(notification.id);
+      } catch (error) {
+        console.error('Failed to mark notification as read:', error);
+        toast.error('Failed to mark notification as read');
+      }
+    }
+
+    // Navigate if there's a status link
     if (notification.statusId) {
       navigate({ to: '/status/$statusId', params: { statusId: notification.statusId } });
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsReadMutation.mutateAsync();
+      toast.success('All notifications marked as read');
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+      toast.error('Failed to mark all notifications as read');
     }
   };
 
@@ -58,10 +83,22 @@ export default function NotificationsPage() {
         <div className="space-y-6">
           {unreadNotifications.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                New ({unreadNotifications.length})
-              </h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  New ({unreadNotifications.length})
+                </h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleMarkAllAsRead}
+                  disabled={markAllAsReadMutation.isPending}
+                  className="gap-2"
+                >
+                  <CheckCheck className="h-4 w-4" />
+                  {markAllAsReadMutation.isPending ? 'Marking...' : 'Mark all as read'}
+                </Button>
+              </div>
               {unreadNotifications.map((notification) => (
                 <Card
                   key={notification.id}

@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-sign-out-action-in-the-authenticated-header-so-that-after-a-successful-logout-it-always-redirects-the-user-to-the-public-root-route-homepage-regardless-of-the-current-page",
-      "featureTitle": "Update the Sign Out action in the authenticated header so that after a successful logout it always redirects the user to the public root route \"/\" (homepage), regardless of the current page.",
+      "featureId": "feature-add-a-mark-all-as-read-button-at-the-top-of-the-notifications-alerts-page-frontend-src-pages-notificationspage-tsx-when-tapped-it-must-instantly-mark-every-unread-notification-as-read-and-the-unread-badge-counter-must-clear-immediately-after-success",
+      "featureTitle": "Add a “Mark all as read” button at the top of the Notifications/Alerts page (frontend/src/pages/NotificationsPage.tsx). When tapped, it must instantly mark every unread notification as read and the unread badge/counter must clear immediately after success.",
       "files": [
-        "frontend/src/components/app/AppHeader.tsx"
+        "frontend/src/pages/NotificationsPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,15 +16,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-29"
+        "REQ-34"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-authenticated-only-routes-cannot-remain-visible-after-identity-is-cleared-when-the-app-is-currently-rendering-under-the-authenticated-layout-and-the-internet-identity-becomes-undefined-and-initialization-is-not-in-progress-immediately-redirect-to",
-      "featureTitle": "Ensure authenticated-only routes cannot remain visible after identity is cleared: when the app is currently rendering under the authenticated layout and the Internet Identity becomes undefined (and initialization is not in progress), immediately redirect to \"/\".",
+      "featureId": "feature-implement-a-backend-api-to-mark-all-of-the-caller-s-notifications-as-read-and-wire-it-to-a-new-centralized-react-query-mutation-hook-that-the-notifications-page-uses-for-the-mark-all-as-read-button",
+      "featureTitle": "Implement a backend API to mark all of the caller’s notifications as read, and wire it to a new centralized React Query mutation hook that the Notifications page uses for the “Mark all as read” button.",
       "files": [
-        "frontend/src/components/app/AppLayout.tsx"
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -35,7 +35,27 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-30"
+        "REQ-35"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-tapping-an-individual-notification-marks-it-as-read-before-navigating-to-preserve-existing-expected-behavior-that-tapping-clears-unread-count-using-the-existing-per-notification-mark-as-read-behavior-if-present-or-by-adding-a-backend-api-react-query-mutation-if-it-does-not-exist-yet",
+      "featureTitle": "Ensure tapping an individual notification marks it as read before navigating (to preserve existing expected behavior that tapping clears unread count), using the existing per-notification mark-as-read behavior if present, or by adding a backend API + React Query mutation if it does not exist yet.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/NotificationsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-36"
       ],
       "confidence": "high"
     }

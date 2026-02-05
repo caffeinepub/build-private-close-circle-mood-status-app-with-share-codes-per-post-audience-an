@@ -291,11 +291,11 @@ actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
-  func contains(list : [Principal], member : Principal) : Bool {
-    for (m in list.values()) {
-      if (m == member) { return true };
+  func contains(array : [Principal], member : Principal) : Bool {
+    switch (array.find(func(x) { x == member })) {
+      case (?_) { true };
+      case (null) { false };
     };
-    false;
   };
 
   func sanitizeStatusForViewer(status : StatusPost, viewer : Principal) : StatusPost {
@@ -780,6 +780,83 @@ actor {
     };
   };
 
+  type AudienceType = {
+    #privatePost;
+    #safePeopleOnly;
+    #wholeCircle;
+    #specificPeople;
+  };
+
+  type StatusPostWithAudience = {
+    id : Text;
+    author : Principal;
+    mood : Mood;
+    content : Text;
+    contextTags : ?[Text];
+    audience : [Principal];
+    audienceType : AudienceType;
+    createdAt : Time.Time;
+  };
+
+  func determineAudienceType(audience : [Principal], caller : Principal) : AudienceType {
+    if (audience.size() == 1 and audience[0] == caller) {
+      return #privatePost;
+    };
+
+    let safePeopleList = switch (safePeople.get(caller)) {
+      case (?list) { list.people };
+      case (null) { [] };
+    };
+    if (safePeopleList.size() > 0 and audience.size() > 0) {
+      let allSafePeopleIncluded = audience.filter(
+        func(p) { p != caller }
+      ).filter(
+          func(p) { not contains(safePeopleList, p) }
+        ).isEmpty();
+      if (allSafePeopleIncluded) {
+        return #safePeopleOnly;
+      };
+    };
+
+    switch (circles.get(caller)) {
+      case (?circle) {
+        let remaining = audience.filter(func(p) { p != caller });
+        if (remaining.size() == circle.size()) {
+          let allInCircle = circle.toArray().filter(
+            func(member) {
+              not contains(remaining, member);
+            }
+          ).isEmpty();
+          if (allInCircle) {
+            return #wholeCircle;
+          };
+        };
+      };
+      case (null) {};
+    };
+
+    #specificPeople;
+  };
+
+  func convertToStatusPost(status : StatusPostWithAudience) : StatusPost {
+    {
+      StatusPost with
+      id = status.id;
+      author = status.author;
+      mood = status.mood;
+      content = status.content;
+      contextTags = status.contextTags;
+      audience = status.audience;
+      createdAt = status.createdAt;
+    };
+  };
+
+  func convertToStatusPostWithAudience(status : StatusPost, audienceType : AudienceType) : StatusPostWithAudience {
+    {
+      status with audienceType;
+    };
+  };
+
   public shared ({ caller }) func postStatus(status : StatusPost) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can post statuses");
@@ -791,20 +868,37 @@ actor {
     let filtered = status.audience.filter(func(a) { a != caller });
     let enhancedAudience = [caller].concat(filtered);
 
-    let isSelfOnly = enhancedAudience.size() == 1 and enhancedAudience[0] == caller;
-    let pulseIncrement = if (isSelfOnly) { 0 } else { enhancedAudience.size() - 1 };
+    let audienceType = determineAudienceType(enhancedAudience, caller);
 
-    if (isSelfOnly) {
-    } else {
-      let callerCircle = circles.get(caller);
-      switch (callerCircle) {
-        case (null) {
-          Runtime.trap("Circle must exist to post for audience other than yourself");
+    switch (audienceType) {
+      case (#privatePost) {};
+      case (#safePeopleOnly) {};
+      case (#wholeCircle) {
+        let callerCircle = circles.get(caller);
+        switch (callerCircle) {
+          case (null) {
+            Runtime.trap("Circle must exist to post for audience other than yourself");
+          };
+          case (?circle) {
+            for (recipient in enhancedAudience.values()) {
+              if (recipient != caller and not circle.contains(recipient)) {
+                Runtime.trap("Unauthorized: All audience members must be in your circle");
+              };
+            };
+          };
         };
-        case (?circle) {
-          for (recipient in enhancedAudience.values()) {
-            if (recipient != caller and not circle.contains(recipient)) {
-              Runtime.trap("Unauthorized: All audience members must be in your circle");
+      };
+      case (#specificPeople) {
+        let callerCircle = circles.get(caller);
+        switch (callerCircle) {
+          case (null) {
+            Runtime.trap("Circle must exist to post for audience other than yourself");
+          };
+          case (?circle) {
+            for (recipient in enhancedAudience.values()) {
+              if (recipient != caller and not circle.contains(recipient)) {
+                Runtime.trap("Unauthorized: All audience members must be in your circle");
+              };
             };
           };
         };
@@ -812,15 +906,26 @@ actor {
     };
 
     let id = caller.toText() # "-" # Time.now().toText();
-    statuses.add(id, {
+    let statusWithAudience : StatusPostWithAudience = {
       id;
       author = caller;
       mood = status.mood;
       content = status.content;
       contextTags = status.contextTags;
       audience = enhancedAudience;
+      audienceType;
       createdAt = Time.now();
-    });
+    };
+
+    statuses.add(id, convertToStatusPost(statusWithAudience));
+
+    var pulseIncrement : Nat = 0;
+    switch (audienceType) {
+      case (#privatePost) { pulseIncrement := 0 };
+      case (#safePeopleOnly) { pulseIncrement := 0 };
+      case (#wholeCircle) { pulseIncrement := enhancedAudience.size() - 1 };
+      case (#specificPeople) { pulseIncrement := enhancedAudience.size() - 1 };
+    };
 
     if (pulseIncrement > 0) {
       let currentScore = switch (pulseScores.get(caller)) {
@@ -889,6 +994,43 @@ actor {
         if (aCreatedAt > bCreatedAt) { #less } else { #greater };
       }
     );
+  };
+
+  public shared ({ caller }) func markAllNotificationsAsRead() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can mark notifications as read");
+    };
+
+    let callerNotifications = notifications.filter(
+      func(_, notification) { notification.user == caller }
+    );
+
+    for ((id, notification) in callerNotifications.entries()) {
+      let updatedNotification : Notification = {
+        notification with isRead = true
+      };
+      notifications.add(id, updatedNotification);
+    };
+  };
+
+  public shared ({ caller }) func markNotificationAsRead(notificationId : Text) : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can mark notifications as read");
+    };
+
+    switch (notifications.get(notificationId)) {
+      case (null) { false };
+      case (?notification) {
+        if (notification.user != caller) {
+          return false;
+        };
+        let updatedNotification : Notification = {
+          notification with isRead = true
+        };
+        notifications.add(notificationId, updatedNotification);
+        true;
+      };
+    };
   };
 
   public query ({ caller }) func getNotifications() : async [Notification] {

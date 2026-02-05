@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 224,
+  "projectStateVersion": 228,
   "summary": "CloseCircle will transition circle membership from one-sided (stored only under the owner) to a two-sided model by adding mirrored member→circles storage. Rollout will be gradual, starting with a backend-only storage change (no UI yet), with later planned member-side surfaces like “circles I’m in”, “people who have me in their circle”, a lightweight private relationship viewer, and smarter Safe People suggestions derived from existing relationship/interaction data.",
   "architectural_notes": [
     "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
@@ -26,7 +26,7 @@
     "UI layout: Fixed bottom footer/bottom bar overlaps page body content across multiple screens. Footer should remain fixed/visible, but scrollable page content must include sufficient bottom safe-area/padding so key controls (e.g., Check-In “Share” button) are never hidden; button does not need to be sticky.",
     "Profile update currently overwrites creation date (createdAt); backend should preserve original createdAt and ignore any client-supplied createdAt during updates."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "generatedImages": [
     {
       "filename": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
@@ -889,6 +889,46 @@
         "REQ-30"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-mood-check-in-posting-ui-to-fully-replace-the-existing-audience-selection-with-exactly-these-four-options-in-both-composestatuspage-and-dailycheckinpage-whole-circle-specific-people-only-safe-people-and-just-me-private",
+      "title": "Update the mood/check-in posting UI to fully replace the existing audience selection with exactly these four options (in both ComposeStatusPage and DailyCheckInPage): “Whole circle”, “Specific people”, “Only Safe People”, and “Just me (private)”.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-posting-behavior-for-each-of-the-four-audience-options-in-both-posting-entry-points-composestatuspage-and-dailycheckinpage-using-the-existing-backend-poststatus-api-and-ensuring-the-author-is-included-in-the-final-audience-list-1-whole-circle-all-current-circle-members-2-specific-people-multi-select-any-circle-members-3-only-safe-people-automatically-target-the-user-s-current-safe-people-list-no-manual-recipient-picking-4-just-me-private-audience-contains-only-the-author",
+      "title": "Implement the posting behavior for each of the four audience options in both posting entry points (ComposeStatusPage and DailyCheckInPage), using the existing backend postStatus API and ensuring the author is included in the final audience list: (1) Whole circle = all current circle members; (2) Specific people = multi-select any circle members; (3) Only Safe People = automatically target the user’s current Safe People list (no manual recipient picking); (4) Just me (private) = audience contains only the author.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-mark-all-as-read-button-at-the-top-of-the-notifications-alerts-page-frontend-src-pages-notificationspage-tsx-when-tapped-it-must-instantly-mark-every-unread-notification-as-read-and-the-unread-badge-counter-must-clear-immediately-after-success",
+      "title": "Add a “Mark all as read” button at the top of the Notifications/Alerts page (frontend/src/pages/NotificationsPage.tsx). When tapped, it must instantly mark every unread notification as read and the unread badge/counter must clear immediately after success.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-backend-api-to-mark-all-of-the-caller-s-notifications-as-read-and-wire-it-to-a-new-centralized-react-query-mutation-hook-that-the-notifications-page-uses-for-the-mark-all-as-read-button",
+      "title": "Implement a backend API to mark all of the caller’s notifications as read, and wire it to a new centralized React Query mutation hook that the Notifications page uses for the “Mark all as read” button.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-tapping-an-individual-notification-marks-it-as-read-before-navigating-to-preserve-existing-expected-behavior-that-tapping-clears-unread-count-using-the-existing-per-notification-mark-as-read-behavior-if-present-or-by-adding-a-backend-api-react-query-mutation-if-it-does-not-exist-yet",
+      "title": "Ensure tapping an individual notification marks it as read before navigating (to preserve existing expected behavior that tapping clears unread count), using the existing per-notification mark-as-read behavior if present, or by adding a backend API + React Query mutation if it does not exist yet.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1055,6 +1095,26 @@
         "REQ-27"
       ],
       "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Replace mood/check-in audience selector with 4 options (Whole circle, Specific people multi-select, Only Safe People auto-target, Just me/private) and ensure Pulse does not increase for Safe People-only or private posts",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Backend: update Pulse scoring rules for status posts so Pulse does not increase for (a) “Just me (private)” posts and (b) “Only Safe People” posts, while keeping existing Pulse behavior for “Whole circle” and “Specific people” posts.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-50",
+      "summary": "Add a “Mark all as read” button at the top of the Alerts/Notifications page that instantly marks all unread notifications as read and immediately clears the unread badge counter.",
+      "reqIds": [],
+      "status": "in_progress"
     }
   ],
   "gameProjectType": "none",

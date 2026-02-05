@@ -1,42 +1,70 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix logout redirect and enforce post-logout public routing",
+  "title": "Notifications: Mark all as read + preserve per-notification mark-as-read before navigation",
   "requirements": [
     {
-      "id": "REQ-29",
-      "summary": "Make “Sign Out” always redirect to the public homepage (\"/\") with replace navigation after logout completes, while keeping React Query cache clearing.",
+      "id": "REQ-34",
+      "summary": "Add a “Mark all as read” action to NotificationsPage with loading/disabled states and immediate UI/badge updates after success.",
       "acceptanceCriteria": [
-        "From any authenticated route (e.g., /circle, /profile, /closest-connections), clicking “Sign Out” navigates to \"/\" after logout completes.",
-        "The navigation uses a replace-style redirect (no back-navigation into authenticated pages after logout).",
-        "React Query cache is cleared on logout as it is today, and the redirect still occurs."
+        "On NotificationsPage, a visible button with user-facing text exactly \"Mark all as read\" appears near the top of the page content (above the unread list).",
+        "The button is only shown (or is disabled) when there is at least 1 unread notification (isRead === false).",
+        "Clicking the button marks all currently-unread notifications as read without requiring confirmation.",
+        "After successful completion, the unread section count becomes 0 and unread items move into the read section (or otherwise render as read).",
+        "After successful completion, the bottom navigation unread badge disappears immediately (i.e., the notifications query is invalidated/refetched so unread count becomes 0).",
+        "The button shows an in-progress state (disabled + loading indicator or text) while the operation is running, and errors are surfaced via the app’s standard toast/error UI."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useInternetIdentity.ts",
+          "path": "frontend/src/pages/NotificationsPage.tsx",
           "operation": "modify",
-          "description": "Adjust the `clear` (logout) function to return a Promise that resolves only after logout has completed and identity state has been cleared, so callers can reliably redirect after a successful logout. (Authorization component logout guidance applies—verify the component's usage instructions before implementing.)"
+          "description": "Add a top-of-page \"Mark all as read\" button (text exactly as specified) wired to a React Query mutation; disable/hide when no unread notifications; show in-progress UI while pending; surface failures via the existing toast UI (sonner). Ensure success causes unread list/count to clear and read section to reflect updates by relying on notifications query invalidation/refetch. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/app/AppHeader.tsx",
+          "path": "frontend/src/components/app/BottomNav.tsx",
           "operation": "modify",
-          "description": "Update the “Sign Out” action to (1) await logout completion via `clear()`, (2) clear the React Query cache as it does today, and (3) navigate to \"/\" using replace-style navigation so the user cannot go back into authenticated pages. (Authorization component logout guidance applies—verify the component's usage instructions before implementing.)"
+          "description": "Ensure the unread badge reacts immediately to notifications query invalidation/refetch after mark-all succeeds (no logic changes expected beyond confirming it derives badge from the shared ['notifications'] query). Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-30",
-      "summary": "Redirect away from authenticated-only layout immediately when identity becomes undefined (and initialization is not in progress).",
+      "id": "REQ-35",
+      "summary": "Add centralized React Query mutation hook(s) for marking notifications as read and invalidate the notifications query on success.",
       "acceptanceCriteria": [
-        "If a user logs out while on an authenticated route, the app does not remain on that route showing any protected/error state; it redirects to \"/\".",
-        "If the user manually visits an authenticated URL after logout (e.g., pasting /profile), they are redirected to \"/\".",
-        "No infinite redirect loop occurs during initial identity loading (i.e., do not redirect while identity is still initializing)."
+        "Frontend adds a React Query mutation hook in frontend/src/hooks/useQueries.ts for the new backend method.",
+        "On mutation success, the hook invalidates the ['notifications'] query so UI and bottom-nav badge update immediately."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/app/AppLayout.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add an authenticated-layout guard effect that watches `identity` and `isInitializing` from `useInternetIdentity`; when identity becomes undefined and initialization is not in progress, immediately navigate to \"/\" with replace-style navigation. This ensures protected routes cannot remain visible after logout and prevents loops during initialization. (Authorization component auth-state guidance applies—verify the component's usage instructions before implementing.)"
+          "description": "Add a centralized React Query mutation hook for markAllNotificationsAsRead() that calls the existing backend actor method and invalidates the ['notifications'] query on success; ensure errors can be caught/handled by callers (NotificationsPage) to display the standard toast UI. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "summary": "Ensure tapping an individual notification marks it as read before/alongside navigation and updates unread badge immediately.",
+      "acceptanceCriteria": [
+        "When a user taps a single unread notification card on NotificationsPage, that notification becomes read (isRead=true) and the unread count decreases accordingly.",
+        "If the notification navigates to a status detail route, the mark-as-read action occurs before/alongside navigation (no requirement for a second visit to clear the badge).",
+        "Mark-as-read for a single notification updates the bottom-nav badge immediately once unread count reaches 0 (by invalidating/refetching ['notifications'])."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add (or confirm existing) React Query mutation hook for markNotificationAsRead(notificationId) that calls the backend actor method and invalidates the ['notifications'] query on success so counts/badge update immediately. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/NotificationsPage.tsx",
+          "operation": "modify",
+          "description": "Update notification click handling so that if a notification is unread, it triggers the per-notification mark-as-read mutation before/alongside navigation to the status detail route; handle loading/rapid taps safely and surface errors via the app’s standard toast UI (sonner) while still preserving navigation behavior as required. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/app/BottomNav.tsx",
+          "operation": "modify",
+          "description": "Confirm unread badge is derived from the shared notifications query and therefore drops immediately when per-notification mark-as-read invalidates/refetches ['notifications']. Verify the component's usage instructions before implementing."
         }
       ]
     }

@@ -186,6 +186,8 @@ export interface backendInterface {
     getUserPulseScore(user: Principal): Promise<bigint>;
     isCallerAdmin(): Promise<boolean>;
     joinCircleFromShareCode(code: string): Promise<void>;
+    markAllNotificationsAsRead(): Promise<void>;
+    markNotificationAsRead(notificationId: string): Promise<boolean>;
     postSilentSignal(mood: Mood, content: string): Promise<void>;
     postStatus(status: StatusPost): Promise<void>;
     removeCircleMember(member: Principal): Promise<void>;

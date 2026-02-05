@@ -175,6 +175,8 @@ export interface _SERVICE {
   'getUserPulseScore' : ActorMethod<[Principal], bigint>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'joinCircleFromShareCode' : ActorMethod<[string], undefined>,
+  'markAllNotificationsAsRead' : ActorMethod<[], undefined>,
+  'markNotificationAsRead' : ActorMethod<[string], boolean>,
   'postSilentSignal' : ActorMethod<[Mood, string], undefined>,
   'postStatus' : ActorMethod<[StatusPost], undefined>,
   'removeCircleMember' : ActorMethod<[Principal], undefined>,
