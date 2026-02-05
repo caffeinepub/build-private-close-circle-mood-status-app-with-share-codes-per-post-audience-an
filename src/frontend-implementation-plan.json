@@ -1,21 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Ensure Closest Connections reflects backend interaction counts after qualifying actions",
+  "title": "Add 12 new Physical State moods to frontend catalog",
   "requirements": [
     {
-      "id": "REQ-41",
-      "summary": "Keep Closest Connections UI in sync with backend-provided interaction totals after status posts and Silent Signals by ensuring relevant queries are invalidated/refetched.",
+      "id": "REQ-48",
+      "summary": "Add the 12 specified Physical State mood options (label + emoji) to the frontend mood catalog so they appear in MoodPicker across Daily Check-In and Compose.",
       "acceptanceCriteria": [
-        "After a user posts a status to a specific person / whole circle / only safe people, the Closest Connections page shows a non-zero Interactions value for affected people after data refetch.",
-        "After a user posts a Silent Signal to a Safe Person, the Closest Connections page shows a non-zero Interactions value for that Safe Person after data refetch.",
-        "No new user-facing copy is added/changed beyond what is necessary to surface the real number (keep existing UI text in English)."
+        "The MoodPicker shows all 12 new moods grouped under the \"Physical State\" category.",
+        "Daily Check-In mood selection and Compose mood selection both display the new moods with the specified emojis.",
+        "TypeScript build passes (the new entries reference valid `Mood.*` enum values generated from the backend)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/constants/moods.ts",
           "operation": "modify",
-          "description": "Update the Silent Signal post mutation to invalidate/refetch the Closest Connections query (and keep existing invalidations intact) so interaction totals refresh after posting a Silent Signal."
+          "description": "Extend the `MOODS` list by adding 12 new entries under the existing `physical-state` category using the exact label+emoji pairs: Thirsty 🥤, Dehydrated 💧, Sleepy 😪, Wired (too much caffeine) ☕️, Sore 🤕, Bloated 😣, Overheated 🥵, Cold 🥶, Headache 🤕, Nauseous 🤢, Lightheaded 😵‍💫, Restless 😣. Ensure each entry references the matching `Mood.<variant>` value and do not change any existing categories, labels/emojis, or picker behavior beyond adding these options."
         }
       ]
     }

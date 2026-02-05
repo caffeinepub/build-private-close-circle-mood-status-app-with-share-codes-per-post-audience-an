@@ -39,6 +39,7 @@ export default function MoodPicker({ selectedMood, onSelectMood, autoFocus = fal
       'low-energy': [],
       stressed: [],
       neutral: [],
+      'physical-state': [],
       other: [],
     };
 

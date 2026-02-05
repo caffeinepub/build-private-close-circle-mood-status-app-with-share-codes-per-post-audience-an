@@ -1,116 +1,66 @@
 {
   "kind": "build_request",
-  "title": "Implement backend interaction tracking to power Closest Connections Interaction Count (exclude passive views + join acceptance)",
+  "title": "Add 12 new Physical State moods with matching emojis",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-37",
-      "text": "Add backend storage for directed interaction counts (author → recipient) and a helper to increment counts safely without duplicates or self-increments.",
+      "id": "REQ-47",
+      "text": "Extend the Motoko backend `Mood` variant type in `backend/main.mo` to include these 12 new moods so the generated frontend `Mood` enum stays in sync: `#thirsty`, `#dehydrated`, `#sleepy`, `#wired`, `#sore`, `#bloated`, `#overheated`, `#cold`, `#headache`, `#nauseous`, `#lightheaded`, `#restless`. Also extend `module Mood.toText` to return the corresponding English labels (including the exact label text \"Wired (too much caffeine)\" for `#wired`).",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Try running it again"
+          "Proceed & add matching emoji"
         ]
       },
       "acceptanceCriteria": [
-        "Interaction counts are stored per directed pair (fromPrincipal → toPrincipal).",
-        "Posting events never increment an interaction where fromPrincipal == toPrincipal.",
-        "If the same pair is incremented multiple times over time, the stored count increases monotonically.",
-        "Implementation does not require any new canisters/services (single-actor only)."
+        "`backend/main.mo` compiles with the new `Mood` variants added to the `Mood` type.",
+        "`Mood.toText` returns correct English labels for all 12 new moods, including exactly \"Wired (too much caffeine)\" for `#wired`.",
+        "Frontend type generation/build does not fail due to missing/unknown `Mood` variants."
       ]
     },
     {
-      "id": "REQ-38",
-      "text": "Increment directed interaction counts on status posts based on the final audience used by the backend postStatus flow: for every recipient in the final audience (excluding the author), increment (author → recipient) by 1. This must apply to Whole circle, Specific people, and Only Safe People posts, and must NOT apply to Just me (private) posts.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Try running it again"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When a caller posts a status to Whole circle, interaction counts increase by +1 for each audience recipient other than the caller.",
-        "When a caller posts a status to Specific people, interaction counts increase by +1 for each selected recipient other than the caller.",
-        "When a caller posts a status to Only Safe People, interaction counts increase by +1 for each targeted Safe Person other than the caller.",
-        "When a caller posts a Just me (private) status (audience is caller only), no interaction counts change.",
-        "Interaction increments are computed from the backend’s enhanced/final audience list (not from any pre-sanitized UI input)."
-      ]
-    },
-    {
-      "id": "REQ-39",
-      "text": "Increment directed interaction counts on Silent Signal posts: for every audience recipient selected by the backend postSilentSignal logic (excluding the author), increment (author → recipient) by 1. Silent Signals must not generate any additional notifications as part of this change.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Try running it again"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When a caller posts a Silent Signal to N Safe People, interaction counts increase by +1 for each (caller → safePerson) pair.",
-        "If the Silent Signal audience resolves to only the caller (no Safe People), no interaction counts change.",
-        "No new notification records are created due to interaction tracking changes."
-      ]
-    },
-    {
-      "id": "REQ-40",
-      "text": "Update the backend closest-connections query (getBestCircleConnectionsWithWhyExplanation) so the returned ConnectionWhyExplanation.interaction field reflects real interaction totals derived from the new interaction tracking. Passive-view interactions and join-request acceptance must remain excluded (no counting for those events).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Try running it again"
-        ]
-      },
-      "acceptanceCriteria": [
-        "For each returned recommended person, the `interaction` field is > 0 after relevant posts/signals occur between the caller and that person (according to the implemented interaction rules).",
-        "No interaction is added/changed by viewing a status detail page.",
-        "No interaction is added/changed when accepting a join request.",
-        "Existing API shape returned by `getBestCircleConnectionsWithWhyExplanation()` remains compatible with the current frontend usage (no breaking type changes)."
-      ]
-    },
-    {
-      "id": "REQ-41",
-      "text": "Ensure frontend Closest Connections continues to display the updated Interaction Count coming from the backend without showing 0 after qualifying interactions have occurred.",
+      "id": "REQ-48",
+      "text": "Update the frontend mood catalog in `frontend/src/constants/moods.ts` to add the 12 new moods under the existing `physical-state` category with matching emojis, so they appear everywhere the mood picker is used (Daily Check-In and Compose flows). Use these exact label+emoji pairs:\n- Thirsty 🥤\n- Dehydrated 💧\n- Sleepy 😪\n- Wired (too much caffeine) ☕️\n- Sore 🤕\n- Bloated 😣\n- Overheated 🥵\n- Cold 🥶\n- Headache 🤕\n- Nauseous 🤢\n- Lightheaded 😵‍💫\n- Restless 😣",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Try running it again"
+          "Proceed & add matching emoji"
         ]
       },
       "acceptanceCriteria": [
-        "After a user posts a status to a specific person / whole circle / only safe people, the Closest Connections page shows a non-zero Interactions value for affected people after data refetch.",
-        "After a user posts a Silent Signal to a Safe Person, the Closest Connections page shows a non-zero Interactions value for that Safe Person after data refetch.",
-        "No new user-facing copy is added/changed beyond what is necessary to surface the real number (keep existing UI text in English)."
+        "The MoodPicker shows all 12 new moods grouped under the \"Physical State\" category.",
+        "Daily Check-In mood selection and Compose mood selection both display the new moods with the specified emojis.",
+        "TypeScript build passes (the new entries reference valid `Mood.*` enum values generated from the backend)."
       ]
     }
   ],
   "constraints": [
-    "Do not count interaction events for (4) viewing someone’s status detail or (5) accepting a join request (explicitly excluded for now).",
-    "Respect the single-actor Motoko backend architecture: all logic stays in backend/main.mo; add backend/migration.mo only if an upgrade-safe migration is strictly required.",
-    "Do not edit files under frontend/src/components/ui or other frontend immutable paths listed in SYSTEM_CONTEXT."
+    "Backend must remain a single-actor Motoko canister; keep all logic in `backend/main.mo`.",
+    "Do not edit any frontend files under the immutable paths listed in SYSTEM_CONTEXT (compose read-only UI components instead of modifying them).",
+    "Use English for all user-facing text."
   ],
   "nonGoals": [
-    "Adding likes/comments/reactions or any other interaction signals beyond status audience delivery and silent signals.",
-    "Adding passive-view interaction tracking now (may be done later).",
-    "Counting join-request acceptance as interaction now (may be done later).",
-    "Redesigning Closest Connections UI beyond reflecting the correct interaction number."
+    "Do not add any additional moods beyond the 12 specified.",
+    "Do not change existing mood categories, existing mood labels/emojis, or mood picker UX beyond adding the new options."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

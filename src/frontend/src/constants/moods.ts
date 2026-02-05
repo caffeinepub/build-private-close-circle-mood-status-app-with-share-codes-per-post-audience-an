@@ -4,7 +4,7 @@ export interface MoodOption {
   value: Mood;
   label: string;
   emoji: string;
-  category: 'positive' | 'calm' | 'low-energy' | 'stressed' | 'neutral' | 'other';
+  category: 'positive' | 'calm' | 'low-energy' | 'stressed' | 'neutral' | 'physical-state' | 'other';
 }
 
 export const MOODS: MoodOption[] = [
@@ -58,6 +58,23 @@ export const MOODS: MoodOption[] = [
   // Neutral
   { value: Mood.neutral, label: 'Neutral', emoji: '😐', category: 'neutral' },
 
+  // Physical State (body needs and sensations)
+  { value: Mood.hungry, label: 'Hungry', emoji: '😋', category: 'physical-state' },
+  { value: Mood.starving, label: 'Starving', emoji: '🤤', category: 'physical-state' },
+  { value: Mood.craving, label: 'Craving', emoji: '🍔', category: 'physical-state' },
+  { value: Mood.thirsty, label: 'Thirsty', emoji: '🥤', category: 'physical-state' },
+  { value: Mood.dehydrated, label: 'Dehydrated', emoji: '💧', category: 'physical-state' },
+  { value: Mood.sleepy, label: 'Sleepy', emoji: '😪', category: 'physical-state' },
+  { value: Mood.wired, label: 'Wired (too much caffeine)', emoji: '☕️', category: 'physical-state' },
+  { value: Mood.sore, label: 'Sore', emoji: '🤕', category: 'physical-state' },
+  { value: Mood.bloated, label: 'Bloated', emoji: '😣', category: 'physical-state' },
+  { value: Mood.overheated, label: 'Overheated', emoji: '🥵', category: 'physical-state' },
+  { value: Mood.cold, label: 'Cold', emoji: '🥶', category: 'physical-state' },
+  { value: Mood.headache, label: 'Headache', emoji: '🤕', category: 'physical-state' },
+  { value: Mood.nauseous, label: 'Nauseous', emoji: '🤢', category: 'physical-state' },
+  { value: Mood.lightheaded, label: 'Lightheaded', emoji: '😵‍💫', category: 'physical-state' },
+  { value: Mood.restless, label: 'Restless', emoji: '😣', category: 'physical-state' },
+
   // Other (complex/mixed emotions)
   { value: Mood.embarrass, label: 'Embarrassed', emoji: '😳', category: 'other' },
   { value: Mood.shy, label: 'Shy', emoji: '🙈', category: 'other' },
@@ -72,6 +89,7 @@ export const MOOD_CATEGORIES = {
   'low-energy': { label: 'Low Energy', description: 'Tired or withdrawn' },
   stressed: { label: 'Stressed', description: 'Anxious or tense' },
   neutral: { label: 'Neutral', description: 'Balanced or even' },
+  'physical-state': { label: 'Physical State', description: 'Body needs and sensations' },
   other: { label: 'Other', description: 'Complex emotions' },
 } as const;
 

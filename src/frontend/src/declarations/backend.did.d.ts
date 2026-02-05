@@ -44,42 +44,57 @@ export type Mood = { 'joy' : null } |
   { 'inspiration' : null } |
   { 'tired' : null } |
   { 'content' : null } |
+  { 'dehydrated' : null } |
   { 'anxious' : null } |
   { 'courage' : null } |
   { 'happy' : null } |
   { 'angry' : null } |
+  { 'lightheaded' : null } |
+  { 'thirsty' : null } |
   { 'triumph' : null } |
   { 'nervous' : null } |
   { 'embarrass' : null } |
   { 'apathetic' : null } |
+  { 'hungry' : null } |
   { 'melancholy' : null } |
   { 'bore' : null } |
+  { 'headache' : null } |
   { 'calm' : null } |
+  { 'cold' : null } |
+  { 'bloated' : null } |
   { 'fear' : null } |
+  { 'starving' : null } |
+  { 'sore' : null } |
   { 'irritate' : null } |
   { 'relaxed' : null } |
   { 'grateful' : null } |
   { 'lonely' : null } |
   { 'secure' : null } |
   { 'unsafe' : null } |
+  { 'sleepy' : null } |
   { 'satisfy' : null } |
   { 'motivate' : null } |
   { 'stressed' : null } |
   { 'frustrate' : null } |
+  { 'nauseous' : null } |
   { 'overwhelm' : null } |
   { 'passionate' : null } |
   { 'disappoint' : null } |
   { 'excited' : null } |
+  { 'overheated' : null } |
   { 'indifferen' : null } |
   { 'humbled' : null } |
   { 'disgust' : null } |
   { 'confident' : null } |
   { 'curious' : null } |
   { 'relieved' : null } |
+  { 'wired' : null } |
   { 'worry' : null } |
+  { 'craving' : null } |
   { 'guilty' : null } |
   { 'ashamed' : null } |
   { 'neutral' : null } |
+  { 'restless' : null } |
   { 'optimistic' : null };
 export interface Notification {
   'id' : string,

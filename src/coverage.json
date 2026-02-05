@@ -1,52 +1,31 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T20:55:10.615Z",
+  "generatedAt": "2026-02-05T23:14:41.549Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
+    "total": 2,
     "implemented": 1,
     "items": [
       {
-        "id": "REQ-37",
-        "summary": "Add backend storage for directed interaction counts (author → recipient) and a helper to increment counts safely without duplicates or self-increments.",
+        "id": "REQ-47",
+        "summary": "Extend the Motoko backend `Mood` variant type in `backend/main.mo` to include these 12 new moods so the generated frontend `Mood` enum stays in sync: `#thirsty`, `#dehydrated`, `#sleepy`, `#wired`, `#sore`, `#bloated`, `#overheated`, `#cold`, `#headache`, `#nauseous`, `#lightheaded`, `#restless`. Also extend `module Mood.toText` to return the corresponding English labels (including the exact label text \"Wired (too much caffeine)\" for `#wired`).",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-38",
-        "summary": "Increment directed interaction counts on status posts based on the final audience used by the backend postStatus flow: for every recipient in the final audience (excluding the author), increment (author → recipient) by 1. This must apply to Whole circle, Specific people, and Only Safe People posts, and must NOT apply to Just me (private) posts.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-39",
-        "summary": "Increment directed interaction counts on Silent Signal posts: for every audience recipient selected by the backend postSilentSignal logic (excluding the author), increment (author → recipient) by 1. Silent Signals must not generate any additional notifications as part of this change.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-40",
-        "summary": "Update the backend closest-connections query (getBestCircleConnectionsWithWhyExplanation) so the returned ConnectionWhyExplanation.interaction field reflects real interaction totals derived from the new interaction tracking. Passive-view interactions and join-request acceptance must remain excluded (no counting for those events).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-41",
-        "summary": "Ensure frontend Closest Connections continues to display the updated Interaction Count coming from the backend without showing 0 after qualifying interactions have occurred.",
+        "id": "REQ-48",
+        "summary": "Update the frontend mood catalog in `frontend/src/constants/moods.ts` to add the 12 new moods under the existing `physical-state` category with matching emojis, so they appear everywhere the mood picker is used (Daily Check-In and Compose flows). Use these exact label+emoji pairs:\n- Thirsty 🥤\n- Dehydrated 💧\n- Sleepy 😪\n- Wired (too much caffeine) ☕️\n- Sore 🤕\n- Bloated 😣\n- Overheated 🥵\n- Cold 🥶\n- Headache 🤕\n- Nauseous 🤢\n- Lightheaded 😵‍💫\n- Restless 😣",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/constants/moods.ts"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/constants/moods.ts"
         ]
       }
     ]
@@ -58,7 +37,11 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/constants/moods.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

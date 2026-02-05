@@ -41,6 +41,12 @@ export function getMoodColorClasses(category: MoodOption['category']): {
       text: 'text-mood-neutral',
       ring: 'ring-mood-neutral/30',
     },
+    'physical-state': {
+      border: 'border-mood-neutral/40',
+      bg: 'bg-mood-neutral/10',
+      text: 'text-mood-neutral',
+      ring: 'ring-mood-neutral/30',
+    },
     other: {
       border: 'border-mood-other/40',
       bg: 'bg-mood-other/10',
@@ -62,6 +68,7 @@ export function getMoodGradientClasses(category: MoodOption['category']): string
     'low-energy': 'bg-gradient-to-br from-mood-low-energy/20 to-mood-low-energy/5',
     stressed: 'bg-gradient-to-br from-mood-stressed/20 to-mood-stressed/5',
     neutral: 'bg-gradient-to-br from-mood-neutral/20 to-mood-neutral/5',
+    'physical-state': 'bg-gradient-to-br from-mood-neutral/20 to-mood-neutral/5',
     other: 'bg-gradient-to-br from-mood-other/20 to-mood-other/5',
   };
 

@@ -62,6 +62,21 @@ actor {
     #passionate;
     #indifferen;
     #irritate;
+    #hungry;
+    #starving;
+    #craving;
+    #thirsty;
+    #dehydrated;
+    #sleepy;
+    #wired;
+    #sore;
+    #bloated;
+    #overheated;
+    #cold;
+    #headache;
+    #nauseous;
+    #lightheaded;
+    #restless;
   };
 
   module Mood {
@@ -112,6 +127,21 @@ actor {
         case (#passionate) { "Passionate" };
         case (#indifferen) { "Indifferent" };
         case (#irritate) { "Irritated" };
+        case (#hungry) { "Hungry" };
+        case (#starving) { "Starving" };
+        case (#craving) { "Craving" };
+        case (#thirsty) { "Thirsty" };
+        case (#dehydrated) { "Dehydrated" };
+        case (#sleepy) { "Sleepy" };
+        case (#wired) { "Wired (too much caffeine)" };
+        case (#sore) { "Sore" };
+        case (#bloated) { "Bloated" };
+        case (#overheated) { "Overheated" };
+        case (#cold) { "Cold" };
+        case (#headache) { "Headache" };
+        case (#nauseous) { "Nauseous" };
+        case (#lightheaded) { "Lightheaded" };
+        case (#restless) { "Restless" };
       };
     };
   };

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 230,
+  "projectStateVersion": 238,
   "summary": "CloseCircle will transition circle membership from one-sided (stored only under the owner) to a two-sided model by adding mirrored member→circles storage. Rollout will be gradual, starting with a backend-only storage change (no UI yet), with later planned member-side surfaces like “circles I’m in”, “people who have me in their circle”, a lightweight private relationship viewer, and smarter Safe People suggestions derived from existing relationship/interaction data.",
   "architectural_notes": [
     "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
@@ -26,7 +26,7 @@
     "UI layout: Fixed bottom footer/bottom bar overlaps page body content across multiple screens. Footer should remain fixed/visible, but scrollable page content must include sufficient bottom safe-area/padding so key controls (e.g., Check-In “Share” button) are never hidden; button does not need to be sticky.",
     "Profile update currently overwrites creation date (createdAt); backend should preserve original createdAt and ignore any client-supplied createdAt during updates."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "generatedImages": [
     {
       "filename": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
@@ -937,6 +937,46 @@
         "REQ-41"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-mood-catalog-used-by-the-mood-picker-frontend-src-constants-moods-ts-to-include-the-new-moods-with-the-exact-emojis-and-appropriate-category-placement-so-they-display-in-both-daily-check-in-and-normal-compose-flows-hungry-starving-craving-place-them-in-an-existing-visible-category-e-g-low-energy-rather-than-creating-a-new-hidden-bottom-only-category",
+      "title": "Update the frontend mood catalog used by the mood picker (`frontend/src/constants/moods.ts`) to include the new moods with the exact emojis and appropriate category placement so they display in both Daily Check-In and normal Compose flows: Hungry 😋, Starving 🤤, Craving 🍔. Place them in an existing visible category (e.g., `low-energy`) rather than creating a new hidden/bottom-only category.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-or-reconcile-any-stray-unused-mood-catalog-code-that-references-the-new-moods-outside-the-real-catalog-source-of-truth-so-the-app-cannot-end-up-in-a-state-where-moods-appear-in-one-file-but-not-in-the-picker-in-particular-ensure-the-snippet-in-frontend-index-ts-does-not-cause-confusion-or-divergence-from-frontend-src-constants-moods-ts",
+      "title": "Remove or reconcile any stray/unused mood-catalog code that references the new moods outside the real catalog source of truth, so the app cannot end up in a state where moods appear in one file but not in the picker. In particular, ensure the snippet in `frontend/index.ts` does not cause confusion or divergence from `frontend/src/constants/moods.ts`.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-mood-catalog-so-the-moods-hungry-starving-and-craving-are-no-longer-in-the-low-energy-category-and-instead-appear-under-a-new-physical-state-category-everywhere-the-mood-picker-is-used-including-daily-check-in-and-normal-compose",
+      "title": "Update the frontend mood catalog so the moods Hungry 😋, Starving 🤤, and Craving 🍔 are no longer in the “Low Energy” category and instead appear under a new “Physical State” category everywhere the mood picker is used (including Daily Check-In and normal Compose).",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-mood-category-dependent-ui-code-supports-the-new-physical-state-category-without-runtime-errors-or-typescript-errors-including-mood-grouping-and-mood-color-styling",
+      "title": "Ensure all mood-category dependent UI code supports the new “Physical State” category without runtime errors or TypeScript errors (including mood grouping and mood color styling).",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-mood-catalog-in-frontend-src-constants-moods-ts-to-add-the-12-new-moods-under-the-existing-physical-state-category-with-matching-emojis-so-they-appear-everywhere-the-mood-picker-is-used-daily-check-in-and-compose-flows-use-these-exact-label-emoji-pairs-thirsty-dehydrated-sleepy-wired-too-much-caffeine-sore-bloated-overheated-cold-headache-nauseous-lightheaded-restless",
+      "title": "Update the frontend mood catalog in `frontend/src/constants/moods.ts` to add the 12 new moods under the existing `physical-state` category with matching emojis, so they appear everywhere the mood picker is used (Daily Check-In and Compose flows). Use these exact label+emoji pairs:\n- Thirsty 🥤\n- Dehydrated 💧\n- Sleepy 😪\n- Wired (too much caffeine) ☕️\n- Sore 🤕\n- Bloated 😣\n- Overheated 🥵\n- Cold 🥶\n- Headache 🤕\n- Nauseous 🤢\n- Lightheaded 😵‍💫\n- Restless 😣",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1159,6 +1199,40 @@
       "summary": "Update the backend closest-connections query (getBestCircleConnectionsWithWhyExplanation) so the returned ConnectionWhyExplanation.interaction field reflects real interaction totals derived from the new interaction tracking. Passive-view interactions and join-request acceptance must remain excluded (no counting for those events).",
       "reqIds": [
         "REQ-40"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Expand the mood catalog and mood picker by adding new everyday moods starting with: Hungry 😋, Starving 🤤, Craving 🍔 (with appropriate emojis/categories), and propose additional everyday mood options for user selection.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Add the three new mood variants to the Motoko backend `Mood` type so the frontend can reference them via `@/backend` without missing/undefined enum values: `#hungry`, `#starving`, and `#craving`. Also extend `module Mood.toText` to return the corresponding English labels.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Move Hungry 😋, Starving 🤤, and Craving 🍔 moods from the “Low Energy” category to a new “Physical State” category in the frontend mood catalog/mood picker so they appear grouped under Physical State across Daily Check-In and normal Compose.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Expand the Physical State mood catalog by adding 12 new moods (Thirsty, Dehydrated, Sleepy, Wired (too much caffeine), Sore, Bloated, Overheated, Cold, Headache, Nauseous, Lightheaded, Restless) with matching emojis and wire them into the mood picker/catalog so they appear across Daily Check-In and normal Compose flows.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-60",
+      "summary": "Extend the Motoko backend `Mood` variant type in `backend/main.mo` to include these 12 new moods so the generated frontend `Mood` enum stays in sync: `#thirsty`, `#dehydrated`, `#sleepy`, `#wired`, `#sore`, `#bloated`, `#overheated`, `#cold`, `#headache`, `#nauseous`, `#lightheaded`, `#restless`. Also extend `module Mood.toText` to return the corresponding English labels (including the exact label text \"Wired (too much caffeine)\" for `#wired`).",
+      "reqIds": [
+        "REQ-47"
       ],
       "status": "pending"
     }

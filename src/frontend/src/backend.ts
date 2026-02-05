@@ -192,42 +192,57 @@ export enum Mood {
     inspiration = "inspiration",
     tired = "tired",
     content = "content",
+    dehydrated = "dehydrated",
     anxious = "anxious",
     courage = "courage",
     happy = "happy",
     angry = "angry",
+    lightheaded = "lightheaded",
+    thirsty = "thirsty",
     triumph = "triumph",
     nervous = "nervous",
     embarrass = "embarrass",
     apathetic = "apathetic",
+    hungry = "hungry",
     melancholy = "melancholy",
     bore = "bore",
+    headache = "headache",
     calm = "calm",
+    cold = "cold",
+    bloated = "bloated",
     fear = "fear",
+    starving = "starving",
+    sore = "sore",
     irritate = "irritate",
     relaxed = "relaxed",
     grateful = "grateful",
     lonely = "lonely",
     secure = "secure",
     unsafe = "unsafe",
+    sleepy = "sleepy",
     satisfy = "satisfy",
     motivate = "motivate",
     stressed = "stressed",
     frustrate = "frustrate",
+    nauseous = "nauseous",
     overwhelm = "overwhelm",
     passionate = "passionate",
     disappoint = "disappoint",
     excited = "excited",
+    overheated = "overheated",
     indifferen = "indifferen",
     humbled = "humbled",
     disgust = "disgust",
     confident = "confident",
     curious = "curious",
     relieved = "relieved",
+    wired = "wired",
     worry = "worry",
+    craving = "craving",
     guilty = "guilty",
     ashamed = "ashamed",
     neutral = "neutral",
+    restless = "restless",
     optimistic = "optimistic"
 }
 export enum RelationshipIntent {
@@ -1125,6 +1140,8 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     content: null;
 } | {
+    dehydrated: null;
+} | {
     anxious: null;
 } | {
     courage: null;
@@ -1132,6 +1149,10 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
     happy: null;
 } | {
     angry: null;
+} | {
+    lightheaded: null;
+} | {
+    thirsty: null;
 } | {
     triumph: null;
 } | {
@@ -1141,13 +1162,25 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     apathetic: null;
 } | {
+    hungry: null;
+} | {
     melancholy: null;
 } | {
     bore: null;
 } | {
+    headache: null;
+} | {
     calm: null;
 } | {
+    cold: null;
+} | {
+    bloated: null;
+} | {
     fear: null;
+} | {
+    starving: null;
+} | {
+    sore: null;
 } | {
     irritate: null;
 } | {
@@ -1161,6 +1194,8 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     unsafe: null;
 } | {
+    sleepy: null;
+} | {
     satisfy: null;
 } | {
     motivate: null;
@@ -1169,6 +1204,8 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     frustrate: null;
 } | {
+    nauseous: null;
+} | {
     overwhelm: null;
 } | {
     passionate: null;
@@ -1176,6 +1213,8 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
     disappoint: null;
 } | {
     excited: null;
+} | {
+    overheated: null;
 } | {
     indifferen: null;
 } | {
@@ -1189,7 +1228,11 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     relieved: null;
 } | {
+    wired: null;
+} | {
     worry: null;
+} | {
+    craving: null;
 } | {
     guilty: null;
 } | {
@@ -1197,9 +1240,11 @@ function from_candid_variant_n24(_uploadFile: (file: ExternalBlob) => Promise<Ui
 } | {
     neutral: null;
 } | {
+    restless: null;
+} | {
     optimistic: null;
 }): Mood {
-    return "joy" in value ? Mood.joy : "sad" in value ? Mood.sad : "shy" in value ? Mood.shy : "zen" in value ? Mood.zen : "hopeful" in value ? Mood.hopeful : "inspiration" in value ? Mood.inspiration : "tired" in value ? Mood.tired : "content" in value ? Mood.content : "anxious" in value ? Mood.anxious : "courage" in value ? Mood.courage : "happy" in value ? Mood.happy : "angry" in value ? Mood.angry : "triumph" in value ? Mood.triumph : "nervous" in value ? Mood.nervous : "embarrass" in value ? Mood.embarrass : "apathetic" in value ? Mood.apathetic : "melancholy" in value ? Mood.melancholy : "bore" in value ? Mood.bore : "calm" in value ? Mood.calm : "fear" in value ? Mood.fear : "irritate" in value ? Mood.irritate : "relaxed" in value ? Mood.relaxed : "grateful" in value ? Mood.grateful : "lonely" in value ? Mood.lonely : "secure" in value ? Mood.secure : "unsafe" in value ? Mood.unsafe : "satisfy" in value ? Mood.satisfy : "motivate" in value ? Mood.motivate : "stressed" in value ? Mood.stressed : "frustrate" in value ? Mood.frustrate : "overwhelm" in value ? Mood.overwhelm : "passionate" in value ? Mood.passionate : "disappoint" in value ? Mood.disappoint : "excited" in value ? Mood.excited : "indifferen" in value ? Mood.indifferen : "humbled" in value ? Mood.humbled : "disgust" in value ? Mood.disgust : "confident" in value ? Mood.confident : "curious" in value ? Mood.curious : "relieved" in value ? Mood.relieved : "worry" in value ? Mood.worry : "guilty" in value ? Mood.guilty : "ashamed" in value ? Mood.ashamed : "neutral" in value ? Mood.neutral : "optimistic" in value ? Mood.optimistic : value;
+    return "joy" in value ? Mood.joy : "sad" in value ? Mood.sad : "shy" in value ? Mood.shy : "zen" in value ? Mood.zen : "hopeful" in value ? Mood.hopeful : "inspiration" in value ? Mood.inspiration : "tired" in value ? Mood.tired : "content" in value ? Mood.content : "dehydrated" in value ? Mood.dehydrated : "anxious" in value ? Mood.anxious : "courage" in value ? Mood.courage : "happy" in value ? Mood.happy : "angry" in value ? Mood.angry : "lightheaded" in value ? Mood.lightheaded : "thirsty" in value ? Mood.thirsty : "triumph" in value ? Mood.triumph : "nervous" in value ? Mood.nervous : "embarrass" in value ? Mood.embarrass : "apathetic" in value ? Mood.apathetic : "hungry" in value ? Mood.hungry : "melancholy" in value ? Mood.melancholy : "bore" in value ? Mood.bore : "headache" in value ? Mood.headache : "calm" in value ? Mood.calm : "cold" in value ? Mood.cold : "bloated" in value ? Mood.bloated : "fear" in value ? Mood.fear : "starving" in value ? Mood.starving : "sore" in value ? Mood.sore : "irritate" in value ? Mood.irritate : "relaxed" in value ? Mood.relaxed : "grateful" in value ? Mood.grateful : "lonely" in value ? Mood.lonely : "secure" in value ? Mood.secure : "unsafe" in value ? Mood.unsafe : "sleepy" in value ? Mood.sleepy : "satisfy" in value ? Mood.satisfy : "motivate" in value ? Mood.motivate : "stressed" in value ? Mood.stressed : "frustrate" in value ? Mood.frustrate : "nauseous" in value ? Mood.nauseous : "overwhelm" in value ? Mood.overwhelm : "passionate" in value ? Mood.passionate : "disappoint" in value ? Mood.disappoint : "excited" in value ? Mood.excited : "overheated" in value ? Mood.overheated : "indifferen" in value ? Mood.indifferen : "humbled" in value ? Mood.humbled : "disgust" in value ? Mood.disgust : "confident" in value ? Mood.confident : "curious" in value ? Mood.curious : "relieved" in value ? Mood.relieved : "wired" in value ? Mood.wired : "worry" in value ? Mood.worry : "craving" in value ? Mood.craving : "guilty" in value ? Mood.guilty : "ashamed" in value ? Mood.ashamed : "neutral" in value ? Mood.neutral : "restless" in value ? Mood.restless : "optimistic" in value ? Mood.optimistic : value;
 }
 function from_candid_variant_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     romantic: null;
@@ -1371,6 +1416,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
 } | {
     content: null;
 } | {
+    dehydrated: null;
+} | {
     anxious: null;
 } | {
     courage: null;
@@ -1378,6 +1425,10 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
     happy: null;
 } | {
     angry: null;
+} | {
+    lightheaded: null;
+} | {
+    thirsty: null;
 } | {
     triumph: null;
 } | {
@@ -1387,13 +1438,25 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
 } | {
     apathetic: null;
 } | {
+    hungry: null;
+} | {
     melancholy: null;
 } | {
     bore: null;
 } | {
+    headache: null;
+} | {
     calm: null;
 } | {
+    cold: null;
+} | {
+    bloated: null;
+} | {
     fear: null;
+} | {
+    starving: null;
+} | {
+    sore: null;
 } | {
     irritate: null;
 } | {
@@ -1407,6 +1470,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
 } | {
     unsafe: null;
 } | {
+    sleepy: null;
+} | {
     satisfy: null;
 } | {
     motivate: null;
@@ -1415,6 +1480,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
 } | {
     frustrate: null;
 } | {
+    nauseous: null;
+} | {
     overwhelm: null;
 } | {
     passionate: null;
@@ -1422,6 +1489,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
     disappoint: null;
 } | {
     excited: null;
+} | {
+    overheated: null;
 } | {
     indifferen: null;
 } | {
@@ -1435,13 +1504,19 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
 } | {
     relieved: null;
 } | {
+    wired: null;
+} | {
     worry: null;
+} | {
+    craving: null;
 } | {
     guilty: null;
 } | {
     ashamed: null;
 } | {
     neutral: null;
+} | {
+    restless: null;
 } | {
     optimistic: null;
 } {
@@ -1461,6 +1536,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
         tired: null
     } : value == Mood.content ? {
         content: null
+    } : value == Mood.dehydrated ? {
+        dehydrated: null
     } : value == Mood.anxious ? {
         anxious: null
     } : value == Mood.courage ? {
@@ -1469,6 +1546,10 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
         happy: null
     } : value == Mood.angry ? {
         angry: null
+    } : value == Mood.lightheaded ? {
+        lightheaded: null
+    } : value == Mood.thirsty ? {
+        thirsty: null
     } : value == Mood.triumph ? {
         triumph: null
     } : value == Mood.nervous ? {
@@ -1477,14 +1558,26 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
         embarrass: null
     } : value == Mood.apathetic ? {
         apathetic: null
+    } : value == Mood.hungry ? {
+        hungry: null
     } : value == Mood.melancholy ? {
         melancholy: null
     } : value == Mood.bore ? {
         bore: null
+    } : value == Mood.headache ? {
+        headache: null
     } : value == Mood.calm ? {
         calm: null
+    } : value == Mood.cold ? {
+        cold: null
+    } : value == Mood.bloated ? {
+        bloated: null
     } : value == Mood.fear ? {
         fear: null
+    } : value == Mood.starving ? {
+        starving: null
+    } : value == Mood.sore ? {
+        sore: null
     } : value == Mood.irritate ? {
         irritate: null
     } : value == Mood.relaxed ? {
@@ -1497,6 +1590,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
         secure: null
     } : value == Mood.unsafe ? {
         unsafe: null
+    } : value == Mood.sleepy ? {
+        sleepy: null
     } : value == Mood.satisfy ? {
         satisfy: null
     } : value == Mood.motivate ? {
@@ -1505,6 +1600,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
         stressed: null
     } : value == Mood.frustrate ? {
         frustrate: null
+    } : value == Mood.nauseous ? {
+        nauseous: null
     } : value == Mood.overwhelm ? {
         overwhelm: null
     } : value == Mood.passionate ? {
@@ -1513,6 +1610,8 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
         disappoint: null
     } : value == Mood.excited ? {
         excited: null
+    } : value == Mood.overheated ? {
+        overheated: null
     } : value == Mood.indifferen ? {
         indifferen: null
     } : value == Mood.humbled ? {
@@ -1525,14 +1624,20 @@ function to_candid_variant_n38(_uploadFile: (file: ExternalBlob) => Promise<Uint
         curious: null
     } : value == Mood.relieved ? {
         relieved: null
+    } : value == Mood.wired ? {
+        wired: null
     } : value == Mood.worry ? {
         worry: null
+    } : value == Mood.craving ? {
+        craving: null
     } : value == Mood.guilty ? {
         guilty: null
     } : value == Mood.ashamed ? {
         ashamed: null
     } : value == Mood.neutral ? {
         neutral: null
+    } : value == Mood.restless ? {
+        restless: null
     } : value == Mood.optimistic ? {
         optimistic: null
     } : value;
