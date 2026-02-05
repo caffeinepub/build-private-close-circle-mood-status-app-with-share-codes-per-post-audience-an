@@ -525,6 +525,7 @@ export function usePostSilentSignal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['closestConnections'] });
     },
   });
 }

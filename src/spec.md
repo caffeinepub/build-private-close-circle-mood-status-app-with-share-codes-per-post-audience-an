@@ -1,13 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Add a “Mark all as read” action on the Notifications/Alerts page and ensure notification read-state updates immediately (including the bottom-nav unread badge).
+**Goal:** Track and surface real directed interaction counts (author → recipient) from backend status posts and Silent Signal posts so Closest Connections shows accurate non-zero interaction totals, while continuing to exclude passive views and join-request acceptance.
 
 **Planned changes:**
-- Add a “Mark all as read” button near the top of `frontend/src/pages/NotificationsPage.tsx`, shown or enabled only when there is at least one unread notification.
-- Implement a backend method in `backend/main.mo` to mark all of the authenticated caller’s notifications as read (without affecting other users), following existing notifications authorization patterns.
-- Add a centralized React Query mutation in `frontend/src/hooks/useQueries.ts` to call the new backend method and invalidate/refetch the `['notifications']` query on success (to immediately clear unread counts and the bottom-nav badge).
-- Ensure tapping an individual notification marks it as read before/alongside navigation, using existing per-notification mark-as-read behavior or adding the necessary backend API + React Query mutation, and invalidating `['notifications']` so counts/badge update immediately.
-- Add in-progress (disabled/loading) and error handling for the mark-all operation using the app’s standard toast/error UI.
+- Add backend storage for directed interaction counts keyed by (fromPrincipal → toPrincipal) and a safe increment helper that prevents self-increments and supports monotonically increasing counts.
+- Update backend status posting flow to increment (author → recipient) by 1 for each recipient in the backend-computed final audience for Whole circle, Specific people, and Only Safe People; do not increment for Just me posts.
+- Update backend Silent Signal posting flow to increment (author → recipient) by 1 for each recipient resolved by backend audience logic; do not add any new notifications as part of this tracking.
+- Update `getBestCircleConnectionsWithWhyExplanation` so `ConnectionWhyExplanation.interaction` reflects totals derived from the new interaction tracking (still excluding passive views and join-request acceptance) without breaking the existing API shape.
+- Ensure the frontend Closest Connections page continues to display the backend-provided Interaction Count correctly after refetch, without additional UI copy changes.
 
-**User-visible outcome:** On the Notifications page, users can tap “Mark all as read” to instantly clear all unread notifications and remove the unread badge, and tapping a single notification reliably marks it as read immediately as they navigate.
+**User-visible outcome:** After posting statuses (to eligible audiences) or sending Silent Signals, users will see updated, non-zero Interaction counts for affected people on the Closest Connections page after data refresh, while views and join-request acceptance continue not to affect the count.

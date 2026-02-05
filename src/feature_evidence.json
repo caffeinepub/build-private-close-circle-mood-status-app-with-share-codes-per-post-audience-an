@@ -2,27 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-mark-all-as-read-button-at-the-top-of-the-notifications-alerts-page-frontend-src-pages-notificationspage-tsx-when-tapped-it-must-instantly-mark-every-unread-notification-as-read-and-the-unread-badge-counter-must-clear-immediately-after-success",
-      "featureTitle": "Add a “Mark all as read” button at the top of the Notifications/Alerts page (frontend/src/pages/NotificationsPage.tsx). When tapped, it must instantly mark every unread notification as read and the unread badge/counter must clear immediately after success.",
-      "files": [
-        "frontend/src/pages/NotificationsPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-34"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-a-backend-api-to-mark-all-of-the-caller-s-notifications-as-read-and-wire-it-to-a-new-centralized-react-query-mutation-hook-that-the-notifications-page-uses-for-the-mark-all-as-read-button",
-      "featureTitle": "Implement a backend API to mark all of the caller’s notifications as read, and wire it to a new centralized React Query mutation hook that the Notifications page uses for the “Mark all as read” button.",
+      "featureId": "feature-ensure-frontend-closest-connections-continues-to-display-the-updated-interaction-count-coming-from-the-backend-without-showing-0-after-qualifying-interactions-have-occurred",
+      "featureTitle": "Ensure frontend Closest Connections continues to display the updated Interaction Count coming from the backend without showing 0 after qualifying interactions have occurred.",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -35,27 +16,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-35"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-tapping-an-individual-notification-marks-it-as-read-before-navigating-to-preserve-existing-expected-behavior-that-tapping-clears-unread-count-using-the-existing-per-notification-mark-as-read-behavior-if-present-or-by-adding-a-backend-api-react-query-mutation-if-it-does-not-exist-yet",
-      "featureTitle": "Ensure tapping an individual notification marks it as read before navigating (to preserve existing expected behavior that tapping clears unread count), using the existing per-notification mark-as-read behavior if present, or by adding a backend API + React Query mutation if it does not exist yet.",
-      "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/NotificationsPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-36"
+        "REQ-41"
       ],
       "confidence": "high"
     }

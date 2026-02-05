@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 228,
+  "projectStateVersion": 230,
   "summary": "CloseCircle will transition circle membership from one-sided (stored only under the owner) to a two-sided model by adding mirrored member→circles storage. Rollout will be gradual, starting with a backend-only storage change (no UI yet), with later planned member-side surfaces like “circles I’m in”, “people who have me in their circle”, a lightweight private relationship viewer, and smarter Safe People suggestions derived from existing relationship/interaction data.",
   "architectural_notes": [
     "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
@@ -26,7 +26,7 @@
     "UI layout: Fixed bottom footer/bottom bar overlaps page body content across multiple screens. Footer should remain fixed/visible, but scrollable page content must include sufficient bottom safe-area/padding so key controls (e.g., Check-In “Share” button) are never hidden; button does not need to be sticky.",
     "Profile update currently overwrites creation date (createdAt); backend should preserve original createdAt and ignore any client-supplied createdAt during updates."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "generatedImages": [
     {
       "filename": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
@@ -929,6 +929,14 @@
         "REQ-36"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-ensure-frontend-closest-connections-continues-to-display-the-updated-interaction-count-coming-from-the-backend-without-showing-0-after-qualifying-interactions-have-occurred",
+      "title": "Ensure frontend Closest Connections continues to display the updated Interaction Count coming from the backend without showing 0 after qualifying interactions have occurred.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1115,6 +1123,44 @@
       "summary": "Add a “Mark all as read” button at the top of the Alerts/Notifications page that instantly marks all unread notifications as read and immediately clears the unread badge counter.",
       "reqIds": [],
       "status": "in_progress"
+    },
+    {
+      "id": "AR-51",
+      "summary": "Implement backend interaction tracking to power Closest Connections “Interaction Count”: increment directed (author→recipient) counts on mood/status posts (including whole-circle fanout), Silent Signals, and Only Safe People posts; explicitly exclude passive status-detail views and join-request acceptance for now.",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-52",
+      "summary": "Add backend storage for directed interaction counts (author → recipient) and a helper to increment counts safely without duplicates or self-increments.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-53",
+      "summary": "Increment directed interaction counts on status posts based on the final audience used by the backend postStatus flow: for every recipient in the final audience (excluding the author), increment (author → recipient) by 1. This must apply to Whole circle, Specific people, and Only Safe People posts, and must NOT apply to Just me (private) posts.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Increment directed interaction counts on Silent Signal posts: for every audience recipient selected by the backend postSilentSignal logic (excluding the author), increment (author → recipient) by 1. Silent Signals must not generate any additional notifications as part of this change.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-55",
+      "summary": "Update the backend closest-connections query (getBestCircleConnectionsWithWhyExplanation) so the returned ConnectionWhyExplanation.interaction field reflects real interaction totals derived from the new interaction tracking. Passive-view interactions and join-request acceptance must remain excluded (no counting for those events).",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "status": "pending"
     }
   ],
   "gameProjectType": "none",

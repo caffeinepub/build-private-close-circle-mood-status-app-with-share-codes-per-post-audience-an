@@ -1,60 +1,103 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T18:59:07.765Z",
-  "summary": "Frontend NotificationsPage adds a \"Mark all as read\" button and marks individual notifications as read before navigation, but the diff summary does not provide enough visible evidence that the required backend API and the centralized React Query mutation hook (with ['notifications'] invalidation) are implemented. Some acceptance-criteria details (loading indicator text/visual) are also not clearly evidenced due to truncation.",
+  "generatedAt": "2026-02-05T20:55:10.610Z",
+  "summary": "The diff clearly adds an upgrade migration introducing a `directedInteractions` map in the backend, but the provided (truncated) diff does not show any implementation evidence for incrementing interaction counts on status posts or silent signals, nor updating `getBestCircleConnectionsWithWhyExplanation()` to use the new totals, nor any targeted frontend change ensuring Closest Connections displays the updated interaction count. The diff also includes substantial unrelated frontend routing/copy/UI changes that were not requested.",
   "missing_requirements": [
     {
-      "id": "REQ-35",
-      "requirement": "Backend (backend/main.mo) exposes a shared method to mark all of the authenticated caller’s notifications as read (only caller’s; traps if unauthorized) and frontend adds a centralized React Query mutation hook in frontend/src/hooks/useQueries.ts that calls it and invalidates ['notifications'] on success.",
-      "reason": "backend/main.mo is heavily truncated and shows no visible new shared method for mark-all-as-read nor authorization enforcement for it. frontend/src/hooks/useQueries.ts is also truncated and does not show the new useMarkAllNotificationsAsRead hook implementation or query invalidation logic; NotificationsPage imports the hook, but the hook’s existence/behavior is not evidenced in the shown diff content.",
+      "id": "REQ-37",
+      "requirement": "Add backend storage for directed interaction counts (author → recipient) and a helper to increment counts safely without duplicates or self-increments.",
+      "reason": "While migration adds a `directedInteractions` field, the diff summary does not provide evidence of the required backend helper to increment counts safely (no self-increments, monotonic increments, no duplicates) being implemented in `backend/main.mo`.",
       "evidence": [
-        "backend/main.mo (truncated; no mark-all method visible)",
-        "frontend/src/hooks/useQueries.ts (truncated; no useMarkAllNotificationsAsRead implementation visible)",
-        "frontend/src/pages/NotificationsPage.tsx (imports useMarkAllNotificationsAsRead but hook body not shown)"
+        "backend/migration.mo",
+        "backend/main.mo (truncated)"
       ]
     },
     {
-      "id": "REQ-34",
-      "requirement": "The \"Mark all as read\" button shows an in-progress state (disabled + loading indicator or text) while running.",
-      "reason": "The snippet shows the button is disabled while pending, but the diff excerpt does not show any loading indicator or loading text (content is truncated after the disabled prop).",
+      "id": "REQ-38",
+      "requirement": "Increment directed interaction counts on status posts based on the backend’s final audience (Whole circle, Specific people, Only Safe People; not Just me).",
+      "reason": "No visible changes in the provided diff snippets show `postStatus` (or equivalent) computing the final audience and incrementing (author → each recipient) interactions; `backend/main.mo` content shown is unrelated (type definitions).",
       "evidence": [
-        "frontend/src/pages/NotificationsPage.tsx (button disabled={markAllAsReadMutation.isPending} shown; loading indicator/text not visible due to truncation)"
+        "backend/main.mo (truncated)"
       ]
     },
     {
-      "id": "REQ-36",
-      "requirement": "Mark-as-read for a single notification and mark-all should invalidate/refetch ['notifications'] so the bottom-nav badge updates immediately once unread reaches 0, and no other user’s notifications can be marked read.",
-      "reason": "NotificationsPage calls a mutation before navigation, but the diff does not show the mutation hook implementation, its ['notifications'] invalidation behavior, or backend authorization/ownership enforcement for single-notification read updates.",
+      "id": "REQ-39",
+      "requirement": "Increment directed interaction counts on Silent Signal posts for each backend-selected recipient, without generating new notifications.",
+      "reason": "The diff summary provides no evidence of updates to `postSilentSignal` (or equivalent) to increment interaction counts, nor any verification that notification creation behavior is unchanged as part of this tracking.",
       "evidence": [
-        "frontend/src/pages/NotificationsPage.tsx (uses useMarkNotificationAsRead().mutateAsync(notification.id) but invalidation not shown)",
-        "frontend/src/hooks/useQueries.ts (truncated; hook implementations and invalidation not visible)",
-        "backend/main.mo (truncated; authorization/ownership enforcement for notification mutations not visible)"
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "requirement": "Update `getBestCircleConnectionsWithWhyExplanation` so `ConnectionWhyExplanation.interaction` reflects real tracked totals, excluding passive views and join acceptance, without breaking API shape.",
+      "reason": "No evidence in the diff summary shows changes to `getBestCircleConnectionsWithWhyExplanation` or the computation of the `interaction` field using newly tracked directed interaction totals.",
+      "evidence": [
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-41",
+      "requirement": "Ensure frontend Closest Connections continues to display the updated Interaction Count from the backend after qualifying interactions occur.",
+      "reason": "The diff summary does not show any Closest Connections-specific frontend update (component/page/hook) to ensure non-zero interaction counts display after refetch; the only visible frontend code is generic query hooks and a separate file containing high-level summaries.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts (truncated)",
+        "frontend-file-summaries.txt (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added toast success message \"All notifications marked as read\" after the mark-all operation.",
-      "reason": "BuildRequest requires errors surfaced via standard toast/error UI, but does not request a success toast specifically; this is additional behavior beyond the explicit requirements.",
+      "description": "Added a deep-link-only `/closest-connections` route nested under authenticated layout, not linked from navigation surfaces.",
+      "reason": "The BuildRequest did not request any new routes or navigation/routing changes; it only required ensuring existing Closest Connections displays updated interaction counts.",
       "evidence": [
-        "frontend/src/pages/NotificationsPage.tsx (toast.success('All notifications marked as read'))"
+        "frontend-file-summaries.txt (truncated): frontend/src/App.tsx"
       ]
     },
     {
-      "description": "Added a ProgressiveDisclosure section advertising push notifications as \"Coming soon\" on the Notifications page.",
-      "reason": "This UI element is not requested by REQ-34/35/36 (and is unrelated to mark-all/mark-single behavior).",
+      "description": "Login/onboarding/profile UI copy and behavior changes (e.g., Gen Z text-light copy, progressive disclosure, attribution line, modified setup dialog and error states).",
+      "reason": "The BuildRequest explicitly constrained frontend changes to what’s necessary to surface the real interaction number and avoid new user-facing copy changes; these are unrelated UI/copy modifications.",
       "evidence": [
-        "frontend/src/pages/NotificationsPage.tsx (ProgressiveDisclosure trigger=\"Push Notifications — Coming soon\")"
+        "frontend-file-summaries.txt (truncated): frontend/src/components/auth/LoginPanel.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/components/profile/ProfileGate.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/components/profile/ProfileSetupDialog.tsx"
+      ]
+    },
+    {
+      "description": "Broad app layout/header/bottom navigation changes (logout handling, safe-area padding changes, icon-first nav).",
+      "reason": "Not requested by the BuildRequest, which focuses on backend interaction tracking and displaying updated interaction counts.",
+      "evidence": [
+        "frontend-file-summaries.txt (truncated): frontend/src/components/app/AppLayout.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/components/app/AppHeader.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/components/app/BottomNav.tsx"
+      ]
+    },
+    {
+      "description": "Multiple unrelated page UI changes (ProfilePage, CirclePage, FeedPage, NotificationsPage, StatusDetailPage).",
+      "reason": "Not requested; BuildRequest is limited to interaction tracking and Closest Connections interaction count correctness.",
+      "evidence": [
+        "frontend-file-summaries.txt (truncated): frontend/src/pages/ProfilePage.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/pages/CirclePage.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/pages/FeedPage.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/pages/NotificationsPage.tsx",
+        "frontend-file-summaries.txt (truncated): frontend/src/pages/StatusDetailPage.tsx"
+      ]
+    },
+    {
+      "description": "Compose Status page changed with a new four-option audience selector and client-side final-audience computation.",
+      "reason": "REQ-38 requires interaction increments be computed from the backend’s final audience (not UI pre-sanitized input). Changing frontend audience computation is not requested and may conflict with the stated requirement emphasis.",
+      "evidence": [
+        "frontend-file-summaries.txt (truncated): frontend/src/pages/ComposeStatusPage.tsx"
       ]
     }
   ],
-  "confidence": 0.56,
+  "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/NotificationsPage.tsx",
     "project_state.json"
   ]
 }

@@ -1,97 +1,116 @@
 {
   "kind": "build_request",
-  "title": "Add “Mark all as read” button on Notifications page",
+  "title": "Implement backend interaction tracking to power Closest Connections Interaction Count (exclude passive views + join acceptance)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-34",
-      "text": "Add a “Mark all as read” button at the top of the Notifications/Alerts page (frontend/src/pages/NotificationsPage.tsx). When tapped, it must instantly mark every unread notification as read and the unread badge/counter must clear immediately after success.",
+      "id": "REQ-37",
+      "text": "Add backend storage for directed interaction counts (author → recipient) and a helper to increment counts safely without duplicates or self-increments.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Try running it again"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Interaction counts are stored per directed pair (fromPrincipal → toPrincipal).",
+        "Posting events never increment an interaction where fromPrincipal == toPrincipal.",
+        "If the same pair is incremented multiple times over time, the stored count increases monotonically.",
+        "Implementation does not require any new canisters/services (single-actor only)."
+      ]
+    },
+    {
+      "id": "REQ-38",
+      "text": "Increment directed interaction counts on status posts based on the final audience used by the backend postStatus flow: for every recipient in the final audience (excluding the author), increment (author → recipient) by 1. This must apply to Whole circle, Specific people, and Only Safe People posts, and must NOT apply to Just me (private) posts.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Try running it again"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When a caller posts a status to Whole circle, interaction counts increase by +1 for each audience recipient other than the caller.",
+        "When a caller posts a status to Specific people, interaction counts increase by +1 for each selected recipient other than the caller.",
+        "When a caller posts a status to Only Safe People, interaction counts increase by +1 for each targeted Safe Person other than the caller.",
+        "When a caller posts a Just me (private) status (audience is caller only), no interaction counts change.",
+        "Interaction increments are computed from the backend’s enhanced/final audience list (not from any pre-sanitized UI input)."
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "text": "Increment directed interaction counts on Silent Signal posts: for every audience recipient selected by the backend postSilentSignal logic (excluding the author), increment (author → recipient) by 1. Silent Signals must not generate any additional notifications as part of this change.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Try running it again"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When a caller posts a Silent Signal to N Safe People, interaction counts increase by +1 for each (caller → safePerson) pair.",
+        "If the Silent Signal audience resolves to only the caller (no Safe People), no interaction counts change.",
+        "No new notification records are created due to interaction tracking changes."
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "text": "Update the backend closest-connections query (getBestCircleConnectionsWithWhyExplanation) so the returned ConnectionWhyExplanation.interaction field reflects real interaction totals derived from the new interaction tracking. Passive-view interactions and join-request acceptance must remain excluded (no counting for those events).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Try running it again"
+        ]
+      },
+      "acceptanceCriteria": [
+        "For each returned recommended person, the `interaction` field is > 0 after relevant posts/signals occur between the caller and that person (according to the implemented interaction rules).",
+        "No interaction is added/changed by viewing a status detail page.",
+        "No interaction is added/changed when accepting a join request.",
+        "Existing API shape returned by `getBestCircleConnectionsWithWhyExplanation()` remains compatible with the current frontend usage (no breaking type changes)."
+      ]
+    },
+    {
+      "id": "REQ-41",
+      "text": "Ensure frontend Closest Connections continues to display the updated Interaction Count coming from the backend without showing 0 after qualifying interactions have occurred.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-8",
-          "msg-12"
+          "msg-1"
         ],
         "quotes": [
-          "I also want a \"Mark all as read\" button",
-          "At the top of the alerts page\n\ntapping it should mark every unread notification as read instantly\n\n3. yes"
+          "Try running it again"
         ]
       },
       "acceptanceCriteria": [
-        "On NotificationsPage, a visible button with user-facing text exactly \"Mark all as read\" appears near the top of the page content (above the unread list).",
-        "The button is only shown (or is disabled) when there is at least 1 unread notification (isRead === false).",
-        "Clicking the button marks all currently-unread notifications as read without requiring confirmation.",
-        "After successful completion, the unread section count becomes 0 and unread items move into the read section (or otherwise render as read).",
-        "After successful completion, the bottom navigation unread badge disappears immediately (i.e., the notifications query is invalidated/refetched so unread count becomes 0).",
-        "The button shows an in-progress state (disabled + loading indicator or text) while the operation is running, and errors are surfaced via the app’s standard toast/error UI."
-      ]
-    },
-    {
-      "id": "REQ-35",
-      "text": "Implement a backend API to mark all of the caller’s notifications as read, and wire it to a new centralized React Query mutation hook that the Notifications page uses for the “Mark all as read” button.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-12"
-        ],
-        "quotes": [
-          "tapping it should mark every unread notification as read instantly"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend (backend/main.mo) exposes a shared method that, for the authenticated caller, updates stored notifications so any notification with notification.user == caller isRead becomes true (leaving other users’ notifications unchanged).",
-        "Backend method enforces the same authorization pattern as existing notifications methods (user permission required; traps if unauthorized).",
-        "Frontend adds a React Query mutation hook in frontend/src/hooks/useQueries.ts for the new backend method.",
-        "On mutation success, the hook invalidates the ['notifications'] query so UI and bottom-nav badge update immediately.",
-        "The feature works even when there are many notifications (no partial updates; all caller notifications become read in one action)."
-      ]
-    },
-    {
-      "id": "REQ-36",
-      "text": "Ensure tapping an individual notification marks it as read before navigating (to preserve existing expected behavior that tapping clears unread count), using the existing per-notification mark-as-read behavior if present, or by adding a backend API + React Query mutation if it does not exist yet.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-3",
-          "msg-4",
-          "msg-12"
-        ],
-        "quotes": [
-          "In CloseCircle, notifications are marked as read automatically when you tap them in the Alerts page.",
-          "That clears the unread count, and the bottom‑nav badge disappears as soon as there are zero unread items.",
-          "tapping it should mark every unread notification as read instantly"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When a user taps a single unread notification card on NotificationsPage, that notification becomes read (isRead=true) and the unread count decreases accordingly.",
-        "If the notification navigates to a status detail route, the mark-as-read action occurs before/alongside navigation (no requirement for a second visit to clear the badge).",
-        "Mark-as-read for a single notification updates the bottom-nav badge immediately once unread count reaches 0 (by invalidating/refetching ['notifications']).",
-        "No notification belonging to other users can be marked read by the caller."
+        "After a user posts a status to a specific person / whole circle / only safe people, the Closest Connections page shows a non-zero Interactions value for affected people after data refetch.",
+        "After a user posts a Silent Signal to a Safe Person, the Closest Connections page shows a non-zero Interactions value for that Safe Person after data refetch.",
+        "No new user-facing copy is added/changed beyond what is necessary to surface the real number (keep existing UI text in English)."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (Shadcn UI sources are read-only and must be composed).",
-    "Do not modify any paths listed as immutable in SYSTEM_CONTEXT.",
-    "Backend must remain a single Motoko actor; keep logic in backend/main.mo and only add backend/migration.mo changes if a stable upgrade migration is required."
+    "Do not count interaction events for (4) viewing someone’s status detail or (5) accepting a join request (explicitly excluded for now).",
+    "Respect the single-actor Motoko backend architecture: all logic stays in backend/main.mo; add backend/migration.mo only if an upgrade-safe migration is strictly required.",
+    "Do not edit files under frontend/src/components/ui or other frontend immutable paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Do not implement real-time push notifications.",
-    "Do not change notification polling intervals unless required for correctness of the new mark-all behavior.",
-    "Do not add confirmation dialogs for the “Mark all as read” action."
+    "Adding likes/comments/reactions or any other interaction signals beyond status audience delivery and silent signals.",
+    "Adding passive-view interaction tracking now (may be done later).",
+    "Counting join-request acceptance as interaction now (may be done later).",
+    "Redesigning Closest Connections UI beyond reflecting the correct interaction number."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

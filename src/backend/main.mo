@@ -1,17 +1,20 @@
 import Text "mo:core/Text";
 import List "mo:core/List";
 import Map "mo:core/Map";
+import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import Time "mo:core/Time";
-import Iter "mo:core/Iter";
-import Order "mo:core/Order";
 import Nat32 "mo:core/Nat32";
 import Char "mo:core/Char";
+import Iter "mo:core/Iter";
+import Order "mo:core/Order";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type Mood = {
     #happy;
@@ -286,10 +289,32 @@ actor {
   let safePeople = Map.empty<Principal, SafePeopleList>();
   let silentSignals = Map.empty<Text, SilentSignal>();
   var pulseScores = Map.empty<Principal, Nat>();
+  var directedInteractions = Map.empty<Principal, Map.Map<Principal, Nat>>();
 
   let DEFAULT_CIRCLE_SIZE_LIMIT = 10;
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
+
+  func incrementDirectedInteraction(author : Principal, recipient : Principal) {
+    if (author == recipient) { return };
+
+    let currentAuthorMap = switch (directedInteractions.get(author)) {
+      case (null) {
+        let newMap = Map.empty<Principal, Nat>();
+        newMap.add(recipient, 1);
+        directedInteractions.add(author, newMap);
+        newMap;
+      };
+      case (?authorMap) {
+        let currentCount = switch (authorMap.get(recipient)) {
+          case (null) { 0 };
+          case (?count) { count };
+        };
+        authorMap.add(recipient, currentCount + 1);
+        authorMap;
+      };
+    };
+  };
 
   func contains(array : [Principal], member : Principal) : Bool {
     switch (array.find(func(x) { x == member })) {
@@ -467,7 +492,6 @@ actor {
 
     let entry : UserProfile = switch (existingProfile) {
       case (null) {
-        // New profile creation: use all provided fields and set createdAt to now
         {
           profile with
           shareCode;
@@ -475,7 +499,6 @@ actor {
         };
       };
       case (?existing) {
-        // Profile update: preserve immutable fields (name, gender, dateOfBirth, createdAt)
         {
           name = existing.name;
           gender = existing.gender;
@@ -707,7 +730,6 @@ actor {
         circle.add(from);
         circles.add(caller, circle);
 
-        // Update memberCircles (mirrored index)
         let ownerList = switch (memberCircles.get(from)) {
           case (null) {
             let l = List.empty<Principal>();
@@ -761,9 +783,8 @@ actor {
           let newCircle = List.fromArray(filteredMembers);
           circles.add(caller, newCircle);
 
-          // Update memberCircles (mirrored index)
           let updatedOwners = switch (memberCircles.get(member)) {
-            case (null) { List.empty<Principal>() }; // No owners
+            case (null) { List.empty<Principal>() };
             case (?owners) {
               owners.filter(func(owner) { owner != caller });
             };
@@ -921,10 +942,18 @@ actor {
 
     var pulseIncrement : Nat = 0;
     switch (audienceType) {
-      case (#privatePost) { pulseIncrement := 0 };
-      case (#safePeopleOnly) { pulseIncrement := 0 };
-      case (#wholeCircle) { pulseIncrement := enhancedAudience.size() - 1 };
-      case (#specificPeople) { pulseIncrement := enhancedAudience.size() - 1 };
+      case (#privatePost) {
+        pulseIncrement := 0;
+      };
+      case (#safePeopleOnly) {
+        pulseIncrement := 0;
+      };
+      case (#wholeCircle) {
+        pulseIncrement := enhancedAudience.size() - 1;
+      };
+      case (#specificPeople) {
+        pulseIncrement := enhancedAudience.size() - 1;
+      };
     };
 
     if (pulseIncrement > 0) {
@@ -937,6 +966,7 @@ actor {
 
     for (recipient in enhancedAudience.values()) {
       if (recipient != caller) {
+        incrementDirectedInteraction(caller, recipient);
         let notificationId = id # recipient.toText();
         notifications.add(notificationId, {
           id = notificationId;
@@ -1291,6 +1321,12 @@ actor {
       createdAt = Time.now();
     };
 
+    for (recipient in audience.values()) {
+      if (recipient != caller) {
+        incrementDirectedInteraction(caller, recipient);
+      };
+    };
+
     silentSignals.add(signalId, newSignal);
   };
 
@@ -1339,22 +1375,45 @@ actor {
 
     let directConnectionCount = directConnections.size();
 
+    let possibleConnections = List.empty<ConnectionWhyExplanation>();
+
     if (directConnectionCount > 0) {
-      directConnections.toArray().map(
-        func(person) {
-          let name = switch (profiles.get(person)) {
-            case (?p) { p.name };
-            case (null) { "Unknown" };
+      for (person in directConnections.values()) {
+        let name = switch (profiles.get(person)) {
+          case (?p) { p.name };
+          case (null) { "Unknown" };
+        };
+        possibleConnections.add({
+          principal = person;
+          name;
+          why = "Friend already in circle";
+          sharedConnections = 1;
+          interaction = 0;
+        });
+      };
+    };
+
+    let finalConnections = possibleConnections.sort(
+      func(a, b) {
+        Nat.compare(b.sharedConnections, a.sharedConnections);
+      }
+    ).toArray();
+
+    finalConnections.map(
+      func(connection) {
+        {
+          connection with
+          interaction = switch (directedInteractions.get(caller)) {
+            case (null) { 0 };
+            case (?authorMap) {
+              switch (authorMap.get(connection.principal)) {
+                case (null) { 0 };
+                case (?count) { count };
+              };
+            };
           };
-          {
-            principal = person;
-            name;
-            why = "Friend already in circle";
-            sharedConnections = 1;
-            interaction = 0;
-          };
-        }
-      );
-    } else { [] : [ConnectionWhyExplanation] };
+        };
+      }
+    );
   };
 };
