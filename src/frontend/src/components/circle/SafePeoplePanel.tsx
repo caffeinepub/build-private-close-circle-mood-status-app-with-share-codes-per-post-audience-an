@@ -6,6 +6,7 @@ import { useGetEligibleSafePeopleCandidates, useGetSafePeople, useSetSafePerson,
 import { Heart, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
+import { Principal } from '@dfinity/principal';
 
 export default function SafePeoplePanel() {
   const { data: candidates = [], isLoading: candidatesLoading } = useGetEligibleSafePeopleCandidates();
@@ -29,15 +30,23 @@ export default function SafePeoplePanel() {
     setPendingChanges((prev) => new Set(prev).add(principal));
 
     try {
+      // Convert string to Principal before calling backend
+      const principalObj = Principal.fromText(principal);
+      
       if (isCurrentlySelected) {
-        await unsetSafePerson.mutateAsync(principal as any);
+        await unsetSafePerson.mutateAsync(principalObj);
         toast.success('Removed');
       } else {
-        await setSafePerson.mutateAsync(principal as any);
+        await setSafePerson.mutateAsync(principalObj);
         toast.success('Added');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Update failed');
+      // Handle Principal conversion errors gracefully
+      if (error.message?.includes('Invalid principal')) {
+        toast.error('Invalid principal format');
+      } else {
+        toast.error(error.message || 'Update failed');
+      }
     } finally {
       setPendingChanges((prev) => {
         const next = new Set(prev);

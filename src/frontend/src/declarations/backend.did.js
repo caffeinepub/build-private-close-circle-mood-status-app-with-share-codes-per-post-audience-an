@@ -128,12 +128,17 @@ export const Notification = IDL.Record({
   'isRead' : IDL.Bool,
   'statusId' : IDL.Opt(IDL.Text),
   'message' : IDL.Text,
+  'requesterName' : IDL.Opt(IDL.Text),
 });
 export const JoinRequest = IDL.Record({
   'to' : IDL.Principal,
   'from' : IDL.Principal,
   'createdAt' : Time,
   'shareCode' : IDL.Text,
+});
+export const PendingRequestWithProfile = IDL.Record({
+  'request' : JoinRequest,
+  'profile' : UserProfile,
 });
 
 export const idlService = IDL.Service({
@@ -167,7 +172,7 @@ export const idlService = IDL.Service({
   'getStatus' : IDL.Func([IDL.Text], [IDL.Opt(StatusPost)], ['query']),
   'getUnprocessedJoinRequests' : IDL.Func(
       [],
-      [IDL.Vec(JoinRequest)],
+      [IDL.Vec(PendingRequestWithProfile)],
       ['query'],
     ),
   'getUserProfile' : IDL.Func(
@@ -314,12 +319,17 @@ export const idlFactory = ({ IDL }) => {
     'isRead' : IDL.Bool,
     'statusId' : IDL.Opt(IDL.Text),
     'message' : IDL.Text,
+    'requesterName' : IDL.Opt(IDL.Text),
   });
   const JoinRequest = IDL.Record({
     'to' : IDL.Principal,
     'from' : IDL.Principal,
     'createdAt' : Time,
     'shareCode' : IDL.Text,
+  });
+  const PendingRequestWithProfile = IDL.Record({
+    'request' : JoinRequest,
+    'profile' : UserProfile,
   });
   
   return IDL.Service({
@@ -357,7 +367,7 @@ export const idlFactory = ({ IDL }) => {
     'getStatus' : IDL.Func([IDL.Text], [IDL.Opt(StatusPost)], ['query']),
     'getUnprocessedJoinRequests' : IDL.Func(
         [],
-        [IDL.Vec(JoinRequest)],
+        [IDL.Vec(PendingRequestWithProfile)],
         ['query'],
       ),
     'getUserProfile' : IDL.Func(

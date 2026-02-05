@@ -1,62 +1,70 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-04T22:26:15.846Z",
-  "summary": "Diff adds an avatar union type (system avatar id or uploaded bytes) and frontend UI/editor utilities for picking/uploading avatars, plus React Query hooks and ProfilePage wiring. However, backend upload validation and the actual bundled image assets are not evidenced, and a new Motoko file (migration.mo) appears to violate the constraint that all Motoko logic must live in backend/main.mo.",
+  "generatedAt": "2026-02-05T12:00:12.787Z",
+  "summary": "Frontend changes add audience normalization via a utility (buildAudienceWithAuthor) in ComposeStatusPage/DailyCheckInPage and introduce private/self-only UI indicators in StatusCard/StatusDetailPage. Backend changes are truncated; the diff summary does not provide evidence that the required backend validation/normalization and privacy guarantees were implemented in backend/main.mo.",
   "missing_requirements": [
     {
-      "id": "REQ-13",
-      "requirement": "Add backend validation for uploaded avatars: allow only PNG/JPEG and enforce ≤ 1000KB; reject invalid uploads with clear error messages.",
-      "reason": "The diff shows frontend-side validation helpers and toasts, but does not show any backend validation logic or error messages for rejecting invalid uploads.",
+      "id": "REQ-12",
+      "requirement": "Update backend status posting validation so a user with zero circle members can successfully post a mood/status when the post audience is self-only (audience == [caller]), while rejecting any other principals when the caller has no circle; still require profile before posting.",
+      "reason": "backend/main.mo is truncated and the diff summary does not show any changes to postStatus validation logic or to the unauthorized/trap conditions for the no-circle case, nor any evidence that profile-required validation is preserved.",
       "evidence": [
-        "backend/main.mo (truncated; Avatar/UploadedAvatar types shown but no validation logic evidenced)",
-        "frontend/src/utils/profileAvatar.ts (client-side type/size validation only)"
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "requirement": "Ensure backend normalizes/enforces self-visibility by always including the caller in the stored audience (deduplicated), including the audience==[] case becoming [caller], without requiring circle membership for self-only posts.",
+      "reason": "No evidence in the diff summary that backend persists a normalized/deduplicated audience that always includes the caller, or that audience==[] is accepted and stored as [caller]. Frontend adds buildAudienceWithAuthor usage, but REQ-13 is explicitly a backend requirement.",
+      "evidence": [
+        "backend/main.mo (truncated)",
+        "frontend/src/pages/ComposeStatusPage.tsx (truncated)",
+        "frontend/src/pages/DailyCheckInPage.tsx (truncated)"
       ]
     },
     {
       "id": "REQ-15",
-      "requirement": "Bundle a fixed set of system avatar images in the frontend as static assets (not served via backend).",
-      "reason": "A constants catalog references PNG paths under /assets/generated, but the actual image files are not shown as added/modified in the diff summary, so bundling of the required PNG assets is not evidenced.",
+      "requirement": "Update DailyCheckInPage UI so users with zero selectable circle members can still post, defaulting to self-only/private with clear English microcopy; submitted audience results in caller-only audience on backend.",
+      "reason": "DailyCheckInPage is truncated; while it now calls buildAudienceWithAuthor, the diff excerpt does not show the audience section microcopy/UX behavior when selectableMembers.length===0 (e.g., indicating 'private/self-only') or that submission is unblocked in that state.",
       "evidence": [
-        "frontend/src/constants/systemAvatars.ts (references /assets/generated/system-avatar-0X.dim_256x256.png)"
+        "frontend/src/pages/DailyCheckInPage.tsx (truncated)"
       ]
     },
     {
-      "id": "REQ-12",
-      "requirement": "Existing profile reads (getCallerUserProfile/getUserProfile/viewProfile) include the avatar data needed for rendering.",
-      "reason": "Avatar types and migration are shown, but the diff summary does not include evidence that getCallerUserProfile/getUserProfile/viewProfile were updated to return avatar data (the relevant parts of backend/main.mo are truncated).",
+      "id": "REQ-16",
+      "requirement": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts remain visible only to the author and do not become visible to new circle members via getFeed/getStatus.",
+      "reason": "No evidence in the diff summary of backend changes to getFeed/getStatus filtering logic to ensure audience-based privacy is enforced over time. UI-only changes (e.g., 'Private' badge) do not satisfy the backend privacy requirement.",
       "evidence": [
-        "backend/main.mo (truncated; cannot confirm profile read methods include avatar)"
+        "backend/main.mo (truncated)",
+        "frontend/src/components/status/StatusCard.tsx",
+        "frontend/src/pages/StatusDetailPage.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Introduced a separate Motoko migration module file (backend/migration.mo) and wired it via (with migration = Migration.run).",
-      "reason": "Not requested by the BuildRequest and appears to conflict with the constraint that all Motoko logic lives in backend/main.mo.",
+      "description": "Show a 'Private' badge with a lock icon on StatusCard for the author’s self-only posts.",
+      "reason": "Not requested by any requirement; requirements only asked for compose/check-in audience UX and backend validation/normalization/privacy behavior, not feed card badges.",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo (imports Migration \"migration\" and uses (with migration = Migration.run))"
+        "frontend/src/components/status/StatusCard.tsx"
       ]
     },
     {
-      "description": "Added new dedicated backend-facing operations for avatar changes (uploadAvatar and selectSystemAvatar) with corresponding React Query hooks.",
-      "reason": "The BuildRequest requires avatar to be readable/writable as part of a user profile, but does not request separate backend endpoints/mutations for avatar selection/upload.",
+      "description": "Enhanced StatusDetailPage unauthorized/private error state UI with lock icon and explanatory text about private posts.",
+      "reason": "Not requested; REQ-16 concerns backend access control, not adding new status detail error UI messaging.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts (useUploadAvatar, useSelectSystemAvatar calling actor.uploadAvatar/selectSystemAvatar)"
+        "frontend/src/pages/StatusDetailPage.tsx"
       ]
     }
   ],
-  "confidence": 0.66,
+  "confidence": 0.62,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/profile/ProfileAvatarEditor.tsx",
-    "frontend/src/constants/systemAvatars.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ProfilePage.tsx",
-    "frontend/src/utils/profileAvatar.ts",
+    "frontend/src/components/status/StatusCard.tsx",
+    "frontend/src/pages/ComposeStatusPage.tsx",
+    "frontend/src/pages/DailyCheckInPage.tsx",
+    "frontend/src/pages/StatusDetailPage.tsx",
     "project_state.json"
   ]
 }

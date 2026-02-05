@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, JoinRequest, StatusPost, Notification, FeedItem, SilentSignal, Mood, Avatar, UploadedAvatar } from '@/backend';
+import type { UserProfile, JoinRequest, StatusPost, Notification, FeedItem, SilentSignal, Mood, Avatar, UploadedAvatar, PendingRequestWithProfile } from '@/backend';
 import type { Principal } from '@dfinity/principal';
 
 // Profile queries
@@ -163,7 +163,7 @@ export function useJoinCircleFromShareCode() {
 export function useGetUnprocessedJoinRequests() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<JoinRequest[]>({
+  return useQuery<PendingRequestWithProfile[]>({
     queryKey: ['joinRequests'],
     queryFn: async () => {
       if (!actor) return [];
@@ -250,6 +250,7 @@ export function usePostStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['status'] });
     },
   });
 }

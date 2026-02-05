@@ -11,7 +11,7 @@ import { useSearch } from '@tanstack/react-router';
 export default function CirclePage() {
   const { data: requests = [] } = useGetUnprocessedJoinRequests();
   const { data: feed = [] } = useGetFeed();
-  const search = useSearch({ from: '/circle' }) as { tab?: string };
+  const search = useSearch({ from: '/authenticated/circle' }) as { tab?: string };
   const pendingCount = requests.length;
 
   // Filter feed to only status posts for Circle Energy

@@ -28,6 +28,15 @@ export default function NotificationsPage() {
     }
   };
 
+  // Helper to display notification message with fallback for requesterName
+  const getNotificationMessage = (notification: typeof notifications[0]) => {
+    // If requesterName is available and message contains "Unknown user", replace it
+    if (notification.requesterName && notification.message.includes('Unknown user')) {
+      return notification.message.replace('Unknown user', notification.requesterName);
+    }
+    return notification.message;
+  };
+
   return (
     <div className="container max-w-2xl py-8 px-4 space-y-6">
       <div>
@@ -71,7 +80,7 @@ export default function NotificationsPage() {
                   <CardContent className="py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 space-y-1">
-                        <p className="text-sm">{notification.message}</p>
+                        <p className="text-sm">{getNotificationMessage(notification)}</p>
                         <p className="text-xs text-muted-foreground">
                           {formatDistanceToNow(Number(notification.createdAt) / 1_000_000, {
                             addSuffix: true,
@@ -98,7 +107,7 @@ export default function NotificationsPage() {
                   <CardContent className="py-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 space-y-1">
-                        <p className="text-sm text-muted-foreground">{notification.message}</p>
+                        <p className="text-sm text-muted-foreground">{getNotificationMessage(notification)}</p>
                         <p className="text-xs text-muted-foreground">
                           {formatDistanceToNow(Number(notification.createdAt) / 1_000_000, {
                             addSuffix: true,

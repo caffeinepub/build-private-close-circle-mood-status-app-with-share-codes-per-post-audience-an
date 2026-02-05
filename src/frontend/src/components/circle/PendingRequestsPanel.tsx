@@ -1,4 +1,4 @@
-import { useGetUnprocessedJoinRequests, useAcceptJoinRequest, useDeclineJoinRequest, useGetUserProfiles } from '@/hooks/useQueries';
+import { useGetUnprocessedJoinRequests, useAcceptJoinRequest, useDeclineJoinRequest } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -11,21 +11,24 @@ export default function PendingRequestsPanel() {
   const acceptRequest = useAcceptJoinRequest();
   const declineRequest = useDeclineJoinRequest();
 
-  const requesters = requests.map((r) => r.from);
-  const { data: profiles = {} } = useGetUserProfiles(requesters);
-
-  const handleAccept = async (request: typeof requests[0]) => {
+  const handleAccept = async (requestWithProfile: typeof requests[0]) => {
     try {
-      await acceptRequest.mutateAsync({ from: request.from, code: request.shareCode });
+      await acceptRequest.mutateAsync({ 
+        from: requestWithProfile.request.from, 
+        code: requestWithProfile.request.shareCode 
+      });
       toast.success('Request accepted!');
     } catch (error: any) {
       toast.error(error.message || 'Failed to accept request');
     }
   };
 
-  const handleDecline = async (request: typeof requests[0]) => {
+  const handleDecline = async (requestWithProfile: typeof requests[0]) => {
     try {
-      await declineRequest.mutateAsync({ user: request.from, code: request.shareCode });
+      await declineRequest.mutateAsync({ 
+        user: requestWithProfile.request.from, 
+        code: requestWithProfile.request.shareCode 
+      });
       toast.success('Request declined');
     } catch (error: any) {
       toast.error(error.message || 'Failed to decline request');
@@ -77,12 +80,12 @@ export default function PendingRequestsPanel() {
           </p>
         ) : (
           <div className="space-y-3">
-            {requests.map((request) => {
+            {requests.map((requestWithProfile) => {
+              const { request, profile } = requestWithProfile;
               const principalStr = request.from.toString();
-              const profile = profiles[principalStr];
-              const displayName = profile?.name || 'Unknown user';
-              const age = profile?.dateOfBirth ? calculateAge(profile.dateOfBirth) : null;
-              const showAge = profile?.showAge && age !== null;
+              const displayName = profile.name;
+              const age = profile.dateOfBirth ? calculateAge(profile.dateOfBirth) : null;
+              const showAge = profile.showAge && age !== null;
 
               return (
                 <div
@@ -96,19 +99,17 @@ export default function PendingRequestsPanel() {
                         <span className="text-xs text-muted-foreground">• {age}</span>
                       )}
                     </div>
-                    {profile && (
-                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                        <span>{getGenderLabel(profile.gender)}</span>
-                        <span>•</span>
-                        <span>{getIntentLabel(profile.relationshipIntent)}</span>
-                      </div>
-                    )}
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      <span>{getGenderLabel(profile.gender)}</span>
+                      <span>•</span>
+                      <span>{getIntentLabel(profile.relationshipIntent)}</span>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => handleAccept(request)}
+                      onClick={() => handleAccept(requestWithProfile)}
                       disabled={acceptRequest.isPending || declineRequest.isPending}
                     >
                       <Check className="h-4 w-4" />
@@ -116,7 +117,7 @@ export default function PendingRequestsPanel() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleDecline(request)}
+                      onClick={() => handleDecline(requestWithProfile)}
                       disabled={acceptRequest.isPending || declineRequest.isPending}
                     >
                       <X className="h-4 w-4" />

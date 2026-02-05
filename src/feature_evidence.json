@@ -2,13 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-profile-page-ui-to-display-the-current-avatar-and-when-editing-allow-users-to-either-upload-a-new-avatar-image-png-jpeg-1000kb-or-select-from-a-fixed-set-of-bundled-system-avatars-keep-avatar-selection-only-on-the-existing-profile-edit-screen-no-onboarding-changes",
-      "featureTitle": "Update the Profile page UI to display the current avatar and, when editing, allow users to either upload a new avatar image (PNG/JPEG ≤ 1000KB) or select from a fixed set of bundled system avatars; keep avatar selection only on the existing profile edit screen (no onboarding changes).",
+      "featureId": "feature-update-the-compose-status-ui-composestatuspage-so-users-with-zero-selectable-circle-members-can-still-post-with-the-audience-effectively-defaulting-to-self-only-private-and-communicated-in-the-ui-using-english-copy",
+      "featureTitle": "Update the Compose status UI (ComposeStatusPage) so users with zero selectable circle members can still post, with the audience effectively defaulting to self-only/private and communicated in the UI using English copy.",
       "files": [
-        "frontend/src/components/profile/ProfileAvatarEditor.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/ProfilePage.tsx",
-        "frontend/src/utils/profileAvatar.ts"
+        "frontend/src/pages/ComposeStatusPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -24,11 +21,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-bundle-a-fixed-set-of-system-avatar-images-in-the-frontend-as-static-assets-and-wire-the-profile-edit-picker-to-these-assets-using-stable-explicit-identifiers-so-the-selection-can-be-persisted-in-the-backend",
-      "featureTitle": "Bundle a fixed set of system avatar images in the frontend as static assets and wire the Profile edit picker to these assets using stable, explicit identifiers (so the selection can be persisted in the backend).",
+      "featureId": "feature-update-the-daily-check-in-ui-dailycheckinpage-so-users-with-zero-selectable-circle-members-can-still-post-defaulting-to-self-only-private-audience-with-clear-english-microcopy",
+      "featureTitle": "Update the Daily check-in UI (DailyCheckInPage) so users with zero selectable circle members can still post, defaulting to self-only/private audience with clear English microcopy.",
       "files": [
-        "frontend/src/components/profile/ProfileAvatarEditor.tsx",
-        "frontend/src/constants/systemAvatars.ts"
+        "frontend/src/pages/DailyCheckInPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -40,6 +36,26 @@
       ],
       "testIds": [
         "REQ-15"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-preserve-privacy-of-self-only-posts-after-the-user-later-joins-a-circle-self-only-posts-must-remain-visible-only-to-the-author-and-must-not-automatically-become-visible-to-new-circle-members",
+      "featureTitle": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts must remain visible only to the author and must not automatically become visible to new circle members.",
+      "files": [
+        "frontend/src/components/status/StatusCard.tsx",
+        "frontend/src/pages/StatusDetailPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-16"
       ],
       "confidence": "high"
     }

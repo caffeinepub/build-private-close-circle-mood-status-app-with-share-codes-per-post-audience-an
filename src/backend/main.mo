@@ -9,11 +9,10 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import Nat32 "mo:core/Nat32";
 import Char "mo:core/Char";
-import Migration "migration";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
-(with migration = Migration.run)
 actor {
   type Mood = {
     #happy;
@@ -209,6 +208,7 @@ actor {
     statusId : ?Text;
     isRead : Bool;
     createdAt : Time.Time;
+    requesterName : ?Text;
   };
 
   module Notification {
@@ -245,7 +245,6 @@ actor {
     };
   };
 
-  // Types for Safe People System and Silent Signals
   type SafePeopleList = {
     people : [Principal];
   };
@@ -255,7 +254,7 @@ actor {
     author : Principal;
     mood : Mood;
     content : Text;
-    audience : [Principal]; // Safe People by default, optionally full circle
+    audience : [Principal];
     createdAt : Time.Time;
   };
 
@@ -301,9 +300,7 @@ actor {
     };
   };
 
-  // Helper function to check if a principal is in any circle connection with the caller
   func isCircleConnection(caller : Principal, person : Principal) : Bool {
-    // Check if person is in caller's own circle
     switch (circles.get(caller)) {
       case (?circle) {
         if (circle.contains(person)) {
@@ -313,7 +310,6 @@ actor {
       case (null) {};
     };
 
-    // Check if caller is in person's circle
     switch (circles.get(person)) {
       case (?circle) {
         if (circle.contains(caller)) {
@@ -326,11 +322,9 @@ actor {
     false;
   };
 
-  // Helper function to get all circle connections for a user
   func getAllCircleConnections(user : Principal) : [Principal] {
     var connections = List.empty<Principal>();
 
-    // Add members from user's own circle
     switch (circles.get(user)) {
       case (?circle) {
         for (member in circle.toArray().values()) {
@@ -342,14 +336,11 @@ actor {
       case (null) {};
     };
 
-    // Add circles where user is a member
     for ((owner, circle) in circles.entries()) {
       if (owner != user and circle.contains(user)) {
-        // Add the owner
         if (not connections.contains(owner)) {
           connections.add(owner);
         };
-        // Add other members of that circle
         for (member in circle.toArray().values()) {
           if (member != user and not connections.contains(member)) {
             connections.add(member);
@@ -359,6 +350,27 @@ actor {
     };
 
     connections.toArray();
+  };
+
+  func hasPendingJoinRequestFrom(circleOwner : Principal, requester : Principal) : Bool {
+    let ownerProfile = switch (profiles.get(circleOwner)) {
+      case (?profile) { profile };
+      case (null) { return false };
+    };
+    let key = ownerProfile.shareCode.concat(requester.toText());
+    switch (requests.get(key)) {
+      case (?request) {
+        request.to == circleOwner and request.from == requester;
+      };
+      case (null) { false };
+    };
+  };
+
+  func hasProfile(user : Principal) : Bool {
+    switch (profiles.get(user)) {
+      case (?_) { true };
+      case (null) { false };
+    };
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -378,10 +390,13 @@ actor {
     if (AccessControl.isAdmin(accessControlState, caller)) {
       return profiles.get(user);
     };
-    if (not isInCircleId(caller, user) and not isInCircleId(user, caller)) {
-      Runtime.trap("Unauthorized: Can only view profiles of circle members");
+    if (isInCircleId(caller, user) or isInCircleId(user, caller)) {
+      return profiles.get(user);
     };
-    profiles.get(user);
+    if (hasPendingJoinRequestFrom(caller, user)) {
+      return profiles.get(user);
+    };
+    Runtime.trap("Unauthorized: Can only view profiles of circle members or pending requesters");
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
@@ -408,13 +423,11 @@ actor {
       Runtime.trap("Unauthorized: Only users can upload avatars");
     };
 
-    // Validate content type
     if (avatar.contentType != "image/png" and avatar.contentType != "image/jpeg") {
       Runtime.trap("Invalid content type. Only PNG and JPEG images are supported");
     };
 
-    // Validate size (max 1000KB)
-    let maxSizeBytes = 1000 * 1024; // 1000 KB
+    let maxSizeBytes = 1000 * 1024;
     if (avatar.image.size() > maxSizeBytes) {
       Runtime.trap("Image size exceeds the maximum allowed size of 1000KB.");
     };
@@ -448,16 +461,36 @@ actor {
     profiles.add(caller, updatedProfile);
   };
 
-  public query ({ caller }) func getUnprocessedJoinRequests() : async [JoinRequest] {
+  type PendingRequestWithProfile = {
+    request : JoinRequest;
+    profile : UserProfile;
+  };
+
+  public query ({ caller }) func getUnprocessedJoinRequests() : async [PendingRequestWithProfile] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view join requests");
     };
+
     let current = getProfileFromCaller(caller);
-    requests.values().toArray().filter(
+
+    let pendingRequests = requests.values().toArray().filter(
       func(r) {
         r.to == caller and r.shareCode == current.shareCode and not isInCircleId(caller, r.from);
       }
     ).sort();
+
+    let grouped = pendingRequests.map(
+      func(request) {
+        switch (profiles.get(request.from)) {
+          case (?profile) {
+            ?{ request; profile };
+          };
+          case (null) { null };
+        };
+      }
+    );
+
+    grouped.filterMap(func(x) { x });
   };
 
   public shared ({ caller }) func updateProfile(profile : UserProfile) : async () {
@@ -486,7 +519,10 @@ actor {
     if (isInCircleId(id, caller) or isInCircleId(caller, id)) {
       return getProfileFromCaller(id);
     };
-    Runtime.trap("Unauthorized: Can only view your own profile or profiles of circle members");
+    if (hasPendingJoinRequestFrom(caller, id)) {
+      return getProfileFromCaller(id);
+    };
+    Runtime.trap("Unauthorized: Can only view your own profile, profiles of circle members, or pending requesters");
   };
 
   public query ({ caller }) func getShareCodeByPrincipal(principal : Principal) : async Text {
@@ -524,6 +560,10 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can join circles");
     };
+    if (not hasProfile(caller)) {
+      Runtime.trap("Unauthorized: You must create a profile before joining circles");
+    };
+
     let target = getProfileByShareCode(code);
     if (target.0 == caller) {
       Runtime.trap("You cannot join your own circle");
@@ -540,14 +580,17 @@ actor {
     };
     requests.add(key, request);
 
+    let requesterProfile = getProfileFromCaller(caller);
+
     let notificationId = key # "_" # Time.now().toText();
     let notification : Notification = {
       id = notificationId;
       user = target.0;
-      message = target.1.name # " has requested to join your Circle.";
+      message = requesterProfile.name # " has requested to join your Circle.";
       statusId = null;
       isRead = false;
       createdAt = Time.now();
+      requesterName = ?requesterProfile.name;
     };
     notifications.add(notificationId, notification);
   };
@@ -629,19 +672,27 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can post statuses");
     };
-    if (status.audience.isEmpty()) {
-      Runtime.trap("No recipients selected");
+    if (not hasProfile(caller)) {
+      Runtime.trap("Unauthorized: You must create a profile before posting statuses");
     };
 
-    let callerCircle = circles.get(caller);
-    switch (callerCircle) {
-      case (null) {
-        Runtime.trap("You must have circle members before posting");
-      };
-      case (?circle) {
-        for (recipient in status.audience.values()) {
-          if (recipient != caller and not circle.contains(recipient)) {
-            Runtime.trap("Unauthorized: All audience members must be in your circle");
+    let filtered = status.audience.filter(func(a) { a != caller });
+    let enhancedAudience = [caller].concat(filtered);
+
+    let isSelfOnly = enhancedAudience.size() == 1 and enhancedAudience[0] == caller;
+
+    if (isSelfOnly) {
+    } else {
+      let callerCircle = circles.get(caller);
+      switch (callerCircle) {
+        case (null) {
+          Runtime.trap("Circle must exist to post for audience other than yourself");
+        };
+        case (?circle) {
+          for (recipient in enhancedAudience.values()) {
+            if (recipient != caller and not circle.contains(recipient)) {
+              Runtime.trap("Unauthorized: All audience members must be in your circle");
+            };
           };
         };
       };
@@ -654,11 +705,11 @@ actor {
       mood = status.mood;
       content = status.content;
       contextTags = status.contextTags;
-      audience = status.audience;
+      audience = enhancedAudience;
       createdAt = Time.now();
     });
 
-    for (recipient in status.audience.values()) {
+    for (recipient in enhancedAudience.values()) {
       if (recipient != caller) {
         let notificationId = id # recipient.toText();
         notifications.add(notificationId, {
@@ -668,12 +719,12 @@ actor {
           statusId = ?id;
           isRead = false;
           createdAt = Time.now();
+          requesterName = null;
         });
       };
     };
   };
 
-  // Enhanced feed item type to unify statuses and silent signals
   type FeedItem = {
     #status : StatusPost;
     #silentSignal : SilentSignal;
@@ -781,6 +832,13 @@ actor {
     };
   };
 
+  func getNameFromCaller(id : Principal) : Text {
+    switch (profiles.get(id)) {
+      case (null) { "Unknown user" };
+      case (?profile) { profile.name };
+    };
+  };
+
   func getProfileByShareCode(code : Text) : (Principal, UserProfile) {
     let filteredProfiles = profiles.entries().toArray().filter(
       func((_, v)) { v.shareCode == code }
@@ -793,7 +851,6 @@ actor {
     filteredProfiles[0];
   };
 
-  // New Journal CRUD Methods
   public shared ({ caller }) func createOrUpdateJournalEntry(content : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can create journal entries");
@@ -889,8 +946,6 @@ actor {
     };
   };
 
-  // SAFE PEOPLE SYSTEM
-
   public query ({ caller }) func getSafePeople() : async [Principal] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view Safe People lists");
@@ -909,7 +964,6 @@ actor {
       Runtime.trap("You cannot set yourself as a Safe Person");
     };
 
-    // Verify that the person is a circle connection
     if (not isCircleConnection(caller, person)) {
       Runtime.trap("Unauthorized: Can only set Safe People from your circle connections");
     };
@@ -923,14 +977,12 @@ actor {
       Runtime.trap("Safe People list can only contain up to 2 people");
     };
 
-    // Check if the person is already set
     for (p in currentList.values()) {
       if (p == person) {
         Runtime.trap("This person is already set as safe person");
       };
     };
 
-    // Add the new person
     currentList := currentList.concat([person]);
     safePeople.add(caller, {
       people = currentList;
@@ -953,7 +1005,6 @@ actor {
     });
   };
 
-  // CANDIDATE RETRIEVAL FOR SAFE PEOPLE
   public query ({ caller }) func getEligibleSafePeopleCandidates() : async [Principal] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can retrieve Safe People candidates");
@@ -961,10 +1012,12 @@ actor {
     getAllCircleConnections(caller);
   };
 
-  // SILENT SIGNALS
   public shared ({ caller }) func postSilentSignal(mood : Mood, content : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can post silent signals");
+    };
+    if (not hasProfile(caller)) {
+      Runtime.trap("Unauthorized: You must create a profile before posting silent signals");
     };
 
     let signalId = caller.toText() # "-" # Time.now().toText();
@@ -974,7 +1027,6 @@ actor {
         if (list.people.isEmpty()) {
           [caller];
         } else {
-          // Validate that all Safe People are still valid circle connections
           for (person in list.people.values()) {
             if (not isCircleConnection(caller, person)) {
               Runtime.trap("Unauthorized: Safe People list contains invalid circle connections");
@@ -997,22 +1049,18 @@ actor {
     silentSignals.add(signalId, newSignal);
   };
 
-  // GET ALL SILENT SIGNALS FOR A USER
   public query ({ caller }) func getSilentSignals() : async [SilentSignal] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view silent signals");
     };
-    // Filter signals where caller is in the audience
     let visibleSignals = silentSignals.values().toArray().filter(
       func(signal) { contains(signal.audience, caller) }
     );
-    // Sort by createdAt descending
     visibleSignals.sort(
       func(a, b) { if (a.createdAt < b.createdAt) { #greater } else #less }
     );
   };
 
-  // Get all signals posted by caller
   public query ({ caller }) func getOwnSilentSignals() : async [SilentSignal] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view their own signals");

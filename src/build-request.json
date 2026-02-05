@@ -1,109 +1,127 @@
 {
   "kind": "build_request",
-  "title": "Add profile avatars: upload (≤1000KB PNG/JPEG) + bundled system avatar picker on Profile edit",
+  "title": "Allow users with zero circle members to post self-only mood updates",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-12",
-      "text": "Extend the backend user profile model to persist an optional avatar choice that can be either (a) a bundled system avatar identifier or (b) an uploaded image (PNG/JPEG).",
+      "text": "Update backend status posting validation so a user with zero circle members can successfully post a mood/status when the post audience is self-only (i.e., the audience list contains only the caller/author).",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-3",
-          "msg-5"
+          "msg-4",
+          "msg-6",
+          "msg-8"
         ],
         "quotes": [
-          "Allow users to upload their profile picture in profile or just pick a default system images/gravatars",
-          "i want a fixed set of system avatars we bundle in the frontend"
+          "Enable a user without a circle member to be able to post a mode",
+          "1. Yes",
+          "They should remain private/self-only"
         ]
       },
       "acceptanceCriteria": [
-        "Backend candid/types compile and the frontend can read/write the avatar choice as part of a user profile",
-        "Avatar storage supports both: system avatar reference and uploaded image bytes + content type",
-        "Existing profile reads (getCallerUserProfile/getUserProfile/viewProfile) include the avatar data needed for rendering"
+        "Given a caller with no circle (circles.get(caller) is null), calling postStatus with audience == [caller] succeeds (no trap).",
+        "Given a caller with no circle, calling postStatus with audience containing any principal other than caller traps with an unauthorized error (audience recipients must be in the caller's circle).",
+        "Backend continues to enforce that the caller must have a profile before posting statuses."
       ]
     },
     {
       "id": "REQ-13",
-      "text": "Add backend validation for uploaded avatars to enforce: content type must be PNG or JPEG, and byte size must be ≤ 1000KB; reject invalid uploads with clear error messages.",
+      "text": "Ensure backend normalizes/enforces self-visibility for status posts by always including the caller in the stored audience (deduplicated), without requiring circle membership for this self-only case.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-6"
         ],
         "quotes": [
-          "enforce a max file size/format limit, ≤ 1000KB"
+          "Yes"
         ]
       },
       "acceptanceCriteria": [
-        "Uploading an avatar > 1000KB fails with an error explaining the size limit",
-        "Uploading a non-PNG/JPEG fails with an error explaining allowed formats",
-        "Uploading a valid PNG/JPEG ≤ 1000KB succeeds and is returned on subsequent profile fetches"
+        "If a client submits a status with an audience that does not include the caller, the stored status audience still includes the caller (no duplicates).",
+        "If a client submits audience == [], the stored status audience becomes [caller] and the post succeeds even when the caller has no circle members."
       ]
     },
     {
       "id": "REQ-14",
-      "text": "Update the Profile page UI to display the current avatar and, when editing, allow users to either upload a new avatar image (PNG/JPEG ≤ 1000KB) or select from a fixed set of bundled system avatars; keep avatar selection only on the existing profile edit screen (no onboarding changes).",
+      "text": "Update the Compose status UI (ComposeStatusPage) so users with zero selectable circle members can still post, with the audience effectively defaulting to self-only/private and communicated in the UI using English copy.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3",
-          "msg-5"
+          "msg-4",
+          "msg-6"
         ],
         "quotes": [
-          "Allow users to upload their profile picture in profile or just pick a default system images/gravatars",
-          "only in the existing profile edit screen"
+          "Enable a user without a circle member to be able to post a mode",
+          "1. Yes"
         ]
       },
       "acceptanceCriteria": [
-        "In non-edit mode, Profile page shows the user’s current avatar (or a sensible fallback if none is set)",
-        "In edit mode, the user can pick a system avatar from a visible list/grid and see it selected in the preview",
-        "In edit mode, the user can choose a local file and the UI blocks files that are not PNG/JPEG or exceed 1000KB with an English error toast/message",
-        "Saving persists the chosen avatar and it remains after refresh/reload"
+        "On /compose, when selectableMembers.length === 0, the UI does not block submission and posting succeeds (no backend audience validation error).",
+        "The audience section clearly indicates the post will be private/self-only when there are no circle members (English user-facing text).",
+        "The submitted audience for this case results in a self-only audience on the backend (caller-only)."
       ]
     },
     {
       "id": "REQ-15",
-      "text": "Bundle a fixed set of system avatar images in the frontend as static assets and wire the Profile edit picker to these assets using stable, explicit identifiers (so the selection can be persisted in the backend).",
+      "text": "Update the Daily check-in UI (DailyCheckInPage) so users with zero selectable circle members can still post, defaulting to self-only/private audience with clear English microcopy.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-4",
+          "msg-6"
         ],
         "quotes": [
-          "i want a fixed set of system avatars we bundle in the frontend"
+          "Enable a user without a circle member to be able to post a mode",
+          "1. Yes"
         ]
       },
       "acceptanceCriteria": [
-        "System avatar images are included as static frontend assets (not served via backend)",
-        "Profile edit shows the full set of system avatars and allows selecting one",
-        "The persisted system-avatar choice round-trips correctly (select -> save -> reload -> still selected)"
+        "On /daily-check-in, when selectableMembers.length === 0, the UI does not block submission and posting succeeds (no backend audience validation error).",
+        "The audience section indicates the post will be private/self-only when there are no circle members (English user-facing text).",
+        "The submitted audience for this case results in a self-only audience on the backend (caller-only)."
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts must remain visible only to the author and must not automatically become visible to new circle members.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "They should remain private/self-only"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After a user posts a self-only status (audience caller-only) and later joins a circle, other circle members cannot access that status via getFeed or getStatus.",
+        "The author continues to see the self-only status in their own feed/history."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single-actor Motoko canister; all Motoko logic lives in backend/main.mo.",
-    "Do not edit any files under frontend/src/components/ui (shadcn components are read-only).",
-    "Do not edit immutable frontend hook files listed in SYSTEM_CONTEXT (compose around them instead).",
-    "No external storage/CDN for uploaded images; store uploaded avatar data within the canister.",
-    "All user-facing text must be in English."
+    "Backend must remain a single Motoko actor; implement all logic changes in backend/main.mo.",
+    "Do not edit any files under frontend/src/components/ui or other immutable paths listed in SYSTEM_CONTEXT.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not add avatar selection/upload to onboarding; only the existing Profile edit screen.",
-    "Do not implement auto-generated gravatars/identicons derived from principal.",
-    "Do not add third-party authentication or third-party media hosting."
+    "Changing how circle membership is modeled or adding new circle concepts.",
+    "Adding new authentication methods beyond existing Internet Identity.",
+    "Creating new feed/history screens; rely on existing feed behavior to show the author their own posts."
   ],
   "imageRequirements": {
-    "required": [
-      "Abstract system avatar illustration with simple shapes, warm neutral palette (system-avatar-01.dim_256x256.png)",
-      "Abstract system avatar illustration with simple shapes, high-contrast dark-friendly palette (system-avatar-02.dim_256x256.png)",
-      "Abstract system avatar illustration with geometric pattern and soft gradients (system-avatar-03.dim_256x256.png)",
-      "Abstract system avatar illustration with minimal face silhouette and flat colors (system-avatar-04.dim_256x256.png)",
-      "Abstract system avatar illustration with nature motif (leaf/stone shapes), minimal style (system-avatar-05.dim_256x256.png)",
-      "Abstract system avatar illustration with playful stickers/collage feel, minimal noise (system-avatar-06.dim_256x256.png)",
-      "Abstract system avatar illustration with bold lines and pastel blocks (system-avatar-07.dim_256x256.png)",
-      "Abstract system avatar illustration with calm monochrome + accent color (system-avatar-08.dim_256x256.png)"
-    ],
+    "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

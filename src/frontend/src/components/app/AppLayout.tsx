@@ -7,7 +7,11 @@ import SoundEffectsManager from '../sound/SoundEffectsManager';
 import { FloatingJournalVisibilityProvider } from '@/contexts/FloatingJournalVisibilityContext';
 import { JournalOverlayControllerProvider, useJournalOverlayController } from '@/contexts/JournalOverlayControllerContext';
 
-function AppLayoutContent() {
+interface AppLayoutProps {
+  children?: React.ReactNode;
+}
+
+function AppLayoutContent({ children }: AppLayoutProps) {
   const { isOpen, resetToToday, closeJournal } = useJournalOverlayController();
 
   return (
@@ -15,7 +19,7 @@ function AppLayoutContent() {
       <div className="flex min-h-screen flex-col bg-background">
         <AppHeader />
         <main className="flex-1 pb-safe-offset-16">
-          <Outlet />
+          {children || <Outlet />}
         </main>
         <BottomNav />
         <FloatingJournalFab />
@@ -26,10 +30,10 @@ function AppLayoutContent() {
   );
 }
 
-export default function AppLayout() {
+export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <JournalOverlayControllerProvider>
-      <AppLayoutContent />
+      <AppLayoutContent children={children} />
     </JournalOverlayControllerProvider>
   );
 }

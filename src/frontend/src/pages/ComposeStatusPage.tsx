@@ -18,10 +18,13 @@ import { calculateAge } from '@/utils/age';
 import { useJournalOverlayController } from '@/contexts/JournalOverlayControllerContext';
 import { getMoodOption } from '@/constants/moods';
 import { getMoodGradientClasses, getMoodColorClasses } from '@/utils/moodColors';
+import { useInternetIdentity } from '@/hooks/useInternetIdentity';
+import { buildAudienceWithAuthor } from '@/utils/audience';
 
 export default function ComposeStatusPage() {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { from?: string };
+  const { identity } = useInternetIdentity();
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [content, setContent] = useState('');
   const [selectedAudience, setSelectedAudience] = useState<Set<string>>(new Set());
@@ -33,6 +36,26 @@ export default function ComposeStatusPage() {
   const { data: profiles = {} } = useGetUserProfiles(circleMembers);
   const postStatus = usePostStatus();
   const { openJournal } = useJournalOverlayController();
+
+  const currentUserPrincipal = identity?.getPrincipal().toString();
+
+  // Filter out the current user from circle members
+  const selectableMembers = circleMembers.filter(
+    (member) => member.toString() !== currentUserPrincipal
+  );
+
+  // Prune selectedAudience when selectableMembers changes to prevent stale selections
+  useEffect(() => {
+    if (selectableMembers.length === 0) {
+      setSelectedAudience(new Set());
+    } else {
+      const validPrincipals = new Set(selectableMembers.map(m => m.toString()));
+      setSelectedAudience(prev => {
+        const filtered = new Set(Array.from(prev).filter(p => validPrincipals.has(p)));
+        return filtered.size !== prev.size ? filtered : prev;
+      });
+    }
+  }, [selectableMembers.length]);
 
   useEffect(() => {
     if (search.from === 'mood-reminder' && moodPickerRef.current) {
@@ -60,13 +83,14 @@ export default function ComposeStatusPage() {
       return;
     }
 
-    if (selectedAudience.size === 0) {
-      toast.error('Pick at least one person');
+    if (!identity) {
+      toast.error('Not authenticated');
       return;
     }
 
     try {
-      const audiencePrincipals = Array.from(selectedAudience).map((p) => Principal.fromText(p));
+      const selectedRecipients = Array.from(selectedAudience).map((p) => Principal.fromText(p));
+      const audienceWithAuthor = buildAudienceWithAuthor(selectedRecipients, identity.getPrincipal());
 
       await postStatus.mutateAsync({
         id: '',
@@ -74,7 +98,7 @@ export default function ComposeStatusPage() {
         mood: selectedMood,
         content: content.trim(),
         contextTags: contextTags.length > 0 ? contextTags : undefined,
-        audience: audiencePrincipals,
+        audience: audienceWithAuthor,
         createdAt: BigInt(0),
       });
 
@@ -147,16 +171,16 @@ export default function ComposeStatusPage() {
                     <Separator />
 
                     <div className="space-y-3">
-                      <Label>Who sees this? *</Label>
+                      <Label>Who sees this? (optional)</Label>
                       {loadingMembers ? (
                         <div className="py-4 text-center text-sm text-muted-foreground">Loading...</div>
-                      ) : circleMembers.length === 0 ? (
+                      ) : selectableMembers.length === 0 ? (
                         <div className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-                          No circle members yet
+                          No circle members yet — this post will be private (only you can see it)
                         </div>
                       ) : (
                         <div className="space-y-2 rounded-lg border p-4 max-h-64 overflow-y-auto">
-                          {circleMembers.map((member) => {
+                          {selectableMembers.map((member) => {
                             const principalStr = member.toString();
                             const profile = profiles[principalStr];
                             const displayName = profile?.name || `User ${principalStr.slice(0, 8)}...`;
@@ -185,7 +209,9 @@ export default function ComposeStatusPage() {
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        Only selected people see this
+                        {selectableMembers.length === 0 
+                          ? 'Posts stay private until you join a circle'
+                          : 'You always see your own posts'}
                       </p>
                     </div>
                   </div>
@@ -196,7 +222,7 @@ export default function ComposeStatusPage() {
             <div className="flex gap-2">
               <Button
                 onClick={handleSubmit}
-                disabled={postStatus.isPending || !selectedMood || selectedAudience.size === 0}
+                disabled={postStatus.isPending || !selectedMood}
                 className={`flex-1 ${moodGradient} ${moodColorClasses?.border} border-2 shadow-md hover:shadow-lg transition-all`}
               >
                 {postStatus.isPending ? 'Sharing...' : 'Share'}

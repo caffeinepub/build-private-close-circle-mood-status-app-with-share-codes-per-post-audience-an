@@ -17,7 +17,6 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
   const [enabled, setEnabledState] = useState(() => getSoundPreference());
   const [isUnlocked, setIsUnlocked] = useState(false);
   const audioRefs = useRef<Record<SoundCue, HTMLAudioElement>>({} as any);
-  const unlockAttempted = useRef(false);
 
   // Initialize audio elements
   useEffect(() => {
@@ -42,11 +41,10 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Attempt to unlock audio on first user interaction
+  // Attempt to unlock audio on user interaction
   useEffect(() => {
     const unlockAudio = async () => {
-      if (unlockAttempted.current || isUnlocked) return;
-      unlockAttempted.current = true;
+      if (isUnlocked) return;
 
       try {
         // Try to play and immediately pause a silent audio to unlock
@@ -64,14 +62,14 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
         }
       } catch {
         // Audio still locked, will try again on next interaction
-        unlockAttempted.current = false;
       }
     };
 
     // Listen for any user interaction to unlock audio
+    // Do NOT use { once: true } so we can retry on subsequent interactions
     const events = ['click', 'touchstart', 'keydown'];
     events.forEach((event) => {
-      document.addEventListener(event, unlockAudio, { once: true, passive: true });
+      document.addEventListener(event, unlockAudio, { passive: true });
     });
 
     return () => {

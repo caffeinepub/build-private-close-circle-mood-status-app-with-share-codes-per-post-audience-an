@@ -28,6 +28,10 @@ export interface StatusPost {
     audience: Array<Principal>;
     author: Principal;
 }
+export interface PendingRequestWithProfile {
+    request: JoinRequest;
+    profile: UserProfile;
+}
 export interface JournalEntry {
     content: string;
     date: Time;
@@ -40,6 +44,7 @@ export interface Notification {
     isRead: boolean;
     statusId?: string;
     message: string;
+    requesterName?: string;
 }
 export type FeedItem = {
     __kind__: "status";
@@ -160,7 +165,7 @@ export interface backendInterface {
     getShareCodeByPrincipal(principal: Principal): Promise<string>;
     getSilentSignals(): Promise<Array<SilentSignal>>;
     getStatus(statusId: string): Promise<StatusPost | null>;
-    getUnprocessedJoinRequests(): Promise<Array<JoinRequest>>;
+    getUnprocessedJoinRequests(): Promise<Array<PendingRequestWithProfile>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     joinCircleFromShareCode(code: string): Promise<void>;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 109,
+  "projectStateVersion": 180,
   "summary": "CloseCircle Scope 2 remains micro‑UX to reduce thinking and increase guidance in the daily check‑in flow. Scope 3 makes the Mood Analyzer actionable by mapping detected patterns to conservative, rule‑based, non‑clinical micro‑actions (≤2 minutes). Add Scope 4: Circles that do something day‑to‑day—make circles useful without social pressure via Safe People (1–2) and silent, no‑reply signals (e.g., “Low energy today”, “Okay, just quiet”) with no demanding notifications.",
   "existing_features": [
     {
@@ -548,19 +548,6 @@
       "version": 1
     },
     {
-      "id": "IF-46",
-      "title": "Footer credit line with ICP attribution and inline ICP logo",
-      "synonyms": [
-        "AppFooter",
-        "footer credits",
-        "ICP logo asset",
-        "powered by Internet Computer"
-      ],
-      "description": "Adds a persistent footer credit line including “© CloseCircle. 2026. Built by Abel Odoh (https://x.com/AbelOdoh_IC) using Caffeine AI & powered by Internet Computer”, and embeds a small inline Internet Computer (ICP) logo asset for attribution.",
-      "reqIds": [],
-      "version": 1
-    },
-    {
       "id": "IF-47",
       "title": "User-facing light/dark mode toggle control",
       "synonyms": [
@@ -605,18 +592,170 @@
       "version": 1
     },
     {
-      "id": "feature-update-the-profile-page-ui-to-display-the-current-avatar-and-when-editing-allow-users-to-either-upload-a-new-avatar-image-png-jpeg-1000kb-or-select-from-a-fixed-set-of-bundled-system-avatars-keep-avatar-selection-only-on-the-existing-profile-edit-screen-no-onboarding-changes",
-      "title": "Update the Profile page UI to display the current avatar and, when editing, allow users to either upload a new avatar image (PNG/JPEG ≤ 1000KB) or select from a fixed set of bundled system avatars; keep avatar selection only on the existing profile edit screen (no onboarding changes).",
+      "id": "IF-50",
+      "title": "Profile picture (avatar) support with system avatars and editor UI",
+      "synonyms": [
+        "ProfileAvatarEditor",
+        "system avatars",
+        "profile avatar selection",
+        "profileAvatar utils",
+        "StorageClient"
+      ],
+      "description": "Adds avatar support to the profile flow, including a ProfileAvatarEditor UI and a set of bundled system avatar images users can choose from, with supporting utilities for avatar handling/storage integration.",
+      "reqIds": [
+        "AR-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-51",
+      "title": "Reusable build template and deployment scaffolding (React + Motoko)",
+      "synonyms": [
+        "build-template",
+        "deploy.sh",
+        "icp.yaml",
+        "Dockerfile",
+        "image resize/prune scripts"
+      ],
+      "description": "Adds a standalone build-template workspace containing frontend/backend canister configs, deploy scripts, Dockerfile, and utility scripts (e.g., prune-unused-images, resize-images) to support reproducible builds and deployment/export of the CloseCircle stack.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-52",
+      "title": "Compact in-app attribution line under CloseCircle logo; footer attribution block removed",
+      "synonyms": [
+        "AR-15 implementation",
+        "AR-17 implementation",
+        "header attribution",
+        "remove footer powered-by ICP line"
+      ],
+      "description": "Removes the large footer attribution/credit block and relocates a shorter “Built by Abel Odoh …” attribution line under the CloseCircle logo within the in-app UI; drops the “Powered by Internet Computer” line per updated attribution requirements.",
+      "reqIds": [
+        "AR-15",
+        "AR-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-53",
+      "title": "Redesigned public homepage and new start/login entry routes",
+      "synonyms": [
+        "PublicHomePage",
+        "HomeRoutePage",
+        "StartAuthPage"
+      ],
+      "description": "Introduces a redesigned public landing experience and reorganizes unauthenticated entry routing with dedicated public pages to improve the first-run/login experience and separate public onboarding from the authenticated app shell.",
+      "reqIds": [
+        "AR-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-54",
+      "title": "Invite-code-first homepage/login flow with session persistence",
+      "synonyms": [
+        "InviteCodeAuthStepPage",
+        "inviteCodeSession"
+      ],
+      "description": "Implements an invite-code-first entry flow: users enter an invite/share code first, then proceed to authentication/account creation in a follow-up step. The entered code is persisted for the session to support the multi-step flow and downstream join behavior.",
+      "reqIds": [
+        "AR-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-55",
+      "title": "Audience selector excludes self and removes recipient count in compose UI",
+      "synonyms": [
+        "audience.ts",
+        "ComposeStatusPage audience UI",
+        "no self recipient",
+        "remove 'shared with X persons'"
+      ],
+      "description": "Updates the compose audience selector so the author is not shown as a tickable recipient while still always retaining author visibility of their own post; removes the UI copy that displays a 'shared with X persons' recipient count.",
+      "reqIds": [
+        "AR-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-56",
+      "title": "Authenticated redirect gate to keep unauthenticated users off protected routes (logout-safe routing)",
+      "synonyms": [
+        "AuthenticatedRedirectGate",
+        "logout redirect to public home",
+        "protected-route redirect"
+      ],
+      "description": "Adds a routing gate that detects unauthenticated state and redirects the user away from authenticated-only routes to the public homepage/start flow, preventing protected-route error states and avoiding stray unauth overlays persisting after logout.",
+      "reqIds": [
+        "AR-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-57",
+      "title": "Safe People selection principal conversion fix (avoid “invalid principal argument”)",
+      "synonyms": [
+        "AR-21 fix",
+        "SafePeoplePanel principal handling",
+        "Principal.fromText conversion"
+      ],
+      "description": "Fixes Safe People selection failures caused by passing non-Principal values by ensuring selected principals are normalized/converted to proper Principal values before canister calls.",
+      "reqIds": [
+        "AR-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-58",
+      "title": "Join requests UI displays requester names when available (instead of raw principals)",
+      "synonyms": [
+        "AR-22 fix",
+        "PendingRequestsPanel requester display name",
+        "profile lookup for join requests"
+      ],
+      "description": "Updates the join-requests inbox UI to resolve and show requester profile display names where possible, falling back to principal only when a name cannot be resolved.",
+      "reqIds": [
+        "AR-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "IF-59",
+      "title": "Join-request notification requester name resolution fixed (avoid “Unknown user…”)",
+      "synonyms": [
+        "AR-24 fix",
+        "notification generation/render name resolution",
+        "join request notification copy"
+      ],
+      "description": "Fixes join-request notifications rendering as “Unknown user has requested to join your Circle.” by ensuring requester profile/name is correctly resolved during notification generation and/or rendering.",
+      "reqIds": [
+        "AR-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-compose-status-ui-composestatuspage-so-users-with-zero-selectable-circle-members-can-still-post-with-the-audience-effectively-defaulting-to-self-only-private-and-communicated-in-the-ui-using-english-copy",
+      "title": "Update the Compose status UI (ComposeStatusPage) so users with zero selectable circle members can still post, with the audience effectively defaulting to self-only/private and communicated in the UI using English copy.",
       "reqIds": [
         "REQ-14"
       ],
       "version": 1
     },
     {
-      "id": "feature-bundle-a-fixed-set-of-system-avatar-images-in-the-frontend-as-static-assets-and-wire-the-profile-edit-picker-to-these-assets-using-stable-explicit-identifiers-so-the-selection-can-be-persisted-in-the-backend",
-      "title": "Bundle a fixed set of system avatar images in the frontend as static assets and wire the Profile edit picker to these assets using stable, explicit identifiers (so the selection can be persisted in the backend).",
+      "id": "feature-update-the-daily-check-in-ui-dailycheckinpage-so-users-with-zero-selectable-circle-members-can-still-post-defaulting-to-self-only-private-audience-with-clear-english-microcopy",
+      "title": "Update the Daily check-in UI (DailyCheckInPage) so users with zero selectable circle members can still post, defaulting to self-only/private audience with clear English microcopy.",
       "reqIds": [
         "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-preserve-privacy-of-self-only-posts-after-the-user-later-joins-a-circle-self-only-posts-must-remain-visible-only-to-the-author-and-must-not-automatically-become-visible-to-new-circle-members",
+      "title": "Preserve privacy of self-only posts after the user later joins a circle: self-only posts must remain visible only to the author and must not automatically become visible to new circle members.",
+      "reqIds": [
+        "REQ-16"
       ],
       "version": 1
     }
@@ -653,28 +792,28 @@
       "status": "pending"
     },
     {
-      "id": "AR-15",
-      "summary": "Remove the footer attribution block and relocate a shorter attribution line (e.g., “© CloseCircle. 2026. Built by Abel Odoh using Caffeine AI”) under the CloseCircle logo in a much smaller font; drop the “Powered by Internet Computer” line.",
-      "reqIds": [],
-      "status": "in_progress"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Add profile picture support: allow users to upload an avatar and/or choose from default system images (e.g., gravatar-style) in the profile flow",
+      "id": "AR-25",
+      "summary": "Update homepage CTA text from “No code? Create an account” to “No code? Create an account/Login”",
       "reqIds": [],
       "status": "pending"
     },
     {
-      "id": "AR-17",
-      "summary": "Extend the backend user profile model to persist an optional avatar choice that can be either (a) a bundled system avatar identifier or (b) an uploaded image (PNG/JPEG).",
+      "id": "AR-26",
+      "summary": "Allow users with no circle members to post a mood/status (self-only/default audience); posts appear in their own feed/history and remain private even after later joining a circle",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Update backend status posting validation so a user with zero circle members can successfully post a mood/status when the post audience is self-only (i.e., the audience list contains only the caller/author).",
       "reqIds": [
         "REQ-12"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-18",
-      "summary": "Add backend validation for uploaded avatars to enforce: content type must be PNG or JPEG, and byte size must be ≤ 1000KB; reject invalid uploads with clear error messages.",
+      "id": "AR-28",
+      "summary": "Ensure backend normalizes/enforces self-visibility for status posts by always including the caller in the stored audience (deduplicated), without requiring circle membership for this self-only case.",
       "reqIds": [
         "REQ-13"
       ],
@@ -696,63 +835,61 @@
   "known_issues": [
     "Backend generateRandomShareCode() is deterministic (index mod 36), making server-generated share codes predictable and potentially collision-prone if empty codes are allowed.",
     "Backend createOrUpdateJournalEntry() uses Time.now() as the entry “date” key and filters by exact equality, so repeated saves won’t reliably update/replace same-day entries; backend also doesn’t enforce the UI rule that past days are locked.",
-    "useActor always calls _initializeAccessControlWithSecret() for authenticated users; if CAFFEINE_ADMIN_TOKEN is not set in the canister environment, the canister traps and the app cannot proceed.",
     "Multiple frontend paths convert bigint nanosecond timestamps to Number for sorting/date-fns, risking precision loss and subtle ordering/time display issues.",
-    "Backend joinCircleFromShareCode() notification message uses the target (circle owner) profile name as the requester name, producing misleading notifications.",
     "Backend updateProfile() overwrites createdAt with Time.now(), losing original profile creation timestamp semantics even if the client supplies createdAt.",
     "Share code updates do not purge stale join-request records keyed by the previous share code, despite UI copy implying pending requests are invalidated.",
     "Canister state is stored in non-stable variables (Map/List) with no upgrade persistence shown; data may be lost on canister upgrades.",
     "Circle membership is stored only under the circle owner principal (one-sided), limiting member-centric features unless mirrored state is added.",
-    "urlParams clearParamFromHash() only removes params from hash routes that include a '?' query segment; for simple '#token=value' style hashes, secrets may remain in the URL/history after extraction."
+    "Deployment: build/deploy pipeline encountered an unspecified deployment error during push to the network. Needs error details/log capture to diagnose.",
+    "Logout does not consistently redirect users away from authenticated-only routes; after logout, protected pages can still render a logged-in-only error state instead of returning to the public homepage."
   ],
   "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Abstract system avatar illustration with simple shapes, warm neutral palette (system-avatar-01.dim_256x256.png)\n- Abstract system avatar illustration with simple shapes, high-contrast dark-friendly palette (system-avatar-02.dim_256x256.png)\n- Abstract system avatar illustration with geometric pattern and soft gradients (system-avatar-03.dim_256x256.png)\n- Abstract system avatar illustration with minimal face silhouette and flat colors (system-avatar-04.dim_256x256.png)\n- Abstract system avatar illustration with nature motif (leaf/stone shapes), minimal style (system-avatar-05.dim_256x256.png)\n- Abstract system avatar illustration with playful stickers/collage feel, minimal noise (system-avatar-06.dim_256x256.png)\n- Abstract system avatar illustration with bold lines and pastel blocks (system-avatar-07.dim_256x256.png)\n- Abstract system avatar illustration with calm monochrome + accent color (system-avatar-08.dim_256x256.png)",
   "generatedImages": [
     {
-      "filename": "system-avatar-01.dim_256x256.png",
-      "description": "Abstract system avatar illustration with simple shapes, warm neutral palette",
+      "filename": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
+      "description": "Bundled default system avatar option #01.",
       "targetWidth": 256,
       "targetHeight": 256
     },
     {
-      "filename": "system-avatar-02.dim_256x256.png",
-      "description": "Abstract system avatar illustration with simple shapes, high-contrast dark-friendly palette",
+      "filename": "frontend/public/assets/generated/system-avatar-02.dim_256x256.png",
+      "description": "Bundled default system avatar option #02.",
       "targetWidth": 256,
       "targetHeight": 256
     },
     {
-      "filename": "system-avatar-03.dim_256x256.png",
-      "description": "Abstract system avatar illustration with geometric pattern and soft gradients",
+      "filename": "frontend/public/assets/generated/system-avatar-03.dim_256x256.png",
+      "description": "Bundled default system avatar option #03.",
       "targetWidth": 256,
       "targetHeight": 256
     },
     {
-      "filename": "system-avatar-04.dim_256x256.png",
-      "description": "Abstract system avatar illustration with minimal face silhouette and flat colors",
+      "filename": "frontend/public/assets/generated/system-avatar-04.dim_256x256.png",
+      "description": "Bundled default system avatar option #04.",
       "targetWidth": 256,
       "targetHeight": 256
     },
     {
-      "filename": "system-avatar-05.dim_256x256.png",
-      "description": "Abstract system avatar illustration with nature motif (leaf/stone shapes), minimal style",
+      "filename": "frontend/public/assets/generated/system-avatar-05.dim_256x256.png",
+      "description": "Bundled default system avatar option #05.",
       "targetWidth": 256,
       "targetHeight": 256
     },
     {
-      "filename": "system-avatar-06.dim_256x256.png",
-      "description": "Abstract system avatar illustration with playful stickers/collage feel, minimal noise",
+      "filename": "frontend/public/assets/generated/system-avatar-06.dim_256x256.png",
+      "description": "Bundled default system avatar option #06.",
       "targetWidth": 256,
       "targetHeight": 256
     },
     {
-      "filename": "system-avatar-07.dim_256x256.png",
-      "description": "Abstract system avatar illustration with bold lines and pastel blocks",
+      "filename": "frontend/public/assets/generated/system-avatar-07.dim_256x256.png",
+      "description": "Bundled default system avatar option #07.",
       "targetWidth": 256,
       "targetHeight": 256
     },
     {
-      "filename": "system-avatar-08.dim_256x256.png",
-      "description": "Abstract system avatar illustration with calm monochrome + accent color",
+      "filename": "frontend/public/assets/generated/system-avatar-08.dim_256x256.png",
+      "description": "Bundled default system avatar option #08.",
       "targetWidth": 256,
       "targetHeight": 256
     }

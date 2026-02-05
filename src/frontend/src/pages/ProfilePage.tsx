@@ -415,7 +415,7 @@ export default function ProfilePage() {
             <div className="space-y-0.5">
               <Label htmlFor="sounds-toggle">Sounds</Label>
               <p className="text-xs text-muted-foreground">
-                Play calm sounds for new activity
+                Play sounds for new activity
               </p>
             </div>
             <Switch

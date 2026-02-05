@@ -81,6 +81,11 @@ export interface Notification {
   'isRead' : boolean,
   'statusId' : [] | [string],
   'message' : string,
+  'requesterName' : [] | [string],
+}
+export interface PendingRequestWithProfile {
+  'request' : JoinRequest,
+  'profile' : UserProfile,
 }
 export interface Preferences {
   'intent' : RelationshipIntent,
@@ -143,7 +148,10 @@ export interface _SERVICE {
   'getShareCodeByPrincipal' : ActorMethod<[Principal], string>,
   'getSilentSignals' : ActorMethod<[], Array<SilentSignal>>,
   'getStatus' : ActorMethod<[string], [] | [StatusPost]>,
-  'getUnprocessedJoinRequests' : ActorMethod<[], Array<JoinRequest>>,
+  'getUnprocessedJoinRequests' : ActorMethod<
+    [],
+    Array<PendingRequestWithProfile>
+  >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'joinCircleFromShareCode' : ActorMethod<[string], undefined>,

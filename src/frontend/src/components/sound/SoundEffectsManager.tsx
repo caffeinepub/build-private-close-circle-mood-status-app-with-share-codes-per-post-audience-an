@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useGetNotifications, useGetFeed, useGetUnprocessedJoinRequests, useGetCircleMembers } from '@/hooks/useQueries';
 import { useSound } from '@/hooks/useSound';
-import type { Notification, FeedItem, JoinRequest } from '@/backend';
+import type { Notification, FeedItem, PendingRequestWithProfile } from '@/backend';
 import type { Principal } from '@dfinity/principal';
 
 export default function SoundEffectsManager() {
@@ -10,7 +10,7 @@ export default function SoundEffectsManager() {
   // Track previous data to detect new items
   const prevNotifications = useRef<Notification[] | null>(null);
   const prevFeed = useRef<FeedItem[] | null>(null);
-  const prevJoinRequests = useRef<JoinRequest[] | null>(null);
+  const prevJoinRequests = useRef<PendingRequestWithProfile[] | null>(null);
   const prevCircleMembers = useRef<Principal[] | null>(null);
 
   // Track if first load has completed for each query

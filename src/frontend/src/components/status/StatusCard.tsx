@@ -6,6 +6,7 @@ import { getMoodColorClasses } from '@/utils/moodColors';
 import type { StatusPost } from '@/backend';
 import { formatDistanceToNow } from 'date-fns';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
+import { Lock } from 'lucide-react';
 
 interface StatusCardProps {
   status: StatusPost;
@@ -18,6 +19,10 @@ export default function StatusCard({ status, hideAudience = false }: StatusCardP
 
   const moodOption = getMoodOption(status.mood);
   const isOwnStatus = identity?.getPrincipal().toString() === status.author.toString();
+  
+  // Check if this is a self-only post (audience contains only the author)
+  const isSelfOnly = status.audience.length === 1 && 
+    status.audience[0].toString() === status.author.toString();
 
   const authorName = authorProfile?.name || `User ${status.author.toString().slice(0, 8)}...`;
 
@@ -31,6 +36,12 @@ export default function StatusCard({ status, hideAudience = false }: StatusCardP
             <div className="flex items-center gap-2 mb-2">
               <p className="font-semibold">{authorName}</p>
               {isOwnStatus && <Badge variant="secondary">You</Badge>}
+              {isOwnStatus && isSelfOnly && (
+                <Badge variant="outline" className="gap-1">
+                  <Lock className="h-3 w-3" />
+                  Private
+                </Badge>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
               {formatDistanceToNow(Number(status.createdAt) / 1_000_000, { addSuffix: true })}
@@ -47,14 +58,6 @@ export default function StatusCard({ status, hideAudience = false }: StatusCardP
             {status.content && <p className="text-sm text-muted-foreground mt-1">{status.content}</p>}
           </div>
         </div>
-
-        {!hideAudience && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>
-              Shared with {status.audience.length} {status.audience.length === 1 ? 'person' : 'people'}
-            </span>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
