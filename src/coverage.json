@@ -1,75 +1,47 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T16:49:41.152Z",
+  "generatedAt": "2026-02-05T17:51:10.298Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 3,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-23",
-        "summary": "Add a backend query API that returns ranked “closest connections” recommendations for the caller using only existing relationship/interaction data (e.g., mutual circle relationship signals and interaction frequency derived from existing posts/signals), and include per-person explanation strings describing why each person ranked highly.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-24",
-        "summary": "Add a new authenticated, deep-link-only frontend route and page for a lightweight private “Closest connections” viewer that displays the ranked recommendations and shows the explanation text for each ranked person (reasoning visible here only).",
+        "id": "REQ-29",
+        "summary": "Update the Sign Out action in the authenticated header so that after a successful logout it always redirects the user to the public root route \"/\" (homepage), regardless of the current page.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/ClosestConnectionsPage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/hooks/useInternetIdentity.ts",
+          "frontend/src/components/app/AppHeader.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/ClosestConnectionsPage.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/app/AppHeader.tsx"
         ]
       },
       {
-        "id": "REQ-25",
-        "summary": "Add a centralized React Query hook to fetch the caller’s closest-connection recommendations from the backend, with caching and invalidation wired to existing mutations that can change relationship/interaction signals.",
+        "id": "REQ-30",
+        "summary": "Ensure authenticated-only routes cannot remain visible after identity is cleared: when the app is currently rendering under the authenticated layout and the Internet Identity becomes undefined (and initialization is not in progress), immediately redirect to \"/\".",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/backend.d.ts",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/app/AppLayout.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/backend.d.ts",
-          "frontend/src/hooks/useQueries.ts"
-        ]
-      },
-      {
-        "id": "REQ-26",
-        "summary": "Update the existing Safe People selection UI to show smarter recommendations that influence what the user sees when choosing manually (max 2), without automatically setting/overwriting Safe People selections and without showing explanation text inside the Safe People UI.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/circle/SafePeoplePanel.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/circle/SafePeoplePanel.tsx"
+          "frontend/src/components/app/AppLayout.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/circle/SafePeoplePanel.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ClosestConnectionsPage.tsx",
+    "frontend/src/components/app/AppHeader.tsx",
+    "frontend/src/components/app/AppLayout.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

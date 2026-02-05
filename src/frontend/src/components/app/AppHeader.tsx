@@ -21,8 +21,13 @@ export default function AppHeader() {
   const { openJournal } = useJournalOverlayController();
 
   const handleLogout = async () => {
-    await clear();
-    queryClient.clear();
+    try {
+      await clear();
+      queryClient.clear();
+      navigate({ to: '/', replace: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleProfile = () => {

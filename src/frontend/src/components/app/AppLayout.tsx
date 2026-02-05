@@ -1,4 +1,5 @@
-import { Outlet } from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { Outlet, useNavigate } from '@tanstack/react-router';
 import AppHeader from './AppHeader';
 import BottomNav from './BottomNav';
 import FloatingJournalFab from './FloatingJournalFab';
@@ -6,6 +7,7 @@ import JournalOverlay from '../journal/JournalOverlay';
 import SoundEffectsManager from '../sound/SoundEffectsManager';
 import { FloatingJournalVisibilityProvider } from '@/contexts/FloatingJournalVisibilityContext';
 import { JournalOverlayControllerProvider, useJournalOverlayController } from '@/contexts/JournalOverlayControllerContext';
+import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -13,6 +15,15 @@ interface AppLayoutProps {
 
 function AppLayoutContent({ children }: AppLayoutProps) {
   const { isOpen, resetToToday, closeJournal } = useJournalOverlayController();
+  const { identity, isInitializing } = useInternetIdentity();
+  const navigate = useNavigate();
+
+  // Redirect to homepage if user logs out while on an authenticated route
+  useEffect(() => {
+    if (!identity && !isInitializing) {
+      navigate({ to: '/', replace: true });
+    }
+  }, [identity, isInitializing, navigate]);
 
   return (
     <FloatingJournalVisibilityProvider>

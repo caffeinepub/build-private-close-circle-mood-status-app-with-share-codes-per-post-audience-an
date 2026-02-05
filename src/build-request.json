@@ -1,117 +1,59 @@
 {
   "kind": "build_request",
-  "title": "Add Closest Connections viewer + smarter Safe People recommendations",
-  "priority": "normal",
+  "title": "Fix logout redirect to always return to public homepage (/)",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-23",
-      "text": "Add a backend query API that returns ranked “closest connections” recommendations for the caller using only existing relationship/interaction data (e.g., mutual circle relationship signals and interaction frequency derived from existing posts/signals), and include per-person explanation strings describing why each person ranked highly.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "recent-messages"
-        ],
-        "quotes": [
-          "Add smarter Safe People suggestions, relationship exploration,  picture a lightweight, private viewer (e.g., “your closest connections”)",
-          "purely from existing relationship data (e.g., mutual circles, interaction frequency)",
-          "ranked people & an explanation of why they rank high",
-          "in the new lightweight “closest connections” viewer only"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A new backend query method exists that can be called by an authenticated user to fetch a ranked list of recommended connections for that caller.",
-        "Each recommendation item includes: (1) the recommended person principal, and (2) an ordered list of human-readable explanation strings (English) that justify the ranking based on existing stored data (no new external data sources).",
-        "The recommendation list is limited to a caller-provided limit (or a safe default) and is deterministically sorted (highest rank first).",
-        "The method does not modify Safe People selections and has no side effects.",
-        "Unauthorized callers (non-#user) are rejected consistently with existing backend auth patterns."
-      ]
-    },
-    {
-      "id": "REQ-24",
-      "text": "Add a new authenticated, deep-link-only frontend route and page for a lightweight private “Closest connections” viewer that displays the ranked recommendations and shows the explanation text for each ranked person (reasoning visible here only).",
+      "id": "REQ-29",
+      "text": "Update the Sign Out action in the authenticated header so that after a successful logout it always redirects the user to the public root route \"/\" (homepage), regardless of the current page.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-1"
         ],
         "quotes": [
-          "picture a lightweight, private viewer (e.g., “your closest connections”)",
-          "ranked people & an explanation of why they rank high",
-          "in the new lightweight “closest connections” viewer only"
+          "Let's fix the logout issue that doesn't take me back to homepage once again",
+          "1. Yes, always back to root route “/”",
+          "implement now"
         ]
       },
       "acceptanceCriteria": [
-        "A new authenticated route is added under the existing authenticated layout (no BottomNav item added).",
-        "The page fetches closest-connection recommendations via a centralized React Query hook and renders a ranked list.",
-        "Each list row shows the person’s avatar and name (and may fall back gracefully if profile data is unavailable).",
-        "Each list row provides a way to view the explanation text (e.g., collapsible/accordion), and the explanation text is shown only on this page (not inside Safe People selection UI).",
-        "The page has loading, error, and empty states consistent with existing page patterns."
+        "From any authenticated route (e.g., /circle, /profile, /closest-connections), clicking “Sign Out” navigates to \"/\" after logout completes.",
+        "The navigation uses a replace-style redirect (no back-navigation into authenticated pages after logout).",
+        "React Query cache is cleared on logout as it is today, and the redirect still occurs."
       ]
     },
     {
-      "id": "REQ-25",
-      "text": "Add a centralized React Query hook to fetch the caller’s closest-connection recommendations from the backend, with caching and invalidation wired to existing mutations that can change relationship/interaction signals.",
+      "id": "REQ-30",
+      "text": "Ensure authenticated-only routes cannot remain visible after identity is cleared: when the app is currently rendering under the authenticated layout and the Internet Identity becomes undefined (and initialization is not in progress), immediately redirect to \"/\".",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages"
+          "msg-1"
         ],
         "quotes": [
-          "implement it now",
-          "Smarter Safe People suggestions: compute ranked recommendations (purely from existing relationship/interaction data like mutual circles and interaction frequency)"
+          "Logout does not consistently redirect users away from authenticated-only routes; after logout, protected pages can still render a logged-in-only error state instead of returning to the public homepage.",
+          "1. Yes, always back to root route “/”"
         ]
       },
       "acceptanceCriteria": [
-        "A new hook exists (in the existing query hooks module) that queries the backend closest-connections API and returns typed data usable by both the Safe People UI and the Closest Connections page.",
-        "The hook uses a stable queryKey (including limit) and does not run until the actor is ready, matching existing patterns in frontend/src/hooks/useQueries.ts.",
-        "The query is invalidated (directly or via existing invalidations) after relevant mutations at minimum: posting a status (interaction frequency), accepting a join request, and removing a circle member (relationship graph changes)."
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "text": "Update the existing Safe People selection UI to show smarter recommendations that influence what the user sees when choosing manually (max 2), without automatically setting/overwriting Safe People selections and without showing explanation text inside the Safe People UI.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "recent-messages"
-        ],
-        "quotes": [
-          "it should only influence what you see when choosing manually",
-          "simply show the recommendation without modifying anything",
-          "yes it should affect the existing Safe People limit (max 2)",
-          "in the new lightweight “closest connections” viewer only"
-        ]
-      },
-      "acceptanceCriteria": [
-        "SafePeoplePanel continues to enforce a maximum of 2 selected Safe People and never auto-selects or overwrites existing selections.",
-        "SafePeoplePanel visually highlights or prioritizes recommended candidates (e.g., a “Recommended” section or badge) based on the recommendations hook, while still allowing manual selection as before.",
-        "SafePeoplePanel does not display the per-person explanation text (reasoning) anywhere in the Safe People UI.",
-        "SafePeoplePanel provides a simple in-app navigation affordance to open the Closest Connections viewer page (the viewer remains absent from global navigation like BottomNav)."
+        "If a user logs out while on an authenticated route, the app does not remain on that route showing any protected/error state; it redirects to \"/\".",
+        "If the user manually visits an authenticated URL after logout (e.g., pasting /profile), they are redirected to \"/\".",
+        "No infinite redirect loop occurs during initial identity loading (i.e., do not redirect while identity is still initializing)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain single-actor (all Motoko logic in backend/main.mo).",
-    "Do not edit files under frontend immutablePaths (compose existing components instead).",
-    "Use English for all user-facing text."
+    "Frontend must not modify any files under frontend/src/components/ui or other immutablePaths listed in SYSTEM_CONTEXT.",
+    "Backend remains single-actor; no backend changes are required for this logout redirect fix."
   ],
   "nonGoals": [
-    "Do not automatically set or overwrite a user’s Safe People selections based on recommendations.",
-    "Do not display recommendation reasoning text inside the Safe People selection UI; reasoning is shown only in the Closest Connections viewer.",
-    "Do not add third-party services, analytics, external databases, or real-time sockets for interaction tracking."
+    "Do not redesign the public homepage or login flow UI.",
+    "Do not change authentication provider behavior (Internet Identity / AuthClient configuration) beyond what is necessary to perform the redirect.",
+    "Do not add new routes or change existing route paths."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

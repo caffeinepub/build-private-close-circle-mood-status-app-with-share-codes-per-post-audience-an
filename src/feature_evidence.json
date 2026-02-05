@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-new-authenticated-deep-link-only-frontend-route-and-page-for-a-lightweight-private-closest-connections-viewer-that-displays-the-ranked-recommendations-and-shows-the-explanation-text-for-each-ranked-person-reasoning-visible-here-only",
-      "featureTitle": "Add a new authenticated, deep-link-only frontend route and page for a lightweight private “Closest connections” viewer that displays the ranked recommendations and shows the explanation text for each ranked person (reasoning visible here only).",
+      "featureId": "feature-update-the-sign-out-action-in-the-authenticated-header-so-that-after-a-successful-logout-it-always-redirects-the-user-to-the-public-root-route-homepage-regardless-of-the-current-page",
+      "featureTitle": "Update the Sign Out action in the authenticated header so that after a successful logout it always redirects the user to the public root route \"/\" (homepage), regardless of the current page.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/pages/ClosestConnectionsPage.tsx"
+        "frontend/src/components/app/AppHeader.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,15 +16,15 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-24"
+        "REQ-29"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-centralized-react-query-hook-to-fetch-the-caller-s-closest-connection-recommendations-from-the-backend-with-caching-and-invalidation-wired-to-existing-mutations-that-can-change-relationship-interaction-signals",
-      "featureTitle": "Add a centralized React Query hook to fetch the caller’s closest-connection recommendations from the backend, with caching and invalidation wired to existing mutations that can change relationship/interaction signals.",
+      "featureId": "feature-ensure-authenticated-only-routes-cannot-remain-visible-after-identity-is-cleared-when-the-app-is-currently-rendering-under-the-authenticated-layout-and-the-internet-identity-becomes-undefined-and-initialization-is-not-in-progress-immediately-redirect-to",
+      "featureTitle": "Ensure authenticated-only routes cannot remain visible after identity is cleared: when the app is currently rendering under the authenticated layout and the Internet Identity becomes undefined (and initialization is not in progress), immediately redirect to \"/\".",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/app/AppLayout.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -36,26 +35,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-25"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-existing-safe-people-selection-ui-to-show-smarter-recommendations-that-influence-what-the-user-sees-when-choosing-manually-max-2-without-automatically-setting-overwriting-safe-people-selections-and-without-showing-explanation-text-inside-the-safe-people-ui",
-      "featureTitle": "Update the existing Safe People selection UI to show smarter recommendations that influence what the user sees when choosing manually (max 2), without automatically setting/overwriting Safe People selections and without showing explanation text inside the Safe People UI.",
-      "files": [
-        "frontend/src/components/circle/SafePeoplePanel.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-26"
+        "REQ-30"
       ],
       "confidence": "high"
     }

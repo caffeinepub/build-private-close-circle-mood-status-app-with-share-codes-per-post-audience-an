@@ -138,29 +138,30 @@ export default function MoodAnalyzerCard() {
               {analysis.totalEntries > 0 && topMoods.length > 0 && (
                 <>
                   <Separator />
-                  <ProgressiveDisclosure trigger="Top Moods">
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium">Top Moods</p>
                     <div className="space-y-2">
-                      {topMoods.map(({ mood, count, percentage, label, emoji }) => (
-                        <div key={`${mood}-${label}`} className="space-y-1">
-                          <div className="flex justify-between text-xs items-center">
-                            <span className="flex items-center gap-1.5">
-                              <span>{emoji}</span>
-                              <span>{label}</span>
+                      {topMoods.map((item) => (
+                        <div key={item.mood} className="space-y-1">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="flex items-center gap-2">
+                              <span>{item.emoji}</span>
+                              <span>{item.label}</span>
                             </span>
                             <span className="text-muted-foreground">
-                              {count} ({Math.round(percentage)}%)
+                              {item.count} ({item.percentage.toFixed(0)}%)
                             </span>
                           </div>
-                          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                             <div
                               className="h-full bg-primary transition-all"
-                              style={{ width: `${percentage}%` }}
+                              style={{ width: `${item.percentage}%` }}
                             />
                           </div>
                         </div>
                       ))}
                     </div>
-                  </ProgressiveDisclosure>
+                  </div>
                 </>
               )}
 

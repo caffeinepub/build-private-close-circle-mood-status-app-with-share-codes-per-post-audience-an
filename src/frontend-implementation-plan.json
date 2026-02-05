@@ -1,66 +1,42 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Closest Connections viewer + smarter Safe People recommendations (frontend)",
+  "title": "Fix logout redirect and enforce post-logout public routing",
   "requirements": [
     {
-      "id": "REQ-24",
-      "summary": "Add an authenticated, deep-link-only Closest Connections viewer page that displays ranked recommendations with per-person explanation text.",
+      "id": "REQ-29",
+      "summary": "Make “Sign Out” always redirect to the public homepage (\"/\") with replace navigation after logout completes, while keeping React Query cache clearing.",
       "acceptanceCriteria": [
-        "A new authenticated route is added under the existing authenticated layout (no BottomNav item added).",
-        "The page fetches closest-connection recommendations via a centralized React Query hook and renders a ranked list.",
-        "Each list row shows the person’s avatar and name (and may fall back gracefully if profile data is unavailable).",
-        "Each list row provides a way to view the explanation text (e.g., collapsible/accordion), and the explanation text is shown only on this page (not inside Safe People selection UI).",
-        "The page has loading, error, and empty states consistent with existing page patterns."
+        "From any authenticated route (e.g., /circle, /profile, /closest-connections), clicking “Sign Out” navigates to \"/\" after logout completes.",
+        "The navigation uses a replace-style redirect (no back-navigation into authenticated pages after logout).",
+        "React Query cache is cleared on logout as it is today, and the redirect still occurs."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/ClosestConnectionsPage.tsx",
-          "operation": "create",
-          "description": "Create the authenticated Closest Connections viewer page that calls the new closest-connections React Query hook, renders a ranked list with avatar/name fallbacks, and uses the existing ProgressiveDisclosure collapsible UI to show explanation strings per person (reasoning visible only on this page). Verify the component's usage instructions before implementing."
+          "path": "frontend/src/hooks/useInternetIdentity.ts",
+          "operation": "modify",
+          "description": "Adjust the `clear` (logout) function to return a Promise that resolves only after logout has completed and identity state has been cleared, so callers can reliably redirect after a successful logout. (Authorization component logout guidance applies—verify the component's usage instructions before implementing.)"
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/app/AppHeader.tsx",
           "operation": "modify",
-          "description": "Register a new deep-link-only authenticated child route (under the existing authenticated layout) that renders ClosestConnectionsPage, without adding any BottomNav navigation item."
+          "description": "Update the “Sign Out” action to (1) await logout completion via `clear()`, (2) clear the React Query cache as it does today, and (3) navigate to \"/\" using replace-style navigation so the user cannot go back into authenticated pages. (Authorization component logout guidance applies—verify the component's usage instructions before implementing.)"
         }
       ]
     },
     {
-      "id": "REQ-25",
-      "summary": "Add a centralized React Query hook for closest-connection recommendations with stable caching and invalidation after relationship/interaction mutations.",
+      "id": "REQ-30",
+      "summary": "Redirect away from authenticated-only layout immediately when identity becomes undefined (and initialization is not in progress).",
       "acceptanceCriteria": [
-        "A new hook exists (in the existing query hooks module) that queries the backend closest-connections API and returns typed data usable by both the Safe People UI and the Closest Connections page.",
-        "The hook uses a stable queryKey (including limit) and does not run until the actor is ready, matching existing patterns in frontend/src/hooks/useQueries.ts.",
-        "The query is invalidated (directly or via existing invalidations) after relevant mutations at minimum: posting a status (interaction frequency), accepting a join request, and removing a circle member (relationship graph changes)."
+        "If a user logs out while on an authenticated route, the app does not remain on that route showing any protected/error state; it redirects to \"/\".",
+        "If the user manually visits an authenticated URL after logout (e.g., pasting /profile), they are redirected to \"/\".",
+        "No infinite redirect loop occurs during initial identity loading (i.e., do not redirect while identity is still initializing)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/backend.d.ts",
+          "path": "frontend/src/components/app/AppLayout.tsx",
           "operation": "modify",
-          "description": "Update the frontend backend interface typings to include the new backend closest-connections query method and its return type (including per-person ordered explanation strings), so the new React Query hook and Closest Connections page can be strongly typed."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add a new centralized React Query hook (in this module) to fetch closest-connection recommendations with a stable queryKey that includes the requested limit and is enabled only when the actor is ready. Also wire invalidation of this query in onSuccess handlers for usePostStatus, useAcceptJoinRequest, and useRemoveCircleMember so recommendations refresh after interaction/relationship signal changes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-26",
-      "summary": "Update Safe People selection UI to prioritize smarter recommendations (max 2) without auto-selecting or showing reasoning; add navigation to the Closest Connections viewer.",
-      "acceptanceCriteria": [
-        "SafePeoplePanel continues to enforce a maximum of 2 selected Safe People and never auto-selects or overwrites existing selections.",
-        "SafePeoplePanel visually highlights or prioritizes recommended candidates (e.g., a “Recommended” section or badge) based on the recommendations hook, while still allowing manual selection as before.",
-        "SafePeoplePanel does not display the per-person explanation text (reasoning) anywhere in the Safe People UI.",
-        "SafePeoplePanel provides a simple in-app navigation affordance to open the Closest Connections viewer page (the viewer remains absent from global navigation like BottomNav)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/circle/SafePeoplePanel.tsx",
-          "operation": "modify",
-          "description": "Integrate the closest-connections recommendations hook to visually prioritize/highlight recommended candidates (e.g., reorder into a 'Recommended' section and/or add a badge) while preserving the existing manual selection flow and max-2 enforcement. Do not render any explanation/reasoning text here. Add an in-panel Link/button that navigates to the deep-link Closest Connections viewer route. Verify the component's usage instructions before implementing."
+          "description": "Add an authenticated-layout guard effect that watches `identity` and `isInitializing` from `useInternetIdentity`; when identity becomes undefined and initialization is not in progress, immediately navigate to \"/\" with replace-style navigation. This ensures protected routes cannot remain visible after logout and prevents loops during initialization. (Authorization component auth-state guidance applies—verify the component's usage instructions before implementing.)"
         }
       ]
     }

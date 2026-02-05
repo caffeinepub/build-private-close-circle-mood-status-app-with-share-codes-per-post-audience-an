@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 218,
+  "projectStateVersion": 224,
   "summary": "CloseCircle will transition circle membership from one-sided (stored only under the owner) to a two-sided model by adding mirrored member→circles storage. Rollout will be gradual, starting with a backend-only storage change (no UI yet), with later planned member-side surfaces like “circles I’m in”, “people who have me in their circle”, a lightweight private relationship viewer, and smarter Safe People suggestions derived from existing relationship/interaction data.",
   "architectural_notes": [
     "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
@@ -26,7 +26,7 @@
     "UI layout: Fixed bottom footer/bottom bar overlaps page body content across multiple screens. Footer should remain fixed/visible, but scrollable page content must include sufficient bottom safe-area/padding so key controls (e.g., Check-In “Share” button) are never hidden; button does not need to be sticky.",
     "Profile update currently overwrites creation date (createdAt); backend should preserve original createdAt and ignore any client-supplied createdAt during updates."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "generatedImages": [
     {
       "filename": "frontend/public/assets/generated/system-avatar-01.dim_256x256.png",
@@ -857,6 +857,38 @@
         "REQ-26"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-the-profile-page-s-analyzer-card-frontend-src-components-profile-moodanalyzercard-tsx-make-the-top-moods-section-permanently-collapsed-so-it-never-expands-i-e-the-list-bars-are-not-shown-even-if-the-user-clicks-taps-the-top-moods-disclosure-control",
+      "title": "In the Profile page’s Analyzer card (frontend/src/components/profile/MoodAnalyzerCard.tsx), make the “Top Moods” section permanently collapsed so it never expands (i.e., the list/bars are not shown even if the user clicks/taps the “Top Moods” disclosure control).",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-profile-analyzer-card-frontend-src-components-profile-moodanalyzercard-tsx-so-the-top-moods-section-is-expanded-visible-when-data-exists-and-users-cannot-collapse-it",
+      "title": "Update the Profile Analyzer card (frontend/src/components/profile/MoodAnalyzerCard.tsx) so the “Top Moods” section is expanded/visible when data exists, and users cannot collapse it.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-sign-out-action-in-the-authenticated-header-so-that-after-a-successful-logout-it-always-redirects-the-user-to-the-public-root-route-homepage-regardless-of-the-current-page",
+      "title": "Update the Sign Out action in the authenticated header so that after a successful logout it always redirects the user to the public root route \"/\" (homepage), regardless of the current page.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-authenticated-only-routes-cannot-remain-visible-after-identity-is-cleared-when-the-app-is-currently-rendering-under-the-authenticated-layout-and-the-internet-identity-becomes-undefined-and-initialization-is-not-in-progress-immediately-redirect-to",
+      "title": "Ensure authenticated-only routes cannot remain visible after identity is cleared: when the app is currently rendering under the authenticated layout and the Internet Identity becomes undefined (and initialization is not in progress), immediately redirect to \"/\".",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1013,6 +1045,14 @@
       "summary": "Add a backend query API that returns ranked “closest connections” recommendations for the caller using only existing relationship/interaction data (e.g., mutual circle relationship signals and interaction frequency derived from existing posts/signals), and include per-person explanation strings describing why each person ranked highly.",
       "reqIds": [
         "REQ-23"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "In Profile → Analyzer (MoodAnalyzerCard), make the “Top Moods” section expanded/visible (i.e., not collapsed), and prevent users from collapsing it",
+      "reqIds": [
+        "REQ-27"
       ],
       "status": "pending"
     }
