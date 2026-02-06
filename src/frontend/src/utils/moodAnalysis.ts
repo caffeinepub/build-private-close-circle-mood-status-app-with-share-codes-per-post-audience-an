@@ -34,6 +34,8 @@ function classifyMood(mood: Mood): 'positive' | 'negative' | 'neutral' {
       return 'negative';
     case 'neutral':
       return 'neutral';
+    case 'physical-state':
+      return 'neutral';
     case 'other':
       return 'neutral';
     default:

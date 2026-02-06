@@ -1,4 +1,5 @@
 import type { StatusPost, Mood } from '@/backend';
+import { MOODS } from '@/constants/moods';
 import { timeToDate } from './time';
 
 /**
@@ -15,36 +16,30 @@ export function filterLast7Days(posts: StatusPost[]): StatusPost[] {
 }
 
 /**
- * Categorizes moods into high-level sentiment buckets
+ * Categorizes moods into high-level sentiment buckets using MOODS catalog
  */
 function getMoodSentiment(mood: Mood): 'positive' | 'calm' | 'low' | 'stressed' | 'neutral' | 'mixed' {
-  const positiveSet = new Set([
-    'happy', 'excited', 'joy', 'grateful', 'optimistic', 'confident', 
-    'hopeful', 'inspiration', 'triumph', 'passionate', 'motivate', 'curious', 'courage'
-  ]);
-  
-  const calmSet = new Set([
-    'calm', 'relaxed', 'content', 'zen', 'satisfy', 'relieved', 'secure', 'humbled'
-  ]);
-  
-  const lowSet = new Set([
-    'sad', 'tired', 'bore', 'lonely', 'melancholy', 'disappoint', 'apathetic', 'indifferen'
-  ]);
-  
-  const stressedSet = new Set([
-    'stressed', 'anxious', 'nervous', 'worry', 'overwhelm', 'frustrate', 
-    'angry', 'irritate', 'fear', 'unsafe'
-  ]);
-  
-  const moodStr = mood.toString();
-  
-  if (positiveSet.has(moodStr)) return 'positive';
-  if (calmSet.has(moodStr)) return 'calm';
-  if (lowSet.has(moodStr)) return 'low';
-  if (stressedSet.has(moodStr)) return 'stressed';
-  if (moodStr === 'neutral') return 'neutral';
-  
-  return 'mixed';
+  const moodOption = MOODS.find((m) => m.value === mood);
+  if (!moodOption) return 'mixed';
+
+  switch (moodOption.category) {
+    case 'positive':
+      return 'positive';
+    case 'calm':
+      return 'calm';
+    case 'low-energy':
+      return 'low';
+    case 'stressed':
+      return 'stressed';
+    case 'neutral':
+      return 'neutral';
+    case 'physical-state':
+      return 'neutral';
+    case 'other':
+      return 'mixed';
+    default:
+      return 'mixed';
+  }
 }
 
 /**

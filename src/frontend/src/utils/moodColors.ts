@@ -55,7 +55,7 @@ export function getMoodColorClasses(category: MoodOption['category']): {
     },
   };
 
-  return colorMap[category];
+  return colorMap[category] || colorMap.neutral;
 }
 
 /**
@@ -72,5 +72,5 @@ export function getMoodGradientClasses(category: MoodOption['category']): string
     other: 'bg-gradient-to-br from-mood-other/20 to-mood-other/5',
   };
 
-  return gradientMap[category];
+  return gradientMap[category] || gradientMap.neutral;
 }

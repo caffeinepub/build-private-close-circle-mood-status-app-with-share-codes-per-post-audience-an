@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-mood-catalog-in-frontend-src-constants-moods-ts-to-add-the-12-new-moods-under-the-existing-physical-state-category-with-matching-emojis-so-they-appear-everywhere-the-mood-picker-is-used-daily-check-in-and-compose-flows-use-these-exact-label-emoji-pairs-thirsty-dehydrated-sleepy-wired-too-much-caffeine-sore-bloated-overheated-cold-headache-nauseous-lightheaded-restless",
-      "featureTitle": "Update the frontend mood catalog in `frontend/src/constants/moods.ts` to add the 12 new moods under the existing `physical-state` category with matching emojis, so they appear everywhere the mood picker is used (Daily Check-In and Compose flows). Use these exact label+emoji pairs:\n- Thirsty 🥤\n- Dehydrated 💧\n- Sleepy 😪\n- Wired (too much caffeine) ☕️\n- Sore 🤕\n- Bloated 😣\n- Overheated 🥵\n- Cold 🥶\n- Headache 🤕\n- Nauseous 🤢\n- Lightheaded 😵‍💫\n- Restless 😣",
+      "featureId": "feature-remove-the-onboarding-step-that-asks-the-user-to-choose-between-romantic-vs-friendship-the-looking-for-step-from-the-multi-step-profile-setup-dialog-so-new-users-are-no-longer-prompted-with-that-question-during-onboarding",
+      "featureTitle": "Remove the onboarding step that asks the user to choose between romantic vs friendship (the “Looking for?” step) from the multi-step profile setup dialog, so new users are no longer prompted with that question during onboarding.",
       "files": [
-        "frontend/src/constants/moods.ts"
+        "frontend/src/components/profile/ProfileSetupDialog.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,7 +16,45 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-48"
+        "REQ-52"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-profile-creation-still-sends-valid-backend-required-fields-even-after-removing-the-romantic-vs-friendship-onboarding-step-by-applying-a-safe-default-relationship-intent-value-for-newly-created-profiles",
+      "featureTitle": "Ensure profile creation still sends valid backend-required fields even after removing the romantic vs friendship onboarding step by applying a safe default relationship intent value for newly created profiles.",
+      "files": [
+        "frontend/src/components/profile/ProfileSetupDialog.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-53"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-profile-page-ui-so-the-removed-romantic-vs-friendship-question-is-not-shown-as-a-profile-field-neither-in-view-mode-nor-edit-mode-while-keeping-profile-updates-functional",
+      "featureTitle": "Update the Profile page UI so the removed romantic vs friendship question is not shown as a profile field (neither in view mode nor edit mode), while keeping profile updates functional.",
+      "files": [
+        "frontend/src/pages/ProfilePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-54"
       ],
       "confidence": "high"
     }

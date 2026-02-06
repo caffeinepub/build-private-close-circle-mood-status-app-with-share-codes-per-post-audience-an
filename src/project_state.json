@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 238,
+  "projectStateVersion": 242,
   "summary": "CloseCircle will transition circle membership from one-sided (stored only under the owner) to a two-sided model by adding mirrored member→circles storage. Rollout will be gradual, starting with a backend-only storage change (no UI yet), with later planned member-side surfaces like “circles I’m in”, “people who have me in their circle”, a lightweight private relationship viewer, and smarter Safe People suggestions derived from existing relationship/interaction data.",
   "architectural_notes": [
     "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
@@ -977,6 +977,54 @@
         "REQ-48"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-mood-analyzer-logic-so-the-15-already-added-physical-state-moods-are-fully-included-in-all-analyzer-outputs-distribution-counts-top-moods-ranking-trend-scoring-guidance-text-with-no-missing-unknown-fallbacks-caused-by-category-handling",
+      "title": "Update the Mood Analyzer logic so the 15 already-added “Physical State” moods are fully included in all analyzer outputs (distribution counts, Top Moods ranking, trend/scoring, guidance text) with no missing/unknown fallbacks caused by category handling.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-micro-action-generation-so-the-15-physical-state-moods-are-treated-as-first-class-moods-and-do-not-break-or-distort-micro-action-rules-due-to-incomplete-category-sentiment-mapping",
+      "title": "Update micro-action generation so the 15 Physical State moods are treated as first-class moods and do not break or distort micro-action rules due to incomplete category/sentiment mapping.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-15-physical-state-moods-are-uniform-and-global-across-the-app-by-removing-or-refactoring-any-mood-dependent-logic-that-can-drift-from-the-single-mood-source-of-truth-frontend-src-constants-moods-ts-and-by-ensuring-all-mood-category-dependent-ui-logic-supports-physical-state-without-runtime-or-typescript-errors",
+      "title": "Ensure the 15 Physical State moods are uniform and global across the app by removing or refactoring any mood-dependent logic that can drift from the single mood source of truth (`frontend/src/constants/moods.ts`) and by ensuring all mood-category-dependent UI/logic supports `physical-state` without runtime or TypeScript errors.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-onboarding-step-that-asks-the-user-to-choose-between-romantic-vs-friendship-the-looking-for-step-from-the-multi-step-profile-setup-dialog-so-new-users-are-no-longer-prompted-with-that-question-during-onboarding",
+      "title": "Remove the onboarding step that asks the user to choose between romantic vs friendship (the “Looking for?” step) from the multi-step profile setup dialog, so new users are no longer prompted with that question during onboarding.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-profile-creation-still-sends-valid-backend-required-fields-even-after-removing-the-romantic-vs-friendship-onboarding-step-by-applying-a-safe-default-relationship-intent-value-for-newly-created-profiles",
+      "title": "Ensure profile creation still sends valid backend-required fields even after removing the romantic vs friendship onboarding step by applying a safe default relationship intent value for newly created profiles.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-profile-page-ui-so-the-removed-romantic-vs-friendship-question-is-not-shown-as-a-profile-field-neither-in-view-mode-nor-edit-mode-while-keeping-profile-updates-functional",
+      "title": "Update the Profile page UI so the removed romantic vs friendship question is not shown as a profile field (neither in view mode nor edit mode), while keeping profile updates functional.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1235,6 +1283,18 @@
         "REQ-47"
       ],
       "status": "pending"
+    },
+    {
+      "id": "AR-61",
+      "summary": "Ensure the 15 Physical State moods are treated as global/uniform across the entire app: fully included in Mood Analyzer logic (Top Moods, trends/insights, micro-actions, summaries) and all other mood-dependent surfaces, and make future mood additions automatically propagate everywhere without per-surface omissions.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-62",
+      "summary": "Remove the “romantic vs friendship” onboarding question entirely (keep only intent) and update onboarding/profile flow accordingly",
+      "reqIds": [],
+      "status": "in_progress"
     }
   ],
   "gameProjectType": "none",

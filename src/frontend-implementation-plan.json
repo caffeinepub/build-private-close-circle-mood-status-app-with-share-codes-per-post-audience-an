@@ -1,21 +1,53 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add 12 new Physical State moods to frontend catalog",
+  "title": "Simplify onboarding by removing relationship intent question while preserving required payload fields",
   "requirements": [
     {
-      "id": "REQ-48",
-      "summary": "Add the 12 specified Physical State mood options (label + emoji) to the frontend mood catalog so they appear in MoodPicker across Daily Check-In and Compose.",
+      "id": "REQ-52",
+      "summary": "Remove the “Looking for?” (Friendship/Romantic/Both) step from the multi-step onboarding dialog and keep the step flow working through share-code.",
       "acceptanceCriteria": [
-        "The MoodPicker shows all 12 new moods grouped under the \"Physical State\" category.",
-        "Daily Check-In mood selection and Compose mood selection both display the new moods with the specified emojis.",
-        "TypeScript build passes (the new entries reference valid `Mood.*` enum values generated from the backend)."
+        "In `frontend/src/components/profile/ProfileSetupDialog.tsx`, the onboarding flow no longer includes an intent step that presents options Friendship/Romantic/Both.",
+        "acceptanceCriteria for onboarding navigation: users can proceed through onboarding without ever seeing a romantic/friendship choice, and the flow still reaches the share-code step successfully.",
+        "No onboarding validation errors mention selecting an intent when the user has not been asked for one."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/constants/moods.ts",
+          "path": "frontend/src/components/profile/ProfileSetupDialog.tsx",
           "operation": "modify",
-          "description": "Extend the `MOODS` list by adding 12 new entries under the existing `physical-state` category using the exact label+emoji pairs: Thirsty 🥤, Dehydrated 💧, Sleepy 😪, Wired (too much caffeine) ☕️, Sore 🤕, Bloated 😣, Overheated 🥵, Cold 🥶, Headache 🤕, Nauseous 🤢, Lightheaded 😵‍💫, Restless 😣. Ensure each entry references the matching `Mood.<variant>` value and do not change any existing categories, labels/emojis, or picker behavior beyond adding these options."
+          "description": "Remove the 'intent' onboarding step UI (the “Looking for?” screen) and update the step machine so navigation goes from DOB directly to the existing preferences step and then to share-code. Remove any 'intent' step validation/toasts so onboarding no longer references selecting an intent."
+        }
+      ]
+    },
+    {
+      "id": "REQ-53",
+      "summary": "Ensure onboarding profile creation continues to send backend-required relationship intent fields by auto-applying a safe default without user input.",
+      "acceptanceCriteria": [
+        "When completing onboarding in `ProfileSetupDialog`, the mutation payload still includes `relationshipIntent` and `preferences.intent` fields required by the backend `UserProfile` type.",
+        "For newly created profiles, `relationshipIntent` and `preferences.intent` are set automatically (without user input) to a single consistent default value.",
+        "On successful onboarding, the backend accepts the saved profile (no traps/errors due to missing intent fields)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/profile/ProfileSetupDialog.tsx",
+          "operation": "modify",
+          "description": "Introduce a single consistent default `RelationshipIntent` for new profiles (e.g., a constant in this file), set `relationshipIntent` and `preferences.intent` to that default in the save payload, and remove relationship-intent state/required checks so finishing onboarding never depends on user selecting an intent."
+        }
+      ]
+    },
+    {
+      "id": "REQ-54",
+      "summary": "Remove the “Looking For” field from the Profile page (view and edit) while keeping profile updates valid by preserving the existing stored intent value in update payloads.",
+      "acceptanceCriteria": [
+        "In `frontend/src/pages/ProfilePage.tsx`, the “Looking For” section (Friendship/Romantic/Both) is no longer displayed anywhere in the profile screen.",
+        "Editing and saving the profile still works without requiring the user to select Friendship/Romantic/Both.",
+        "Profile updates continue to send a valid `relationshipIntent` value to the backend (e.g., preserved from the existing stored profile value)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ProfilePage.tsx",
+          "operation": "modify",
+          "description": "Remove the “Looking For” display block from view mode and remove the “Looking For” button group from edit mode. Update edit state/validation so saving no longer requires an intent selection, and ensure the update payload always includes `relationshipIntent` and `preferences.intent` sourced from the existing `userProfile` (preserving stored value) while continuing to allow editing other fields (e.g., showAge, Interested In, avatar)."
         }
       ]
     }

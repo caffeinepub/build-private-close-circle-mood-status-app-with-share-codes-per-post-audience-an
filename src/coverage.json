@@ -1,47 +1,57 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T23:14:41.549Z",
+  "generatedAt": "2026-02-06T00:44:59.278Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-47",
-        "summary": "Extend the Motoko backend `Mood` variant type in `backend/main.mo` to include these 12 new moods so the generated frontend `Mood` enum stays in sync: `#thirsty`, `#dehydrated`, `#sleepy`, `#wired`, `#sore`, `#bloated`, `#overheated`, `#cold`, `#headache`, `#nauseous`, `#lightheaded`, `#restless`. Also extend `module Mood.toText` to return the corresponding English labels (including the exact label text \"Wired (too much caffeine)\" for `#wired`).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-48",
-        "summary": "Update the frontend mood catalog in `frontend/src/constants/moods.ts` to add the 12 new moods under the existing `physical-state` category with matching emojis, so they appear everywhere the mood picker is used (Daily Check-In and Compose flows). Use these exact label+emoji pairs:\n- Thirsty 🥤\n- Dehydrated 💧\n- Sleepy 😪\n- Wired (too much caffeine) ☕️\n- Sore 🤕\n- Bloated 😣\n- Overheated 🥵\n- Cold 🥶\n- Headache 🤕\n- Nauseous 🤢\n- Lightheaded 😵‍💫\n- Restless 😣",
+        "id": "REQ-52",
+        "summary": "Remove the onboarding step that asks the user to choose between romantic vs friendship (the “Looking for?” step) from the multi-step profile setup dialog, so new users are no longer prompted with that question during onboarding.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/constants/moods.ts"
+          "frontend/src/components/profile/ProfileSetupDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/constants/moods.ts"
+          "frontend/src/components/profile/ProfileSetupDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-53",
+        "summary": "Ensure profile creation still sends valid backend-required fields even after removing the romantic vs friendship onboarding step by applying a safe default relationship intent value for newly created profiles.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/profile/ProfileSetupDialog.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/profile/ProfileSetupDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-54",
+        "summary": "Update the Profile page UI so the removed romantic vs friendship question is not shown as a profile field (neither in view mode nor edit mode), while keeping profile updates functional.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/ProfilePage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/ProfilePage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/constants/moods.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/components/profile/ProfileSetupDialog.tsx",
+    "frontend/src/pages/ProfilePage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

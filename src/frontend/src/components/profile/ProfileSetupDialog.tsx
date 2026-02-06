@@ -12,14 +12,16 @@ import { parseDateInput } from '@/utils/age';
 import { FOUNDATION_PROMISE, FOUNDATION_BOUNDARY } from '@/constants/foundationCopy';
 import ProgressiveDisclosure from '@/components/common/ProgressiveDisclosure';
 
-type OnboardingStep = 'name' | 'gender' | 'dob' | 'intent' | 'preferences' | 'shareCode';
+// Default relationship intent for all new profiles
+const DEFAULT_RELATIONSHIP_INTENT = RelationshipIntent.friendship;
+
+type OnboardingStep = 'name' | 'gender' | 'dob' | 'preferences' | 'shareCode';
 
 export default function ProfileSetupDialog() {
   const [step, setStep] = useState<OnboardingStep>('name');
   const [name, setName] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
   const [dateOfBirth, setDateOfBirth] = useState('');
-  const [relationshipIntent, setRelationshipIntent] = useState<RelationshipIntent | null>(null);
   const [preferredGender, setPreferredGender] = useState<Gender | null>(null);
   const [shareCode] = useState(generateShareCode());
   const [copied, setCopied] = useState(false);
@@ -56,12 +58,6 @@ export default function ProfileSetupDialog() {
         toast.error('Birthday cannot be in the future');
         return;
       }
-      setStep('intent');
-    } else if (step === 'intent') {
-      if (!relationshipIntent) {
-        toast.error('Select your intent');
-        return;
-      }
       setStep('preferences');
     } else if (step === 'preferences') {
       if (!preferredGender) {
@@ -73,7 +69,7 @@ export default function ProfileSetupDialog() {
   };
 
   const handleFinish = async () => {
-    if (!name.trim() || !gender || !dateOfBirth || !relationshipIntent || !preferredGender) {
+    if (!name.trim() || !gender || !dateOfBirth || !preferredGender) {
       toast.error('Complete all steps');
       return;
     }
@@ -84,9 +80,9 @@ export default function ProfileSetupDialog() {
         gender,
         dateOfBirth: parseDateInput(dateOfBirth),
         showAge: true,
-        relationshipIntent,
+        relationshipIntent: DEFAULT_RELATIONSHIP_INTENT,
         preferences: {
-          intent: relationshipIntent,
+          intent: DEFAULT_RELATIONSHIP_INTENT,
           gender: preferredGender,
         },
         shareCode: shareCode,
@@ -212,46 +208,6 @@ export default function ProfileSetupDialog() {
                 <p className="text-sm text-muted-foreground">
                   Hide it later in settings
                 </p>
-              </div>
-              <Button onClick={handleNext} className="w-full h-12 text-base" size="lg">
-                Continue
-              </Button>
-            </CardContent>
-          </>
-        );
-
-      case 'intent':
-        return (
-          <>
-            <CardHeader className="space-y-2 text-center">
-              <CardTitle className="text-2xl">Looking for?</CardTitle>
-              <CardDescription className="text-base">
-                Your intentions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-3">
-                <Button
-                  variant={relationshipIntent === RelationshipIntent.friendship ? 'default' : 'outline'}
-                  className="w-full h-16 text-base"
-                  onClick={() => setRelationshipIntent(RelationshipIntent.friendship)}
-                >
-                  Friendship
-                </Button>
-                <Button
-                  variant={relationshipIntent === RelationshipIntent.romantic ? 'default' : 'outline'}
-                  className="w-full h-16 text-base"
-                  onClick={() => setRelationshipIntent(RelationshipIntent.romantic)}
-                >
-                  Romantic
-                </Button>
-                <Button
-                  variant={relationshipIntent === RelationshipIntent.both ? 'default' : 'outline'}
-                  className="w-full h-16 text-base"
-                  onClick={() => setRelationshipIntent(RelationshipIntent.both)}
-                >
-                  Both
-                </Button>
               </div>
               <Button onClick={handleNext} className="w-full h-12 text-base" size="lg">
                 Continue

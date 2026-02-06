@@ -12,9 +12,9 @@ import Iter "mo:core/Iter";
 import Order "mo:core/Order";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   type Mood = {
     #happy;

@@ -1,53 +1,73 @@
 {
   "kind": "build_request",
-  "title": "Add 12 new Physical State moods with matching emojis",
+  "title": "Remove the romantic vs friendship onboarding question (keep onboarding intent flow simplified)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-47",
-      "text": "Extend the Motoko backend `Mood` variant type in `backend/main.mo` to include these 12 new moods so the generated frontend `Mood` enum stays in sync: `#thirsty`, `#dehydrated`, `#sleepy`, `#wired`, `#sore`, `#bloated`, `#overheated`, `#cold`, `#headache`, `#nauseous`, `#lightheaded`, `#restless`. Also extend `module Mood.toText` to return the corresponding English labels (including the exact label text \"Wired (too much caffeine)\" for `#wired`).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Proceed & add matching emoji"
-        ]
-      },
-      "acceptanceCriteria": [
-        "`backend/main.mo` compiles with the new `Mood` variants added to the `Mood` type.",
-        "`Mood.toText` returns correct English labels for all 12 new moods, including exactly \"Wired (too much caffeine)\" for `#wired`.",
-        "Frontend type generation/build does not fail due to missing/unknown `Mood` variants."
-      ]
-    },
-    {
-      "id": "REQ-48",
-      "text": "Update the frontend mood catalog in `frontend/src/constants/moods.ts` to add the 12 new moods under the existing `physical-state` category with matching emojis, so they appear everywhere the mood picker is used (Daily Check-In and Compose flows). Use these exact label+emoji pairs:\n- Thirsty 🥤\n- Dehydrated 💧\n- Sleepy 😪\n- Wired (too much caffeine) ☕️\n- Sore 🤕\n- Bloated 😣\n- Overheated 🥵\n- Cold 🥶\n- Headache 🤕\n- Nauseous 🤢\n- Lightheaded 😵‍💫\n- Restless 😣",
+      "id": "REQ-52",
+      "text": "Remove the onboarding step that asks the user to choose between romantic vs friendship (the “Looking for?” step) from the multi-step profile setup dialog, so new users are no longer prompted with that question during onboarding.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Proceed & add matching emoji"
+          "remove the romantic vs friendship question entirely"
         ]
       },
       "acceptanceCriteria": [
-        "The MoodPicker shows all 12 new moods grouped under the \"Physical State\" category.",
-        "Daily Check-In mood selection and Compose mood selection both display the new moods with the specified emojis.",
-        "TypeScript build passes (the new entries reference valid `Mood.*` enum values generated from the backend)."
+        "In `frontend/src/components/profile/ProfileSetupDialog.tsx`, the onboarding flow no longer includes an intent step that presents options Friendship/Romantic/Both.",
+        "acceptanceCriteria for onboarding navigation: users can proceed through onboarding without ever seeing a romantic/friendship choice, and the flow still reaches the share-code step successfully.",
+        "No onboarding validation errors mention selecting an intent when the user has not been asked for one."
+      ]
+    },
+    {
+      "id": "REQ-53",
+      "text": "Ensure profile creation still sends valid backend-required fields even after removing the romantic vs friendship onboarding step by applying a safe default relationship intent value for newly created profiles.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Reduce the number of questions (maybe just ask intent, not romantic vs friendship).",
+          "remove the romantic vs friendship question entirely"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When completing onboarding in `ProfileSetupDialog`, the mutation payload still includes `relationshipIntent` and `preferences.intent` fields required by the backend `UserProfile` type.",
+        "For newly created profiles, `relationshipIntent` and `preferences.intent` are set automatically (without user input) to a single consistent default value.",
+        "On successful onboarding, the backend accepts the saved profile (no traps/errors due to missing intent fields)."
+      ]
+    },
+    {
+      "id": "REQ-54",
+      "text": "Update the Profile page UI so the removed romantic vs friendship question is not shown as a profile field (neither in view mode nor edit mode), while keeping profile updates functional.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "remove the romantic vs friendship question entirely"
+        ]
+      },
+      "acceptanceCriteria": [
+        "In `frontend/src/pages/ProfilePage.tsx`, the “Looking For” section (Friendship/Romantic/Both) is no longer displayed anywhere in the profile screen.",
+        "Editing and saving the profile still works without requiring the user to select Friendship/Romantic/Both.",
+        "Profile updates continue to send a valid `relationshipIntent` value to the backend (e.g., preserved from the existing stored profile value)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single-actor Motoko canister; keep all logic in `backend/main.mo`.",
-    "Do not edit any frontend files under the immutable paths listed in SYSTEM_CONTEXT (compose read-only UI components instead of modifying them).",
-    "Use English for all user-facing text."
+    "Do not edit any files under `frontend/src/components/ui` (read-only UI component sources must be composed, not edited).",
+    "Do not modify immutable frontend hook files listed in SYSTEM_CONTEXT (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`).",
+    "Respect the existing backend `UserProfile` type shape (relationshipIntent remains a required field in the payload)."
   ],
   "nonGoals": [
-    "Do not add any additional moods beyond the 12 specified.",
-    "Do not change existing mood categories, existing mood labels/emojis, or mood picker UX beyond adding the new options."
+    "Do not add new onboarding questions or new matching/dating features.",
+    "Do not change backend schema/types for `RelationshipIntent`, `UserProfile`, or `UpdateUserProfile` as part of this request.",
+    "Do not redesign the overall onboarding UI beyond removing the specified question and maintaining a working flow."
   ],
   "imageRequirements": {
     "required": [],

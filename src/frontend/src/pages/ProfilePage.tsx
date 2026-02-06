@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGetCallerUserProfile, useUpdateProfile, useUploadAvatar, useSelectSystemAvatar, useGetCallerPulseScore } from '@/hooks/useQueries';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -15,7 +14,7 @@ import { Edit2, Save, X } from 'lucide-react';
 import ShareCodeCard from '@/components/circle/ShareCodeCard';
 import MoodAnalyzerCard from '@/components/profile/MoodAnalyzerCard';
 import ProfileAvatarEditor from '@/components/profile/ProfileAvatarEditor';
-import { Gender, RelationshipIntent } from '@/backend';
+import { Gender } from '@/backend';
 import type { Avatar as AvatarType } from '@/backend';
 import { calculateAge, formatDateForInput } from '@/utils/age';
 import { useFloatingJournalVisibility } from '@/contexts/FloatingJournalVisibilityContext';
@@ -30,7 +29,6 @@ export default function ProfilePage() {
   const selectSystemAvatar = useSelectSystemAvatar();
   const [isEditing, setIsEditing] = useState(false);
   const [showAge, setShowAge] = useState(true);
-  const [relationshipIntent, setRelationshipIntent] = useState<RelationshipIntent | null>(null);
   const [preferredGender, setPreferredGender] = useState<Gender | null>(null);
   const [editingAvatar, setEditingAvatar] = useState<AvatarType | null>(null);
 
@@ -48,7 +46,6 @@ export default function ProfilePage() {
   const handleEdit = () => {
     if (userProfile) {
       setShowAge(userProfile.showAge);
-      setRelationshipIntent(userProfile.relationshipIntent);
       setPreferredGender(userProfile.preferences.gender);
       setEditingAvatar(userProfile.avatar || null);
       setIsEditing(true);
@@ -61,7 +58,7 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!relationshipIntent || !preferredGender) {
+    if (!preferredGender) {
       toast.error('Complete all fields');
       return;
     }
@@ -69,12 +66,12 @@ export default function ProfilePage() {
     if (!userProfile) return;
 
     try {
-      // Update only the mutable profile fields
+      // Update only the mutable profile fields, preserving existing relationshipIntent
       await updateProfile.mutateAsync({
         showAge,
-        relationshipIntent,
+        relationshipIntent: userProfile.relationshipIntent,
         preferences: {
-          intent: relationshipIntent,
+          intent: userProfile.relationshipIntent,
           gender: preferredGender,
         },
         shareCode: userProfile.shareCode,
@@ -103,14 +100,6 @@ export default function ProfilePage() {
       case Gender.female: return 'Female';
       case Gender.nonBinary: return 'Non-Binary';
       case Gender.other: return 'Other';
-    }
-  };
-
-  const getIntentLabel = (intent: RelationshipIntent) => {
-    switch (intent) {
-      case RelationshipIntent.friendship: return 'Friendship';
-      case RelationshipIntent.romantic: return 'Romantic';
-      case RelationshipIntent.both: return 'Both';
     }
   };
 
@@ -232,39 +221,6 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Looking For</Label>
-                <div className="space-y-2">
-                  <Button
-                    type="button"
-                    variant={relationshipIntent === RelationshipIntent.friendship ? 'default' : 'outline'}
-                    onClick={() => setRelationshipIntent(RelationshipIntent.friendship)}
-                    className="w-full"
-                    size="sm"
-                  >
-                    Friendship
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={relationshipIntent === RelationshipIntent.romantic ? 'default' : 'outline'}
-                    onClick={() => setRelationshipIntent(RelationshipIntent.romantic)}
-                    className="w-full"
-                    size="sm"
-                  >
-                    Romantic
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={relationshipIntent === RelationshipIntent.both ? 'default' : 'outline'}
-                    onClick={() => setRelationshipIntent(RelationshipIntent.both)}
-                    className="w-full"
-                    size="sm"
-                  >
-                    Both
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
                 <Label>Interested In</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
@@ -345,11 +301,6 @@ export default function ProfilePage() {
                       )}
                     </p>
                   </div>
-                </div>
-
-                <div>
-                  <Label className="text-xs text-muted-foreground">Looking For</Label>
-                  <p className="mt-1 text-base">{getIntentLabel(userProfile.relationshipIntent)}</p>
                 </div>
 
                 <div>
