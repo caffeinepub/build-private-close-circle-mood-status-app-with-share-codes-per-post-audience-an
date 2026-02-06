@@ -1,73 +1,37 @@
 {
   "kind": "build_request",
-  "title": "Remove the romantic vs friendship onboarding question (keep onboarding intent flow simplified)",
+  "title": "Remove relationship intent badge/text from Circle Members list",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-52",
-      "text": "Remove the onboarding step that asks the user to choose between romantic vs friendship (the “Looking for?” step) from the multi-step profile setup dialog, so new users are no longer prompted with that question during onboarding.",
+      "id": "REQ-55",
+      "text": "In the Circle page’s Members tab, stop displaying each member’s relationship intent (romantic/friendship/both) in the members list UI.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6",
+          "msg-8",
+          "msg-10"
         ],
         "quotes": [
-          "remove the romantic vs friendship question entirely"
+          "In the circles page, under Members, stop displaying circles intent",
+          "yes, the relationship intent (romantic/friendship) badge/text that appear next to each member",
+          "proceed with the build"
         ]
       },
       "acceptanceCriteria": [
-        "In `frontend/src/components/profile/ProfileSetupDialog.tsx`, the onboarding flow no longer includes an intent step that presents options Friendship/Romantic/Both.",
-        "acceptanceCriteria for onboarding navigation: users can proceed through onboarding without ever seeing a romantic/friendship choice, and the flow still reaches the share-code step successfully.",
-        "No onboarding validation errors mention selecting an intent when the user has not been asked for one."
-      ]
-    },
-    {
-      "id": "REQ-53",
-      "text": "Ensure profile creation still sends valid backend-required fields even after removing the romantic vs friendship onboarding step by applying a safe default relationship intent value for newly created profiles.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Reduce the number of questions (maybe just ask intent, not romantic vs friendship).",
-          "remove the romantic vs friendship question entirely"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When completing onboarding in `ProfileSetupDialog`, the mutation payload still includes `relationshipIntent` and `preferences.intent` fields required by the backend `UserProfile` type.",
-        "For newly created profiles, `relationshipIntent` and `preferences.intent` are set automatically (without user input) to a single consistent default value.",
-        "On successful onboarding, the backend accepts the saved profile (no traps/errors due to missing intent fields)."
-      ]
-    },
-    {
-      "id": "REQ-54",
-      "text": "Update the Profile page UI so the removed romantic vs friendship question is not shown as a profile field (neither in view mode nor edit mode), while keeping profile updates functional.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "remove the romantic vs friendship question entirely"
-        ]
-      },
-      "acceptanceCriteria": [
-        "In `frontend/src/pages/ProfilePage.tsx`, the “Looking For” section (Friendship/Romantic/Both) is no longer displayed anywhere in the profile screen.",
-        "Editing and saving the profile still works without requiring the user to select Friendship/Romantic/Both.",
-        "Profile updates continue to send a valid `relationshipIntent` value to the backend (e.g., preserved from the existing stored profile value)."
+        "On /authenticated/circle under the Members tab, member rows no longer show any relationship intent text (e.g., \"Friendship\", \"Romantic\", or \"Both\").",
+        "Gender (and any other existing member metadata like name/age and pulse badge) continues to render as before.",
+        "The frontend TypeScript build passes without unused imports/types related to relationship intent in the members list component."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under `frontend/src/components/ui` (read-only UI component sources must be composed, not edited).",
-    "Do not modify immutable frontend hook files listed in SYSTEM_CONTEXT (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`).",
-    "Respect the existing backend `UserProfile` type shape (relationshipIntent remains a required field in the payload)."
+    "Do not edit any frontend files under immutable paths listed in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Do not add new onboarding questions or new matching/dating features.",
-    "Do not change backend schema/types for `RelationshipIntent`, `UserProfile`, or `UpdateUserProfile` as part of this request.",
-    "Do not redesign the overall onboarding UI beyond removing the specified question and maintaining a working flow."
+    "Do not change the user profile data model or backend APIs for relationship intent.",
+    "Do not change onboarding/profile setup behavior; this change is limited to the Circle Members list display."
   ],
   "imageRequirements": {
     "required": [],

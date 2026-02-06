@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-the-onboarding-step-that-asks-the-user-to-choose-between-romantic-vs-friendship-the-looking-for-step-from-the-multi-step-profile-setup-dialog-so-new-users-are-no-longer-prompted-with-that-question-during-onboarding",
-      "featureTitle": "Remove the onboarding step that asks the user to choose between romantic vs friendship (the “Looking for?” step) from the multi-step profile setup dialog, so new users are no longer prompted with that question during onboarding.",
+      "featureId": "feature-in-the-circle-page-s-members-tab-stop-displaying-each-member-s-relationship-intent-romantic-friendship-both-in-the-members-list-ui",
+      "featureTitle": "In the Circle page’s Members tab, stop displaying each member’s relationship intent (romantic/friendship/both) in the members list UI.",
       "files": [
-        "frontend/src/components/profile/ProfileSetupDialog.tsx"
+        "frontend/src/components/circle/CircleMembersList.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,45 +16,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-52"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-profile-creation-still-sends-valid-backend-required-fields-even-after-removing-the-romantic-vs-friendship-onboarding-step-by-applying-a-safe-default-relationship-intent-value-for-newly-created-profiles",
-      "featureTitle": "Ensure profile creation still sends valid backend-required fields even after removing the romantic vs friendship onboarding step by applying a safe default relationship intent value for newly created profiles.",
-      "files": [
-        "frontend/src/components/profile/ProfileSetupDialog.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-53"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-profile-page-ui-so-the-removed-romantic-vs-friendship-question-is-not-shown-as-a-profile-field-neither-in-view-mode-nor-edit-mode-while-keeping-profile-updates-functional",
-      "featureTitle": "Update the Profile page UI so the removed romantic vs friendship question is not shown as a profile field (neither in view mode nor edit mode), while keeping profile updates functional.",
-      "files": [
-        "frontend/src/pages/ProfilePage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-54"
+        "REQ-55"
       ],
       "confidence": "high"
     }

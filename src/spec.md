@@ -1,11 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Simplify onboarding by removing the “Looking for?” (romantic vs friendship) question while keeping profile creation and updates valid.
+**Goal:** Remove relationship intent (Romantic/Friendship/Both) badge/text from the Circle Members list UI.
 
 **Planned changes:**
-- Remove the intent selection step (Friendship/Romantic/Both) from the multi-step onboarding flow in `frontend/src/components/profile/ProfileSetupDialog.tsx` and ensure the flow still reaches the share-code step.
-- Apply a safe, consistent default for `relationshipIntent` and `preferences.intent` during new profile creation so required backend fields are still sent without user input.
-- Remove the “Looking For” section from `frontend/src/pages/ProfilePage.tsx` in both view and edit modes, while preserving functional profile saving and ensuring a valid `relationshipIntent` is still sent (e.g., using the stored value).
+- Update the Circle page’s Members tab list item/row UI to no longer render relationship intent text/badges.
+- Clean up any members-list component code so relationship-intent-related imports/types are removed and the TypeScript build remains clean.
 
-**User-visible outcome:** New users complete onboarding without being asked romantic vs friendship, and the Profile page no longer shows that field while profile saving continues to work.
+**User-visible outcome:** On `/authenticated/circle` under the Members tab, member rows no longer show relationship intent labels, while other existing metadata (e.g., name/age, gender, pulse badge) continues to display as before.

@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { UserMinus, Users, Zap } from 'lucide-react';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { calculateAge } from '@/utils/age';
-import { Gender, RelationshipIntent } from '@/backend';
+import { Gender } from '@/backend';
 
 export default function CircleMembersList() {
   const { identity } = useInternetIdentity();
@@ -44,14 +44,6 @@ export default function CircleMembersList() {
       case Gender.female: return 'Female';
       case Gender.nonBinary: return 'Non-Binary';
       case Gender.other: return 'Other';
-    }
-  };
-
-  const getIntentLabel = (intent: RelationshipIntent) => {
-    switch (intent) {
-      case RelationshipIntent.friendship: return 'Friendship';
-      case RelationshipIntent.romantic: return 'Romantic';
-      case RelationshipIntent.both: return 'Both';
     }
   };
 
@@ -108,8 +100,6 @@ export default function CircleMembersList() {
                     {profile && (
                       <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                         <span>{getGenderLabel(profile.gender)}</span>
-                        <span>•</span>
-                        <span>{getIntentLabel(profile.relationshipIntent)}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-1.5">

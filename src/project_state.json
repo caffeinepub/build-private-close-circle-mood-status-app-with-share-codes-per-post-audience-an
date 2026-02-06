@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 242,
+  "projectStateVersion": 244,
   "summary": "CloseCircle will transition circle membership from one-sided (stored only under the owner) to a two-sided model by adding mirrored member→circles storage. Rollout will be gradual, starting with a backend-only storage change (no UI yet), with later planned member-side surfaces like “circles I’m in”, “people who have me in their circle”, a lightweight private relationship viewer, and smarter Safe People suggestions derived from existing relationship/interaction data.",
   "architectural_notes": [
     "Frontend is a React SPA using TanStack Router for routing and TanStack React Query for caching, polling, mutations, and cache invalidation.",
@@ -1025,6 +1025,14 @@
         "REQ-54"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-the-circle-page-s-members-tab-stop-displaying-each-member-s-relationship-intent-romantic-friendship-both-in-the-members-list-ui",
+      "title": "In the Circle page’s Members tab, stop displaying each member’s relationship intent (romantic/friendship/both) in the members list UI.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -1293,6 +1301,12 @@
     {
       "id": "AR-62",
       "summary": "Remove the “romantic vs friendship” onboarding question entirely (keep only intent) and update onboarding/profile flow accordingly",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-63",
+      "summary": "Circles → Members: remove the relationship intent (romantic/friendship) badge/text from each member row",
       "reqIds": [],
       "status": "in_progress"
     }

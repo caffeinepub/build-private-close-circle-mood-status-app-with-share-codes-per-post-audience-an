@@ -1,53 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Simplify onboarding by removing relationship intent question while preserving required payload fields",
+  "title": "Remove relationship intent from Circle Members list UI",
   "requirements": [
     {
-      "id": "REQ-52",
-      "summary": "Remove the “Looking for?” (Friendship/Romantic/Both) step from the multi-step onboarding dialog and keep the step flow working through share-code.",
+      "id": "REQ-55",
+      "summary": "Hide relationship intent (romantic/friendship/both) from member rows in the Circle Members tab while keeping all other member metadata unchanged.",
       "acceptanceCriteria": [
-        "In `frontend/src/components/profile/ProfileSetupDialog.tsx`, the onboarding flow no longer includes an intent step that presents options Friendship/Romantic/Both.",
-        "acceptanceCriteria for onboarding navigation: users can proceed through onboarding without ever seeing a romantic/friendship choice, and the flow still reaches the share-code step successfully.",
-        "No onboarding validation errors mention selecting an intent when the user has not been asked for one."
+        "On /authenticated/circle under the Members tab, member rows no longer show any relationship intent text (e.g., \"Friendship\", \"Romantic\", or \"Both\").",
+        "Gender (and any other existing member metadata like name/age and pulse badge) continues to render as before.",
+        "The frontend TypeScript build passes without unused imports/types related to relationship intent in the members list component."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/profile/ProfileSetupDialog.tsx",
+          "path": "frontend/src/components/circle/CircleMembersList.tsx",
           "operation": "modify",
-          "description": "Remove the 'intent' onboarding step UI (the “Looking for?” screen) and update the step machine so navigation goes from DOB directly to the existing preferences step and then to share-code. Remove any 'intent' step validation/toasts so onboarding no longer references selecting an intent."
-        }
-      ]
-    },
-    {
-      "id": "REQ-53",
-      "summary": "Ensure onboarding profile creation continues to send backend-required relationship intent fields by auto-applying a safe default without user input.",
-      "acceptanceCriteria": [
-        "When completing onboarding in `ProfileSetupDialog`, the mutation payload still includes `relationshipIntent` and `preferences.intent` fields required by the backend `UserProfile` type.",
-        "For newly created profiles, `relationshipIntent` and `preferences.intent` are set automatically (without user input) to a single consistent default value.",
-        "On successful onboarding, the backend accepts the saved profile (no traps/errors due to missing intent fields)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/profile/ProfileSetupDialog.tsx",
-          "operation": "modify",
-          "description": "Introduce a single consistent default `RelationshipIntent` for new profiles (e.g., a constant in this file), set `relationshipIntent` and `preferences.intent` to that default in the save payload, and remove relationship-intent state/required checks so finishing onboarding never depends on user selecting an intent."
-        }
-      ]
-    },
-    {
-      "id": "REQ-54",
-      "summary": "Remove the “Looking For” field from the Profile page (view and edit) while keeping profile updates valid by preserving the existing stored intent value in update payloads.",
-      "acceptanceCriteria": [
-        "In `frontend/src/pages/ProfilePage.tsx`, the “Looking For” section (Friendship/Romantic/Both) is no longer displayed anywhere in the profile screen.",
-        "Editing and saving the profile still works without requiring the user to select Friendship/Romantic/Both.",
-        "Profile updates continue to send a valid `relationshipIntent` value to the backend (e.g., preserved from the existing stored profile value)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/ProfilePage.tsx",
-          "operation": "modify",
-          "description": "Remove the “Looking For” display block from view mode and remove the “Looking For” button group from edit mode. Update edit state/validation so saving no longer requires an intent selection, and ensure the update payload always includes `relationshipIntent` and `preferences.intent` sourced from the existing `userProfile` (preserving stored value) while continuing to allow editing other fields (e.g., showAge, Interested In, avatar)."
+          "description": "Remove relationship intent label rendering from the members list UI (delete the RelationshipIntent import, remove the intent-to-label helper, and stop rendering profile.relationshipIntent in each member row) while keeping existing gender/name/age/pulse UI unchanged."
         }
       ]
     }

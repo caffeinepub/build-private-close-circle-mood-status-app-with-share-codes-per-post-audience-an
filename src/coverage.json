@@ -1,46 +1,24 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T00:44:59.278Z",
+  "generatedAt": "2026-02-06T01:25:57.969Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-52",
-        "summary": "Remove the onboarding step that asks the user to choose between romantic vs friendship (the “Looking for?” step) from the multi-step profile setup dialog, so new users are no longer prompted with that question during onboarding.",
+        "id": "REQ-55",
+        "summary": "In the Circle page’s Members tab, stop displaying each member’s relationship intent (romantic/friendship/both) in the members list UI.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/profile/ProfileSetupDialog.tsx"
+          "frontend/src/components/circle/CircleMembersList.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/profile/ProfileSetupDialog.tsx"
-        ]
-      },
-      {
-        "id": "REQ-53",
-        "summary": "Ensure profile creation still sends valid backend-required fields even after removing the romantic vs friendship onboarding step by applying a safe default relationship intent value for newly created profiles.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/profile/ProfileSetupDialog.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/profile/ProfileSetupDialog.tsx"
-        ]
-      },
-      {
-        "id": "REQ-54",
-        "summary": "Update the Profile page UI so the removed romantic vs friendship question is not shown as a profile field (neither in view mode nor edit mode), while keeping profile updates functional.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/ProfilePage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/ProfilePage.tsx"
+          "frontend/src/components/circle/CircleMembersList.tsx"
         ]
       }
     ]
@@ -50,8 +28,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/profile/ProfileSetupDialog.tsx",
-    "frontend/src/pages/ProfilePage.tsx",
+    "frontend/src/components/circle/CircleMembersList.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
