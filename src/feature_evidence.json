@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-in-the-circle-page-s-members-tab-stop-displaying-each-member-s-relationship-intent-romantic-friendship-both-in-the-members-list-ui",
-      "featureTitle": "In the Circle page’s Members tab, stop displaying each member’s relationship intent (romantic/friendship/both) in the members list UI.",
+      "featureId": "feature-on-the-circle-page-members-tab-display-a-bell-icon-next-to-each-circle-member-s-display-name-in-the-members-list-i-e-in-frontend-src-components-circle-circlememberslist-tsx-within-the-row-that-currently-renders-the-member-name-and-optional-age-the-bell-should-appear-for-each-listed-member-excluding-the-current-user-consistent-with-the-existing-othermembers-filtering",
+      "featureTitle": "On the Circle page members tab, display a bell icon next to each circle member’s display name in the members list (i.e., in `frontend/src/components/circle/CircleMembersList.tsx` within the row that currently renders the member name and optional age). The bell should appear for each listed member (excluding the current user, consistent with the existing `otherMembers` filtering).",
       "files": [
         "frontend/src/components/circle/CircleMembersList.tsx"
       ],
@@ -16,7 +16,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-55"
+        "REQ-1"
       ],
       "confidence": "high"
     }

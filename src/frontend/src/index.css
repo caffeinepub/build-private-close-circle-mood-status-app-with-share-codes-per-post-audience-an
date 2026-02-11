@@ -110,7 +110,7 @@
     }
 }
 
-/* Global bottom padding utility for main content to offset fixed BottomNav (h-16 = 4rem) + safe-area */
+/* Global bottom padding utilities for main content to offset fixed bottom UI elements + safe-area */
 @supports (padding: env(safe-area-inset-bottom)) {
     .pb-safe {
         padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
@@ -121,14 +121,14 @@
         padding-bottom: calc(4rem + env(safe-area-inset-bottom));
     }
     
-    /* Safe-area aware positioning for floating action button above bottom nav */
-    .fab-bottom-safe {
-        bottom: calc(4rem + env(safe-area-inset-bottom));
+    /* Main content bottom padding: Footer height (~3rem) + BottomNav height (4rem) + safe-area-inset-bottom */
+    .pb-bottom-bars-safe {
+        padding-bottom: calc(7rem + env(safe-area-inset-bottom));
     }
     
-    /* Ensure footer is positioned above bottom nav with safe-area support */
-    .footer-bottom-safe {
-        margin-bottom: calc(4rem + env(safe-area-inset-bottom));
+    /* Safe-area aware positioning for floating action button above both footer and bottom nav */
+    .fab-bottom-safe {
+        bottom: calc(7rem + env(safe-area-inset-bottom));
     }
 }
 
@@ -138,11 +138,11 @@
         padding-bottom: 4rem;
     }
     
-    .fab-bottom-safe {
-        bottom: 4rem;
+    .pb-bottom-bars-safe {
+        padding-bottom: 7rem;
     }
     
-    .footer-bottom-safe {
-        margin-bottom: 4rem;
+    .fab-bottom-safe {
+        bottom: 7rem;
     }
 }

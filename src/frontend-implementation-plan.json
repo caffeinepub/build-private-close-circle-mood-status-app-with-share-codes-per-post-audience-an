@@ -1,21 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove relationship intent from Circle Members list UI",
+  "title": "Add bell icon next to each Circle member name",
   "requirements": [
     {
-      "id": "REQ-55",
-      "summary": "Hide relationship intent (romantic/friendship/both) from member rows in the Circle Members tab while keeping all other member metadata unchanged.",
+      "id": "REQ-1",
+      "summary": "Display a bell icon adjacent to each listed circle member’s display name in the Circle Members tab (excluding the current user as already filtered).",
       "acceptanceCriteria": [
-        "On /authenticated/circle under the Members tab, member rows no longer show any relationship intent text (e.g., \"Friendship\", \"Romantic\", or \"Both\").",
-        "Gender (and any other existing member metadata like name/age and pulse badge) continues to render as before.",
-        "The frontend TypeScript build passes without unused imports/types related to relationship intent in the members list component."
+        "In the Circle page (Members tab), each listed member row shows a bell icon visually adjacent to the member name.",
+        "The bell icon is not shown for the current user if they are excluded from the list (current behavior).",
+        "The member name, optional age, pulse badge, and remove-member control continue to render and function as before (no regressions)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/circle/CircleMembersList.tsx",
           "operation": "modify",
-          "description": "Remove relationship intent label rendering from the members list UI (delete the RelationshipIntent import, remove the intent-to-label helper, and stop rendering profile.relationshipIntent in each member row) while keeping existing gender/name/age/pulse UI unchanged."
+          "description": "Import a bell icon (e.g., from lucide-react) and render it next to the member display name within the existing name/age row, ensuring it appears for every entry in `otherMembers` while preserving existing layout, age display, pulse badge, and remove-member dialog behavior."
         }
       ]
     }

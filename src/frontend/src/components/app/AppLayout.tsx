@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate } from '@tanstack/react-router';
 import AppHeader from './AppHeader';
 import BottomNav from './BottomNav';
+import AppFooter from './AppFooter';
 import FloatingJournalFab from './FloatingJournalFab';
 import JournalOverlay from '../journal/JournalOverlay';
 import SoundEffectsManager from '../sound/SoundEffectsManager';
@@ -29,10 +30,13 @@ function AppLayoutContent({ children }: AppLayoutProps) {
     <FloatingJournalVisibilityProvider>
       <div className="flex min-h-screen flex-col bg-background">
         <AppHeader />
-        <main className="flex-1 pb-bottom-nav-safe">
+        <main className="flex-1 pb-bottom-bars-safe">
           {children || <Outlet />}
         </main>
-        <BottomNav />
+        <div className="fixed bottom-0 left-0 right-0 z-40">
+          <BottomNav />
+          <AppFooter />
+        </div>
         <FloatingJournalFab />
         <JournalOverlay isOpen={isOpen} onClose={closeJournal} resetToToday={resetToToday} />
         <SoundEffectsManager />

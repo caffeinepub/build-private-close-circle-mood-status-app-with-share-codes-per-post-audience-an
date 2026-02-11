@@ -14,7 +14,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { UserMinus, Users, Zap } from 'lucide-react';
+import { UserMinus, Users, Zap, Bell } from 'lucide-react';
 import { useInternetIdentity } from '@/hooks/useInternetIdentity';
 import { calculateAge } from '@/utils/age';
 import { Gender } from '@/backend';
@@ -92,6 +92,7 @@ export default function CircleMembersList() {
                 >
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-muted-foreground" />
                       <p className="font-medium">{displayName}</p>
                       {showAge && (
                         <span className="text-xs text-muted-foreground">• {age}</span>

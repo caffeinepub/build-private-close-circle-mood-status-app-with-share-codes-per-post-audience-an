@@ -1,37 +1,35 @@
 {
   "kind": "build_request",
-  "title": "Remove relationship intent badge/text from Circle Members list",
+  "title": "Show a bell icon next to each circle member name on the Circle page",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-55",
-      "text": "In the Circle page’s Members tab, stop displaying each member’s relationship intent (romantic/friendship/both) in the members list UI.",
+      "id": "REQ-1",
+      "text": "On the Circle page members tab, display a bell icon next to each circle member’s display name in the members list (i.e., in `frontend/src/components/circle/CircleMembersList.tsx` within the row that currently renders the member name and optional age). The bell should appear for each listed member (excluding the current user, consistent with the existing `otherMembers` filtering).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-8",
-          "msg-10"
+          "msg-usr-1",
+          "msg-usr-2"
         ],
         "quotes": [
-          "In the circles page, under Members, stop displaying circles intent",
-          "yes, the relationship intent (romantic/friendship) badge/text that appear next to each member",
-          "proceed with the build"
+          "Do you remember the ping a circle member feature?\n\nAdd the bell next to the circle member name on the circle page",
+          "Apply the change now"
         ]
       },
       "acceptanceCriteria": [
-        "On /authenticated/circle under the Members tab, member rows no longer show any relationship intent text (e.g., \"Friendship\", \"Romantic\", or \"Both\").",
-        "Gender (and any other existing member metadata like name/age and pulse badge) continues to render as before.",
-        "The frontend TypeScript build passes without unused imports/types related to relationship intent in the members list component."
+        "In the Circle page (Members tab), each listed member row shows a bell icon visually adjacent to the member name.",
+        "The bell icon is not shown for the current user if they are excluded from the list (current behavior).",
+        "The member name, optional age, pulse badge, and remove-member control continue to render and function as before (no regressions)."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any frontend files under immutable paths listed in SYSTEM_CONTEXT."
+    "Do not edit files under the immutable frontend paths listed in SYSTEM_CONTEXT (e.g., `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`)."
   ],
   "nonGoals": [
-    "Do not change the user profile data model or backend APIs for relationship intent.",
-    "Do not change onboarding/profile setup behavior; this change is limited to the Circle Members list display."
+    "Implementing or changing the backend logic for the ping action itself (this request is only to place the bell icon next to names).",
+    "Adding new notification types or altering the Notifications page behavior."
   ],
   "imageRequirements": {
     "required": [],
